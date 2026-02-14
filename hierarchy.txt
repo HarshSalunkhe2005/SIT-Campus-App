@@ -1,0 +1,21 @@
+Folder PATH listing for volume Windows-SSD
+Volume serial number is 1A89-913A
+C:.
++---src
+    +---main
+        +---resources
+            +---static
+            ¦   +---css
+            ¦   ¦   +---admin
+            ¦   ¦   +---auth
+            ¦   ¦   +---dept
+            ¦   ¦   +---shared
+            ¦   ¦   +---student
+            ¦   +---images
+            ¦   +---js
+            +---templates
+                +---admin
+                +---auth
+                +---dept
+                +---fragments
+                +---student
