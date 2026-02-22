@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIT Campus App - Setup Account</title>
+    <link rel="stylesheet" href="../../static/css/shared/base.css" th:href="@{/css/shared/base.css}">
+    <link rel="stylesheet" href="../../static/css/auth/login.css" th:href="@{/css/auth/login.css}">
+</head>
+<body>
+    <main class="sit-split-layout">
+        
+        <section class="sit-brand-pane">
+            <div class="sit-brand-content">
+                <img src="../../static/images/Symlogo333.jpg" th:src="@{/images/Symlogo333.jpg}" alt="SIT Pune Logo" class="sit-brand-logo">
+                <h1 class="sit-brand-title">SIT Pune</h1>
+                <h2 class="sit-brand-subtitle">Campus App</h2>
+                <p class="sit-brand-description">A transparent, high-speed portal to report and track infrastructure issues across the campus.</p>
+            </div>
+        </section>
+
+        <section class="sit-form-pane">
+            <div class="sit-auth-card">
+                <h3 class="sit-auth-card__header">Create Your Account</h3>
+                
+                <form class="sit-auth-form" th:action="@{/auth/verify-prn}" method="POST">
+                    
+                    <div class="sit-input-group">
+                        <label for="prn" class="sit-input-label">Permanent Registration Number (PRN)</label>
+                        <div class="sit-input-wrapper">
+                            <svg class="sit-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <input type="text" id="prn" name="prn" class="sit-input-field sit-input-field--icon" placeholder="e.g., 24070126..." required>
+                        </div>
+                    </div>
+
+                    <div class="sit-input-group">
+                        <label for="email" class="sit-input-label">Official SIT Email</label>
+                        <div class="sit-input-wrapper">
+                            <svg class="sit-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <input type="email" id="email" name="email" class="sit-input-field sit-input-field--icon" placeholder="firstname.lastname.btech_year@sitpune.edu.in" required>
+                        </div>
+                    </div>
+
+                    <div class="sit-auth-error" th:if="${error}">
+                        <p class="sit-error-text" th:text="${error}">User already exists. Please return to login!!</p>
+                    </div>
+
+                    <button type="submit" class="sit-auth-card__submit">Send Verification Code</button>
+                </form>
+
+                <div class="sit-auth-divider">
+                    <span>or</span>
+                </div>
+
+                <div class="sit-auth-footer">
+                    <p class="sit-auth-footer__text">Existing user?</p>
+                    <a th:href="@{/login}" href="login.html" class="sit-btn-secondary">Back to Login</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</body>
+</html>
