@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Login</title>
-    <link rel="stylesheet" th:href="@{/css/shared/base.css}">
-    <link rel="stylesheet" th:href="@{/css/auth/login.css}">
+    <link rel="stylesheet" href="../../static/css/shared/base.css" th:href="@{/css/shared/base.css}">
+    <link rel="stylesheet" href="../../static/css/auth/login.css" th:href="@{/css/auth/login.css}">
 </head>
 <body>
     <main class="sit-split-layout">
@@ -14,7 +14,7 @@
             <div class="sit-brand-content">
                 <h1 class="sit-brand-title">SIT Pune</h1>
                 <h2 class="sit-brand-subtitle">Campus App</h2>
-                <p class="sit-brand-description">A transparent, high-speed portal to report and track issues across the campus.</p>
+                <p class="sit-brand-description">A transparent, high-speed portal to report and track infrastructure issues across the campus.</p>
             </div>
         </section>
 
@@ -43,7 +43,7 @@
 
                 <div class="sit-auth-footer">
                     <p class="sit-auth-footer__text">
-                        New Student? 
+                        New Student?
                         <a th:href="@{/auth/verify-prn}" class="sit-auth-footer__link">Verify PRN & Setup Account</a>
                     </p>
                 </div>

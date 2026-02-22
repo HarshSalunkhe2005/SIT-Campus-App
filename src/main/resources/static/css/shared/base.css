@@ -1,0 +1,21 @@
+:root {
+    --sit-primary: #003366;
+    --sit-secondary: #ff9900;
+    --sit-bg-light: #f4f7f6;
+    --sit-text-dark: #333333;
+    --sit-text-light: #ffffff;
+    --sit-error: #cc0000;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--sit-bg-light);
+    color: var(--sit-text-dark);
+}
