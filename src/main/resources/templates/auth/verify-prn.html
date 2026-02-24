@@ -32,7 +32,7 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <input type="text" id="prn" name="prn" class="sit-input-field sit-input-field--icon" placeholder="e.g., 24070126..." required>
+                            <input type="numeric" id="prn" name="prn" class="sit-input-field sit-input-field--icon" placeholder="e.g., 24070126..." required inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                     </div>
 
@@ -51,7 +51,7 @@
                         <p class="sit-error-text" th:text="${error}">User already exists. Please return to login!!</p>
                     </div>
 
-                    <button type="submit" onclick="window.location.href='setup-password.html'; return false;" class="sit-auth-card__submit">Send Verification Code</button>
+                    <button type="submit" onclick="if(this.form.checkValidity()) { window.location.href='setup-password.html'; return false; }" class="sit-auth-card__submit">Send Verification Code</button>
                 </form>
 
                 <div class="sit-auth-divider">
