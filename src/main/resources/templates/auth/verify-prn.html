@@ -51,7 +51,7 @@
                         <p class="sit-error-text" th:text="${error}">User already exists. Please return to login!!</p>
                     </div>
 
-                    <button type="submit" class="sit-auth-card__submit">Send Verification Code</button>
+                    <button type="submit" onclick="window.location.href='setup-password.html'; return false;" class="sit-auth-card__submit">Send Verification Code</button>
                 </form>
 
                 <div class="sit-auth-divider">
@@ -60,7 +60,7 @@
 
                 <div class="sit-auth-footer">
                     <p class="sit-auth-footer__text">Existing user?</p>
-                    <a th:href="@{/login}" href="login.html" class="sit-btn-secondary">Back to Login</a>
+                    <a href="login.html" th:href="@{/login}" class="sit-btn-secondary">Back to Login</a>
                 </div>
             </div>
         </section>
