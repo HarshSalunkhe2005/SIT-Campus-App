@@ -1,6 +1,25 @@
 Folder PATH listing for volume Windows-SSD
 Volume serial number is 1A89-913A
 C:.
++---campusbackend
+¦   +---.mvn
+¦   ¦   +---wrapper
+¦   +---src
+¦       +---main
+¦       ¦   +---java
+¦       ¦   ¦   +---com
+¦       ¦   ¦       +---sit
+¦       ¦   ¦           +---campusbackend
+¦       ¦   ¦               +---auth
+¦       ¦   ¦                   +---controller
+¦       ¦   ¦                   +---entity
+¦       ¦   ¦                   +---repository
+¦       ¦   +---resources
+¦       +---test
+¦           +---java
+¦               +---com
+¦                   +---sit
+¦                       +---campusbackend
 +---src
     +---main
         +---resources
