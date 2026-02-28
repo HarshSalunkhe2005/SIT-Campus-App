@@ -1,3 +1,15 @@
+package com.sit.campusbackend.auth.controller;
+
+import com.sit.campusbackend.auth.entity.Student;
+import com.sit.campusbackend.auth.repository.StudentRepository;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Random;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
