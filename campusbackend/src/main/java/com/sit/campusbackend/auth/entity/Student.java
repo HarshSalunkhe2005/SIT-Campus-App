@@ -21,7 +21,7 @@ public class Student {
 
     private String lastName;
 
-    private Integer batchYear;
+    private String batchYear;
 
     private Boolean isVerified;
 

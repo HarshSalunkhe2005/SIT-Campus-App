@@ -9,7 +9,6 @@
 </head>
 <body>
     <main class="sit-split-layout">
-        
         <section class="sit-brand-pane">
             <div class="sit-brand-content">
                 <img src="../../static/images/Symlogo333.jpg" th:src="@{/images/Symlogo333.jpg}" alt="SIT Pune Logo" class="sit-brand-logo">
@@ -23,8 +22,7 @@
             <div class="sit-auth-card">
                 <h3 class="sit-auth-card__header">Create Your Account</h3>
                 
-                <form class="sit-auth-form" th:action="@{/auth/verify-prn}" method="POST">
-                    
+                <form id="registrationForm" class="sit-auth-form">
                     <div class="sit-input-group">
                         <label for="prn" class="sit-input-label">Permanent Registration Number (PRN)</label>
                         <div class="sit-input-wrapper">
@@ -32,7 +30,7 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <input type="numeric" id="prn" name="prn" class="sit-input-field sit-input-field--icon" placeholder="e.g., 24070126..." required inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            <input type="text" id="prn" name="prn" class="sit-input-field sit-input-field--icon" placeholder="e.g., 24070126..." required inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                     </div>
 
@@ -43,11 +41,15 @@
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                                 <polyline points="22,6 12,13 2,6"></polyline>
                             </svg>
-                            <input type="email" id="email" name="email" class="sit-input-field sit-input-field--icon" placeholder="firstname.lastname.btech_year@sitpune.edu.in" required pattern=".+@sitpune\.edu\.in$" title="Please use your official SIT email address (@sitpune.edu.in)">
+                            <input type="email" id="email" name="email" class="sit-input-field sit-input-field--icon" placeholder="firstname.lastname.btech2024@sitpune.edu.in" required pattern=".+@sitpune\.edu\.in$" title="Please use your official SIT email address (@sitpune.edu.in)">
                         </div>
                     </div>
 
-                    <button type="submit" onclick="if(this.form.checkValidity()) { window.location.href='setup-password.html'; return false; }" class="sit-auth-card__submit">Send Verification Code</button>
+                    <div id="error-container" style="display: none; margin-bottom: 1rem;">
+                        <p id="error-message" style="color: #ff4d4d; font-size: 0.85rem; margin: 0;"></p>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="sit-auth-card__submit">Send Verification Code</button>
                 </form>
 
                 <div class="sit-auth-divider">
@@ -60,7 +62,51 @@
                 </div>
             </div>
         </section>
-
     </main>
+
+    <script>
+        const form = document.getElementById('registrationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorContainer = document.getElementById('error-container');
+        const errorMessage = document.getElementById('error-message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            errorContainer.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending OTP...';
+
+            const email = document.getElementById('email').value;
+            const prn = document.getElementById('prn').value;
+
+            try {
+                const response = await fetch('http://localhost:8080/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, prn })
+                });
+
+                const result = await response.text();
+
+                if (response.ok) {
+                    sessionStorage.setItem('tempUserEmail', email);
+                    // Standard relative path redirect
+                    window.location.href = "setup-password.html";
+                } else {
+                    // This handles 409 (Existing User) and 400 (Bad Email)
+                    errorMessage.textContent = result;
+                    errorContainer.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Verification Code';
+                }
+            } catch (err) {
+                errorMessage.textContent = "Connection failed. Is the backend running?";
+                errorContainer.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Verification Code';
+            }
+        });
+    </script>
 </body>
 </html>
