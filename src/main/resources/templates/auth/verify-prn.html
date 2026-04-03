@@ -70,7 +70,7 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending...';
             
-            const response = await fetch('http://localhost:8080/auth/register', {
+            const response = await fetch('/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: emailInput.value, prn: prnInput.value })
@@ -78,7 +78,7 @@
 
             if (response.ok) {
                 sessionStorage.setItem('tempUserEmail', emailInput.value);
-                window.location.href = "setup-password.html";
+                window.location.href = '/auth/setup-password';
             } else {
                 const err = await response.text();
                 document.getElementById('error-message').textContent = err;

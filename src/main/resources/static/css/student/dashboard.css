@@ -1,0 +1,273 @@
+/* ==========================================
+   App Header
+   ========================================== */
+.sit-app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 64px;
+    background-color: var(--sit-primary);
+    color: var(--sit-text-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sit-app-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sit-app-header__logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.sit-app-header__name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--sit-secondary);
+    letter-spacing: 0.02em;
+}
+
+.sit-app-header__user {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.sit-app-header__welcome {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.sit-app-header__welcome strong {
+    color: var(--sit-text-light);
+}
+
+.sit-app-header__logout {
+    padding: 0.4rem 1rem;
+    background-color: transparent;
+    color: var(--sit-text-light);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.sit-app-header__logout:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: var(--sit-text-light);
+}
+
+/* ==========================================
+   Dashboard Layout
+   ========================================== */
+.sit-dashboard {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+}
+
+.sit-dashboard__top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.sit-dashboard__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--sit-primary);
+}
+
+/* ==========================================
+   Primary Button (shared)
+   ========================================== */
+.sit-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.65rem 1.4rem;
+    background-color: var(--sit-primary);
+    color: var(--sit-text-light);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.sit-btn-primary:hover {
+    background-color: #002244;
+    transform: translateY(-1px);
+}
+
+/* ==========================================
+   Issue Cards
+   ========================================== */
+.sit-issue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sit-issue-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    border-left: 4px solid var(--sit-primary);
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.sit-issue-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.sit-issue-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+}
+
+.sit-issue-card__title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--sit-text-dark);
+}
+
+.sit-issue-card__description {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sit-issue-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.sit-issue-card__dept,
+.sit-issue-card__date {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.sit-meta-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   Status Badges
+   ========================================== */
+.sit-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.sit-badge--open {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.sit-badge--in-progress {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.sit-badge--resolved {
+    background-color: #d1e7dd;
+    color: #0a3622;
+}
+
+/* ==========================================
+   Empty State
+   ========================================== */
+.sit-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 5rem 1.5rem;
+    gap: 1rem;
+}
+
+.sit-empty-state__icon {
+    width: 72px;
+    height: 72px;
+    color: #c8d0d8;
+}
+
+.sit-empty-state__heading {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--sit-primary);
+}
+
+.sit-empty-state__text {
+    font-size: 1rem;
+    color: #666;
+    max-width: 380px;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+@media (max-width: 600px) {
+    .sit-app-header {
+        padding: 0 1rem;
+    }
+
+    .sit-app-header__welcome {
+        display: none;
+    }
+
+    .sit-dashboard {
+        padding: 1.5rem 1rem 3rem;
+    }
+
+    .sit-dashboard__title {
+        font-size: 1.4rem;
+    }
+
+    .sit-issue-card {
+        padding: 1rem 1.1rem;
+    }
+}
