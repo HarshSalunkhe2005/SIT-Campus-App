@@ -26,18 +26,20 @@
                     <div class="sit-input-group">
                         <label for="prn" class="sit-input-label">Permanent Registration Number (PRN)</label>
                         <div class="sit-input-wrapper">
-                            <input type="text" id="prn" name="prn" class="sit-input-field" placeholder="e.g., 24070126..." required maxlength="11">
-                            <span id="prnCheck" class="validation-checkmark">✓</span>
+                            <input type="text" id="prn" name="prn" class="sit-input-field" placeholder="e.g., 24070126..." required maxlength="11" inputmode="numeric" aria-label="Permanent Registration Number">
+                            <span id="prnCheck" class="validation-checkmark" aria-hidden="true">✓</span>
                         </div>
+                        <small id="prnHelp" class="sit-input-help"></small>
                     </div>
                     <div class="sit-input-group">
                         <label for="email" class="sit-input-label">Official SIT Email</label>
                         <div class="sit-input-wrapper">
-                            <input type="email" id="email" name="email" class="sit-input-field" placeholder="firstname.lastname.btech2024@sitpune.edu.in" required>
-                            <span id="emailCheck" class="validation-checkmark">✓</span>
+                            <input type="email" id="email" name="email" class="sit-input-field" placeholder="firstname.lastname.btech2024@sitpune.edu.in" required aria-label="Official SIT Email Address">
+                            <span id="emailCheck" class="validation-checkmark" aria-hidden="true">✓</span>
                         </div>
+                        <small id="emailHelp" class="sit-input-help"></small>
                     </div>
-                    <div id="error-container" class="error-container" style="display: none;">
+                    <div id="error-container" class="error-container" style="display: none;" role="alert">
                         <p id="error-message" class="error-message"></p>
                     </div>
                     <button type="submit" id="submitBtn" class="sit-auth-card__submit" disabled>Send Verification Code</button>
@@ -52,16 +54,44 @@
         const emailInput = document.getElementById('email');
         const prnCheck = document.getElementById('prnCheck');
         const emailCheck = document.getElementById('emailCheck');
+        const prnHelp = document.getElementById('prnHelp');
+        const emailHelp = document.getElementById('emailHelp');
+        const errorContainer = document.getElementById('error-container');
+        const errorMessage = document.getElementById('error-message');
+
+        // Validation patterns
+        const PRN_PATTERN = /^\d{11}$/;
+        const EMAIL_PATTERN = /^[a-zA-Z0-9._-]+@sitpune\.edu\.in$/;
 
         const validate = () => {
-            const isPrnValid = prnInput.value.length === 11;
-            const isEmailValid = emailInput.value.toLowerCase().endsWith('@sitpune.edu.in');
-            
+            const prnValue = prnInput.value.trim();
+            const emailValue = emailInput.value.toLowerCase().trim();
+
+            // PRN validation
+            const isPrnValid = PRN_PATTERN.test(prnValue);
             prnCheck.classList.toggle('is-visible', isPrnValid);
+            if (!isPrnValid && prnValue.length > 0) {
+                prnHelp.textContent = prnValue.length < 11 ? `${11 - prnValue.length} digits remaining` : 'PRN must be 11 numeric digits';
+                prnHelp.style.color = '#ff4d4d';
+            } else {
+                prnHelp.textContent = '';
+            }
+
+            // Email validation
+            const isEmailValid = EMAIL_PATTERN.test(emailValue);
             emailCheck.classList.toggle('is-visible', isEmailValid);
+            if (!isEmailValid && emailValue.length > 0) {
+                emailHelp.textContent = !emailValue.includes('@sitpune.edu.in') ? 'Must use official SIT email' : 'Invalid email format';
+                emailHelp.style.color = '#ff4d4d';
+            } else {
+                emailHelp.textContent = '';
+            }
+
             submitBtn.disabled = !(isPrnValid && isEmailValid);
+            errorContainer.style.display = 'none';
         };
 
+        // Clear errors on input
         prnInput.addEventListener('input', validate);
         emailInput.addEventListener('input', validate);
 
@@ -69,20 +99,31 @@
             e.preventDefault();
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending...';
+            errorContainer.style.display = 'none';
             
-            const response = await fetch('http://localhost:8080/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: emailInput.value, prn: prnInput.value })
-            });
+            try {
+                const response = await fetch('http://localhost:8080/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: emailInput.value.toLowerCase().trim(), 
+                        prn: prnInput.value.trim() 
+                    })
+                });
 
-            if (response.ok) {
-                sessionStorage.setItem('tempUserEmail', emailInput.value);
-                window.location.href = "setup-password.html";
-            } else {
-                const err = await response.text();
-                document.getElementById('error-message').textContent = err;
-                document.getElementById('error-container').style.display = 'block';
+                if (response.ok) {
+                    sessionStorage.setItem('tempUserEmail', emailInput.value.toLowerCase().trim());
+                    window.location.href = "setup-password.html";
+                } else {
+                    const err = await response.text();
+                    errorMessage.textContent = err || 'Registration failed. Please try again.';
+                    errorContainer.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Verification Code';
+                }
+            } catch (err) {
+                errorMessage.textContent = 'Server connection failed. Please check your connection.';
+                errorContainer.style.display = 'block';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Send Verification Code';
             }
