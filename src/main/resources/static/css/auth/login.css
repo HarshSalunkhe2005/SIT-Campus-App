@@ -198,32 +198,3 @@
     background-color: var(--sit-primary);
     color: var(--sit-text-light);
 }
-
-@media (max-width: 992px) {
-    .sit-brand-pane {
-        flex: 0 0 40%;
-    }
-    .sit-form-pane {
-        flex: 0 0 60%;
-    }
-}
-
-@media (max-width: 768px) {
-    .sit-split-layout {
-        flex-direction: column;
-    }
-    .sit-brand-pane {
-        flex: 1;
-        padding: 3rem 1.5rem;
-        text-align: center;
-    }
-    .sit-brand-content {
-        text-align: center;
-    }
-    .sit-brand-logo {
-        margin: 0 auto 1.5rem auto;
-    }
-    .sit-form-pane {
-        flex: 1;
-    }
-}
