@@ -448,3 +448,16 @@
     .sit-btn             { width: 100%; text-align: center; }
     .sit-toast           { right: 1rem; left: 1rem; max-width: unset; }
 }
+
+.sit-input-label-hint {
+    display: block;
+    font-size: .78rem;
+    color: #6b7280;
+    font-weight: 400;
+    margin-top: .2rem;
+}
+
+.sit-upload-area--error {
+    border-color: var(--sit-error) !important;
+    background: rgba(204, 0, 0, .03);
+}

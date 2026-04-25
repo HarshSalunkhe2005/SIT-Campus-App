@@ -83,13 +83,13 @@
                         </label>
                         <select id="category" name="category" class="sit-select-field" required>
                             <option value="" disabled selected>Select a category…</option>
-                            <option value="ELECTRICAL">⚡ Electrical</option>
-                            <option value="PLUMBING">🚰 Plumbing</option>
-                            <option value="CIVIL">🏗️ Civil / Structural</option>
-                            <option value="CLEANLINESS">🧹 Cleanliness</option>
-                            <option value="IT">💻 IT / Network</option>
-                            <option value="FURNITURE">🪑 Furniture</option>
-                            <option value="OTHER">📦 Other</option>
+                            <option value="ELECTRICAL">Electrical</option>
+                            <option value="PLUMBING">Plumbing</option>
+                            <option value="CIVIL">Civil / Structural</option>
+                            <option value="CLEANLINESS">Cleanliness</option>
+                            <option value="IT">IT / Network</option>
+                            <option value="FURNITURE">Furniture</option>
+                            <option value="OTHER">Other</option>
                         </select>
                         <small class="sit-field-error" id="categoryError"></small>
                     </div>
@@ -119,25 +119,26 @@
                 </div>
 
                 <div class="sit-input-group">
-                    <label class="sit-input-label">
-                        Attach Photo <span class="sit-optional">(Optional)</span>
-                    </label>
-                    <div class="sit-upload-area" id="uploadArea">
-                        <input type="file" id="issueImage" name="image"
-                               accept="image/*" class="sit-file-input">
-                        <div class="sit-upload-prompt" id="uploadPrompt">
-                            <span class="sit-upload-icon">📷</span>
-                            <p>Click or drag &amp; drop an image here</p>
-                            <small>PNG, JPG, WEBP — max 5 MB</small>
-                        </div>
-                        <div class="sit-image-preview" id="imagePreview" style="display:none;">
-                            <img id="previewImg" src="" alt="Preview">
-                            <button type="button" class="sit-remove-image"
-                                    id="removeImage" aria-label="Remove image">✕</button>
-                        </div>
+                <label class="sit-input-label">
+                    Attach Photo <span class="sit-required">*</span>
+                    <small class="sit-input-label-hint">Required — helps the department assess the issue faster.</small>
+                </label>
+                <div class="sit-upload-area" id="uploadArea">
+                    <input type="file" id="issueImage" name="image"
+                        accept="image/*" class="sit-file-input" required>
+                    <div class="sit-upload-prompt" id="uploadPrompt">
+                        <span class="sit-upload-icon">📷</span>
+                        <p>Click or drag &amp; drop an image here</p>
+                        <small>PNG, JPG, WEBP — max 5 MB</small>
                     </div>
-                    <small class="sit-field-error" id="imageError"></small>
+                    <div class="sit-image-preview" id="imagePreview" style="display:none;">
+                        <img id="previewImg" src="" alt="Preview">
+                        <button type="button" class="sit-remove-image"
+                                id="removeImage" aria-label="Remove image">✕</button>
+                    </div>
                 </div>
+                <small class="sit-field-error" id="imageError"></small>
+            </div>
 
                 <div class="sit-form-actions">
                     <button type="reset" class="sit-btn sit-btn--ghost">Clear Form</button>
@@ -311,13 +312,23 @@ removeBtn.addEventListener('click', e => {
     previewImg.src = '';
     imagePreview.style.display = 'none';
     uploadPrompt.style.display  = 'flex';
-    imageError.textContent = '';
+    imageError.textContent = 'A photo is required to submit a report.';
+    uploadArea.classList.add('sit-upload-area--error');
 });
 
 function handleFile(file) {
     imageError.textContent = '';
-    if (!file.type.startsWith('image/')) { imageError.textContent = 'Only image files are allowed.'; return; }
-    if (file.size > 5 * 1024 * 1024)    { imageError.textContent = 'Image must be under 5 MB.'; return; }
+    uploadArea.classList.remove('sit-upload-area--error');
+    if (!file.type.startsWith('image/')) {
+        imageError.textContent = 'Only image files are allowed.';
+        uploadArea.classList.add('sit-upload-area--error');
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        imageError.textContent = 'Image must be under 5 MB.';
+        uploadArea.classList.add('sit-upload-area--error');
+        return;
+    }
     const reader = new FileReader();
     reader.onload = ev => {
         previewImg.src = ev.target.result;
@@ -351,11 +362,19 @@ descTA.addEventListener('input',  () => validateField(descTA,  'descError',    d
 /* ── FORM SUBMIT ── */
 document.getElementById('reportForm').addEventListener('submit', async e => {
     e.preventDefault();
+    const hasImage = fileInput.files && fileInput.files.length > 0;
     const ok = [
         validateField(catSel, 'categoryError', catSel.value !== '', 'Please select a category.'),
-        validateField(locInp, 'locationError',  locInp.value.trim().length >= 3,  'Location too short.'),
-        validateField(descTA, 'descError',      descTA.value.trim().length >= 20, 'Min 20 characters.'),
+        validateField(locInp, 'locationError', locInp.value.trim().length >= 3, 'Location too short.'),
+        validateField(descTA, 'descError', descTA.value.trim().length >= 20, 'Min 20 characters.'),
     ].every(Boolean);
+
+    if (!hasImage) {
+        imageError.textContent = 'A photo is required to submit a report.';
+        uploadArea.classList.add('sit-upload-area--error');
+        if (ok) uploadArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
     if (!ok) return;
 
     const btn = document.getElementById('reportSubmitBtn');
@@ -369,13 +388,13 @@ document.getElementById('reportForm').addEventListener('submit', async e => {
             imagePreview.style.display = 'none';
             uploadPrompt.style.display  = 'flex';
             previewImg.src = '';
+            uploadArea.classList.remove('sit-upload-area--error');
         } else {
             showToast((await res.text()) || '❌ Submission failed. Try again.', 'error');
         }
     } catch { showToast('❌ Server connection failed.', 'error'); }
     finally  { btn.disabled = false; btn.textContent = 'Submit Report'; }
 });
-
 /* ── FILTER & SORT ── */
 const filterSel  = document.getElementById('filterStatus');
 const sortSel    = document.getElementById('sortBy');

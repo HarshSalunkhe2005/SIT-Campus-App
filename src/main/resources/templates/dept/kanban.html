@@ -192,7 +192,41 @@
         </div>
 
     </div><!-- /kanbanBoard -->
+    <!-- STATUS CHANGE MODAL (image proof required) -->
+    <div id="statusModal" class="sit-modal-overlay" role="dialog"
+        aria-modal="true" aria-labelledby="modalTitle" hidden>
+        <div class="sit-modal">
+            <div class="sit-modal__header">
+                <h3 id="modalTitle" class="sit-modal__title">📸 Attach Proof Image</h3>
+                <button class="sit-modal__close" id="modalClose" aria-label="Cancel">✕</button>
+            </div>
+            <p class="sit-modal__subtitle" id="modalSubtitle">
+                Moving this issue requires a photo as proof of action.
+            </p>
 
+            <div class="sit-upload-area" id="modalUploadArea">
+                <input type="file" id="modalFileInput" accept="image/*" class="sit-file-input">
+                <div class="sit-upload-prompt" id="modalUploadPrompt">
+                    <span class="sit-upload-icon">📷</span>
+                    <p>Click or drag &amp; drop a photo here</p>
+                    <small>PNG, JPG, WEBP — max 5 MB</small>
+                </div>
+                <div class="sit-image-preview" id="modalImagePreview" style="display:none;">
+                    <img id="modalPreviewImg" src="" alt="Proof preview">
+                    <button type="button" class="sit-remove-image"
+                            id="modalRemoveImage" aria-label="Remove image">✕</button>
+                </div>
+            </div>
+            <small class="sit-field-error" id="modalImageError"></small>
+
+            <div class="sit-modal__actions">
+                <button class="sit-btn sit-btn--ghost" id="modalCancelBtn">Cancel</button>
+                <button class="sit-btn sit-btn--primary" id="modalConfirmBtn" disabled>
+                    Confirm Move
+                </button>
+            </div>
+        </div>
+    </div>
 </main>
 
 <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>

@@ -267,3 +267,134 @@
     .sit-page-header  { flex-direction: column; }
     .sit-toast        { right: 1rem; left: 1rem; max-width: unset; }
 }
+
+/* =====================================================
+   STATUS CHANGE MODAL
+   ===================================================== */
+.sit-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: sit-fade-in .2s ease;
+}
+.sit-modal-overlay[hidden] { display: none; }
+
+@keyframes sit-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.sit-modal {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+    animation: sit-slide-up .25s ease;
+}
+
+@keyframes sit-slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.sit-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+}
+.sit-modal__title  { font-size: 1.1rem; font-weight: 700; color: var(--sit-primary); }
+.sit-modal__close  {
+    background: none; border: none; font-size: 1.1rem;
+    cursor: pointer; color: #9ca3af; border-radius: 6px;
+    padding: .25rem .4rem; transition: background .15s;
+}
+.sit-modal__close:hover  { background: #f3f4f6; color: var(--sit-text-dark); }
+.sit-modal__subtitle     { font-size: .9rem; color: #6b7280; margin-bottom: 1.25rem; }
+
+/* Reuse upload styles inside modal */
+.sit-modal .sit-upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: border-color .25s, background .25s;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: .4rem;
+}
+.sit-modal .sit-upload-area:hover,
+.sit-modal .sit-upload-area--drag {
+    border-color: var(--sit-primary);
+    background: rgba(0, 51, 102, .03);
+}
+.sit-modal .sit-upload-area--error { border-color: var(--sit-error) !important; }
+.sit-modal .sit-upload-prompt {
+    display: flex; flex-direction: column;
+    align-items: center; gap: .3rem;
+    color: #6b7280; text-align: center;
+    pointer-events: none;
+}
+.sit-modal .sit-upload-icon { font-size: 1.75rem; }
+.sit-modal .sit-upload-prompt p { font-size: .9rem; font-weight: 500; margin: 0; }
+.sit-modal .sit-upload-prompt small { font-size: .78rem; }
+.sit-modal .sit-image-preview {
+    position: relative; display: flex;
+    align-items: center; justify-content: center; width: 100%;
+}
+.sit-modal .sit-image-preview img {
+    max-height: 150px; max-width: 100%;
+    border-radius: 8px; object-fit: contain;
+}
+.sit-remove-image {
+    position: absolute; top: -10px; right: -10px;
+    background: var(--sit-error); color: #fff;
+    border: none; border-radius: 50%;
+    width: 24px; height: 24px; font-size: .8rem;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+}
+
+.sit-field-error {
+    display: block; color: var(--sit-error);
+    font-size: .8rem; margin-bottom: .75rem;
+    font-weight: 500; min-height: 1em;
+}
+
+.sit-modal__actions {
+    display: flex; justify-content: flex-end;
+    gap: .75rem; margin-top: 1.25rem;
+}
+.sit-btn {
+    padding: .65rem 1.5rem; border-radius: 8px;
+    font-size: .95rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+    border: 2px solid transparent;
+}
+.sit-btn--primary {
+    background: var(--sit-primary); color: var(--sit-text-light);
+    border-color: var(--sit-primary);
+}
+.sit-btn--primary:hover:not(:disabled) { background: #002244; }
+.sit-btn--primary:disabled { opacity: .45; cursor: not-allowed; }
+.sit-btn--ghost {
+    background: transparent; color: var(--sit-primary);
+    border-color: var(--sit-primary);
+}
+.sit-btn--ghost:hover { background: var(--sit-primary); color: var(--sit-text-light); }
+
+@media (max-width: 520px) {
+    .sit-modal { padding: 1.25rem; }
+    .sit-modal__actions { flex-direction: column; }
+    .sit-btn { width: 100%; text-align: center; }
+}
