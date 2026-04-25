@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIT Campus App - Student Dashboard</title>
+    <link rel="stylesheet" href="../../static/css/shared/base.css" th:href="@{/css/shared/base.css}">
+    <link rel="stylesheet" href="../../static/css/student/dashboard.css" th:href="@{/css/student/dashboard.css}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="sit-navbar">
+        <div class="sit-navbar__container">
+            <div class="sit-navbar__brand">
+                <h2>SIT Campus App</h2>
+            </div>
+            <div class="sit-navbar__menu">
+                <span class="sit-navbar__user" id="userEmail">harsh.salunkhe@sitpune.edu.in</span>
+                <button class="sit-navbar__logout" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="sit-dashboard">
+        <!-- STATS CARD -->
+        <section class="sit-stats-container">
+            <div class="sit-stat-card">
+                <div class="sit-stat-number" id="statResolved">3</div>
+                <div class="sit-stat-label">Resolved</div>
+            </div>
+            <div class="sit-stat-card">
+                <div class="sit-stat-number" id="statPending">2</div>
+                <div class="sit-stat-label">Pending</div>
+            </div>
+            <div class="sit-stat-card">
+                <div class="sit-stat-number" id="statInProgress">1</div>
+                <div class="sit-stat-label">In Progress</div>
+            </div>
+            <div class="sit-stat-card">
+                <div class="sit-stat-number" id="statTotal">6</div>
+                <div class="sit-stat-label">Total Reports</div>
+            </div>
+        </section>
+
+        <!-- TABS -->
+        <div class="sit-tabs">
+            <button class="sit-tab-btn sit-tab-btn--active" data-tab="report">Report Issue</button>
+            <button class="sit-tab-btn" data-tab="history">Issue History</button>
+        </div>
+
+        <!-- TAB 1: REPORT FORM -->
+        <section id="report" class="sit-tab-content sit-tab-content--active">
+            <div class="sit-card">
+                <h3 class="sit-card__title">Report a Campus Issue</h3>
+                
+                <form id="reportForm" class="sit-form">
+                    <div class="sit-form-group">
+                        <label for="category" class="sit-form-label">Category *</label>
+                        <select id="category" name="category" class="sit-form-input" required>
+                            <option value="">Select Category</option>
+                            <option value="hostel">Hostel</option>
+                            <option value="mess">Mess/Canteen</option>
+                            <option value="wifi">Wi-Fi Network</option>
+                            <option value="classroom">Classroom</option>
+                            <option value="lab">Lab Equipment</option>
+                            <option value="sports">Sports Facility</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="sit-form-group">
+                        <label for="location" class="sit-form-label">Location *</label>
+                        <input type="text" id="location" name="location" class="sit-form-input" placeholder="e.g., Hostel A, Room 301" required>
+                    </div>
+
+                    <div class="sit-form-group">
+                        <label for="description" class="sit-form-label">Description *</label>
+                        <textarea id="description" name="description" class="sit-form-input sit-form-textarea" placeholder="Describe the issue in detail..." required rows="4"></textarea>
+                    </div>
+
+                    <div class="sit-form-group">
+                        <label for="urgency" class="sit-form-label">Urgency Level</label>
+                        <select id="urgency" name="urgency" class="sit-form-input">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+
+                    <!-- TODO: Image Upload - Backend: Accept multipart/form-data with image blob -->
+                    <!-- TODO: Send image via FormData to /api/report endpoint -->
+                    <div class="sit-form-group">
+                        <label for="proofImage" class="sit-form-label">Proof Image git *</label>
+                        <input type="file" id="proofImage" name="proofImage" class="sit-form-input" accept="image/*">
+                        <small class="sit-form-help">Max 5MB. Supported: JPG, PNG, WebP</small>
+                        <div id="imagePreview" class="sit-image-preview" style="display: none;">
+                            <img id="previewImg" src="" alt="Preview">
+                            <button type="button" class="sit-preview-remove" id="removeImageBtn">✕ Remove</button>
+                        </div>
+                    </div>
+
+                    <div id="successMsg" class="sit-success-toast" style="display: none;">
+                        ✓ Issue reported successfully!
+                    </div>
+
+                    <div id="errorMsg" class="sit-error-toast" style="display: none;"></div>
+
+                    <button type="submit" class="sit-btn-primary">Submit Report</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB 2: HISTORY -->
+        <section id="history" class="sit-tab-content">
+            <div class="sit-card">
+                <h3 class="sit-card__title">Your Issue Reports</h3>
+
+                <!-- FILTERS -->
+                <div class="sit-filters">
+                    <select id="filterStatus" class="sit-filter-input">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="inprogress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                    <select id="filterCategory" class="sit-filter-input">
+                        <option value="">All Categories</option>
+                        <option value="hostel">Hostel</option>
+                        <option value="mess">Mess/Canteen</option>
+                        <option value="wifi">Wi-Fi Network</option>
+                        <option value="classroom">Classroom</option>
+                        <option value="lab">Lab Equipment</option>
+                        <option value="sports">Sports Facility</option>
+                    </select>
+                    <button id="sortBtn" class="sit-filter-btn">↓ Sort by Upvotes</button>
+                </div>
+
+                <!-- ISSUES TABLE -->
+                <div class="sit-issues-container" id="issuesContainer">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // TODO: Replace mockIssues with API call to /api/issues (GET)
+        // TODO: Backend: Provide endpoints:
+        //   GET /api/issues - List all issues
+        //   POST /api/report - Submit new issue (multipart/form-data with image blob)
+        //   POST /api/issues/{id}/upvote - Upvote an issue
+        //   DELETE /api/issues/{id} - Delete issue (only own)
+        //   PUT /api/issues/{id} - Edit issue (only own)
+
+        // MOCK DATA
+        const mockIssues = [
+            { id: 1, category: 'hostel', location: 'Hostel A, Room 301', description: 'Water leakage in bathroom', status: 'resolved', date: '2026-03-28', upvotes: 5, urgency: 'high', image: null },
+            { id: 2, category: 'wifi', location: 'Classroom Block C', description: 'Wi-Fi signal weak in corner', status: 'inprogress', date: '2026-04-01', upvotes: 8, urgency: 'medium', image: null },
+            { id: 3, category: 'mess', location: 'Canteen', description: 'Food quality issue', status: 'pending', date: '2026-04-04', upvotes: 3, urgency: 'low', image: null },
+            { id: 4, category: 'lab', location: 'Lab 2', description: 'Projector not working', status: 'resolved', date: '2026-03-20', upvotes: 2, urgency: 'medium', image: null },
+            { id: 5, category: 'classroom', location: 'Room 102', description: 'AC temperature too cold', status: 'resolved', date: '2026-03-15', upvotes: 6, urgency: 'low', image: null },
+            { id: 6, category: 'sports', location: 'Basketball Court', description: 'Damaged hoop', status: 'pending', date: '2026-04-03', upvotes: 1, urgency: 'high', image: null }
+        ];
+
+        let allIssues = [...mockIssues];
+        let sortByUpvotes = false;
+        let selectedImage = null;
+        let upvotedIssues = JSON.parse(localStorage.getItem('upvoted')) || [];
+
+        // IMAGE UPLOAD HANDLER
+        document.getElementById('proofImage').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            // Validation
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image must be less than 5MB', 'error');
+                return;
+            }
+
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                showToast('Only JPG, PNG, WebP allowed', 'error');
+                return;
+            }
+
+            // Convert to Blob and preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                selectedImage = {
+                    blob: file,
+                    data: event.target.result
+                };
+                
+                // Show preview
+                document.getElementById('previewImg').src = event.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // REMOVE IMAGE
+        document.getElementById('removeImageBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            selectedImage = null;
+            document.getElementById('proofImage').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+        });
+
+        // TAB SWITCHING
+        document.querySelectorAll('.sit-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.sit-tab-btn').forEach(b => b.classList.remove('sit-tab-btn--active'));
+                document.querySelectorAll('.sit-tab-content').forEach(c => c.classList.remove('sit-tab-content--active'));
+                
+                btn.classList.add('sit-tab-btn--active');
+                const tabId = btn.dataset.tab;
+                document.getElementById(tabId).classList.add('sit-tab-content--active');
+                
+                if (tabId === 'history') renderIssues();
+            });
+        });
+
+        // UPDATE STATS
+        const updateStats = () => {
+            const resolved = allIssues.filter(i => i.status === 'resolved').length;
+            const pending = allIssues.filter(i => i.status === 'pending').length;
+            const inProgress = allIssues.filter(i => i.status === 'inprogress').length;
+            
+            document.getElementById('statResolved').textContent = resolved;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statInProgress').textContent = inProgress;
+            document.getElementById('statTotal').textContent = allIssues.length;
+        };
+
+        // RENDER ISSUES
+        const renderIssues = () => {
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterCategory = document.getElementById('filterCategory').value;
+            
+            let filtered = allIssues.filter(issue => {
+                return (!filterStatus || issue.status === filterStatus) &&
+                       (!filterCategory || issue.category === filterCategory);
+            });
+
+            if (sortByUpvotes) {
+                filtered.sort((a, b) => b.upvotes - a.upvotes);
+            } else {
+                filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
+
+            const container = document.getElementById('issuesContainer');
+            container.innerHTML = filtered.map(issue => {
+                const isUpvoted = upvotedIssues.includes(issue.id);
+                return `
+                    <div class="sit-issue-card sit-issue-card--${issue.status}">
+                        <div class="sit-issue-header">
+                            <h4 class="sit-issue-title">${issue.description}</h4>
+                            <span class="sit-issue-status sit-status-${issue.status}">${issue.status.charAt(0).toUpperCase() + issue.status.slice(1)}</span>
+                        </div>
+                        ${issue.image ? `<div class="sit-issue-image"><img src="${issue.image}" alt="Proof"></div>` : ''}
+                        <div class="sit-issue-meta">
+                            <span class="sit-meta-item"><strong>Category:</strong> ${issue.category}</span>
+                            <span class="sit-meta-item"><strong>Location:</strong> ${issue.location}</span>
+                            <span class="sit-meta-item"><strong>Date:</strong> ${issue.date}</span>
+                        </div>
+                        <div class="sit-issue-footer">
+                            <button class="sit-upvote-btn ${isUpvoted ? 'sit-upvote-btn--disabled' : ''}" 
+                                    data-id="${issue.id}" 
+                                    ${isUpvoted ? 'disabled' : ''}>
+                                👍 ${issue.upvotes} ${isUpvoted ? '(Upvoted)' : ''}
+                            </button>
+                            <span class="sit-urgency sit-urgency-${issue.urgency}">${issue.urgency.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // UPVOTE HANDLERS
+            document.querySelectorAll('.sit-upvote-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.dataset.id);
+                    
+                    // Check if already upvoted
+                    if (upvotedIssues.includes(id)) {
+                        showToast('Already upvoted this issue', 'error');
+                        return;
+                    }
+
+                    const issue = allIssues.find(i => i.id === id);
+                    if (issue) {
+                        issue.upvotes++;
+                        upvotedIssues.push(id);
+                        localStorage.setItem('upvoted', JSON.stringify(upvotedIssues));
+                        
+                        e.target.disabled = true;
+                        e.target.classList.add('sit-upvote-btn--disabled');
+                        e.target.textContent = `👍 ${issue.upvotes} (Upvoted)`;
+                        
+                        showToast('✓ Upvoted!', 'success');
+                    }
+                });
+            });
+        };
+
+        // SUBMIT REPORT
+        document.getElementById('reportForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // TODO: Backend: Convert Blob to multipart/form-data
+            // TODO: Send to POST /api/report with image blob
+            
+            const newIssue = {
+                id: allIssues.length + 1,
+                category: document.getElementById('category').value,
+                location: document.getElementById('location').value,
+                description: document.getElementById('description').value,
+                urgency: document.getElementById('urgency').value,
+                status: 'pending',
+                date: new Date().toISOString().split('T')[0],
+                upvotes: 0,
+                image: selectedImage ? selectedImage.data : null  // Store base64 for mock
+            };
+
+            allIssues.push(newIssue);
+            updateStats();
+            
+            document.getElementById('reportForm').reset();
+            selectedImage = null;
+            document.getElementById('imagePreview').style.display = 'none';
+            
+            showToast('✓ Issue reported successfully!', 'success');
+            
+            setTimeout(() => {
+                document.querySelector('[data-tab="history"]').click();
+            }, 1500);
+        });
+
+        // FILTERS
+        document.getElementById('filterStatus').addEventListener('change', renderIssues);
+        document.getElementById('filterCategory').addEventListener('change', renderIssues);
+        
+        document.getElementById('sortBtn').addEventListener('click', () => {
+            sortByUpvotes = !sortByUpvotes;
+            const btn = document.getElementById('sortBtn');
+            btn.textContent = sortByUpvotes ? '↑ Sort by Date' : '↓ Sort by Upvotes';
+            renderIssues();
+        });
+
+        // LOGOUT
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Logout?')) {
+                // TODO: Backend: Call POST /auth/logout to invalidate session
+                window.location.href = '/auth/login';
+            }
+        });
+
+        // TOAST NOTIFICATIONS
+        const showToast = (msg, type) => {
+            const container = document.querySelector('.sit-form');
+            const toast = document.createElement('div');
+            toast.className = `sit-toast sit-toast--${type}`;
+            toast.textContent = msg;
+            container.insertBefore(toast, container.firstChild);
+            
+            setTimeout(() => toast.remove(), 3000);
+        };
+
+        // INIT
+        updateStats();
+        renderIssues();
+    </script>
+</body>
+</html>
