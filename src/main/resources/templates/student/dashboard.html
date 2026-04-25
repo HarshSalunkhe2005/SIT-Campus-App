@@ -4,372 +4,434 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Student Dashboard</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css" th:href="@{/css/shared/base.css}">
+    <link rel="stylesheet" href="../../static/css/shared/base.css"      th:href="@{/css/shared/base.css}">
     <link rel="stylesheet" href="../../static/css/student/dashboard.css" th:href="@{/css/student/dashboard.css}">
 </head>
 <body>
-    <!-- NAVBAR -->
-    <nav class="sit-navbar">
-        <div class="sit-navbar__container">
-            <div class="sit-navbar__brand">
-                <h2>SIT Campus App</h2>
-            </div>
-            <div class="sit-navbar__menu">
-                <span class="sit-navbar__user" id="userEmail">harsh.salunkhe@sitpune.edu.in</span>
-                <button class="sit-navbar__logout" id="logoutBtn">Logout</button>
-            </div>
+
+<!-- NAVBAR: th:replace runs on server; inner div is the live-server fallback -->
+<div th:replace="~{fragments/navbar :: navbar('STUDENT')}">
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
+            <div class="navbar-title"><h1>Student Dashboard</h1></div>
+            <div class="navbar-right"><span class="user-name">Student</span></div>
         </div>
     </nav>
+</div>
 
-    <!-- MAIN CONTAINER -->
-    <main class="sit-dashboard">
-        <!-- STATS CARD -->
-        <section class="sit-stats-container">
-            <div class="sit-stat-card">
-                <div class="sit-stat-number" id="statResolved">3</div>
-                <div class="sit-stat-label">Resolved</div>
-            </div>
-            <div class="sit-stat-card">
-                <div class="sit-stat-number" id="statPending">2</div>
-                <div class="sit-stat-label">Pending</div>
-            </div>
-            <div class="sit-stat-card">
-                <div class="sit-stat-number" id="statInProgress">1</div>
-                <div class="sit-stat-label">In Progress</div>
-            </div>
-            <div class="sit-stat-card">
-                <div class="sit-stat-number" id="statTotal">6</div>
-                <div class="sit-stat-label">Total Reports</div>
-            </div>
-        </section>
+<main class="sit-dashboard-main">
 
-        <!-- TABS -->
-        <div class="sit-tabs">
-            <button class="sit-tab-btn sit-tab-btn--active" data-tab="report">Report Issue</button>
-            <button class="sit-tab-btn" data-tab="history">Issue History</button>
+    <!-- PAGE HEADER -->
+    <div class="sit-page-header">
+        <div>
+            <h2 class="sit-page-title">Welcome back, <span th:text="${userName}" class="sit-highlight">Student</span> 👋</h2>
+            <p class="sit-page-subtitle">Track and manage your campus issue reports.</p>
         </div>
+    </div>
 
-        <!-- TAB 1: REPORT FORM -->
-        <section id="report" class="sit-tab-content sit-tab-content--active">
-            <div class="sit-card">
-                <h3 class="sit-card__title">Report a Campus Issue</h3>
-                
-                <form id="reportForm" class="sit-form">
-                    <div class="sit-form-group">
-                        <label for="category" class="sit-form-label">Category *</label>
-                        <select id="category" name="category" class="sit-form-input" required>
-                            <option value="">Select Category</option>
-                            <option value="hostel">Hostel</option>
-                            <option value="mess">Mess/Canteen</option>
-                            <option value="wifi">Wi-Fi Network</option>
-                            <option value="classroom">Classroom</option>
-                            <option value="lab">Lab Equipment</option>
-                            <option value="sports">Sports Facility</option>
-                            <option value="other">Other</option>
+    <!-- STATS -->
+    <section class="sit-stats-container" aria-label="Issue Statistics">
+        <div class="sit-stat-card sit-stat-card--total">
+            <div class="sit-stat-icon">📋</div>
+            <div class="sit-stat-number" th:text="${totalReports}">12</div>
+            <div class="sit-stat-label">Total Reports</div>
+        </div>
+        <div class="sit-stat-card sit-stat-card--pending">
+            <div class="sit-stat-icon">⏳</div>
+            <div class="sit-stat-number" th:text="${pendingReports}">4</div>
+            <div class="sit-stat-label">Pending</div>
+        </div>
+        <div class="sit-stat-card sit-stat-card--inprogress">
+            <div class="sit-stat-icon">🔧</div>
+            <div class="sit-stat-number" th:text="${inProgressReports}">5</div>
+            <div class="sit-stat-label">In Progress</div>
+        </div>
+        <div class="sit-stat-card sit-stat-card--resolved">
+            <div class="sit-stat-icon">✅</div>
+            <div class="sit-stat-number" th:text="${resolvedReports}">3</div>
+            <div class="sit-stat-label">Resolved</div>
+        </div>
+    </section>
+
+    <!-- TABS -->
+    <div class="sit-tabs" role="tablist" aria-label="Dashboard Sections">
+        <button class="sit-tab-btn sit-tab-btn--active" role="tab" aria-selected="true"
+                aria-controls="tab-report" id="btn-report" data-tab="report">
+            📝 Report an Issue
+        </button>
+        <button class="sit-tab-btn" role="tab" aria-selected="false"
+                aria-controls="tab-history" id="btn-history" data-tab="history">
+            📁 My Issues
+        </button>
+    </div>
+
+    <!-- TAB 1: REPORT FORM -->
+    <section id="tab-report" class="sit-tab-content sit-tab-content--active"
+             role="tabpanel" aria-labelledby="btn-report">
+        <div class="sit-card">
+            <h3 class="sit-card__title">Report a Campus Issue</h3>
+
+            <form id="reportForm" class="sit-report-form"
+                  th:action="@{/student/report}" action="#"
+                  method="POST" enctype="multipart/form-data">
+
+                <div class="sit-form-grid">
+                    <div class="sit-input-group">
+                        <label for="category" class="sit-input-label">
+                            Category <span class="sit-required">*</span>
+                        </label>
+                        <select id="category" name="category" class="sit-select-field" required>
+                            <option value="" disabled selected>Select a category…</option>
+                            <option value="ELECTRICAL">⚡ Electrical</option>
+                            <option value="PLUMBING">🚰 Plumbing</option>
+                            <option value="CIVIL">🏗️ Civil / Structural</option>
+                            <option value="CLEANLINESS">🧹 Cleanliness</option>
+                            <option value="IT">💻 IT / Network</option>
+                            <option value="FURNITURE">🪑 Furniture</option>
+                            <option value="OTHER">📦 Other</option>
                         </select>
+                        <small class="sit-field-error" id="categoryError"></small>
                     </div>
 
-                    <div class="sit-form-group">
-                        <label for="location" class="sit-form-label">Location *</label>
-                        <input type="text" id="location" name="location" class="sit-form-input" placeholder="e.g., Hostel A, Room 301" required>
+                    <div class="sit-input-group">
+                        <label for="location" class="sit-input-label">
+                            Location <span class="sit-required">*</span>
+                        </label>
+                        <input type="text" id="location" name="location"
+                               class="sit-input-field"
+                               placeholder="e.g., Block A, Room 203"
+                               required maxlength="100">
+                        <small class="sit-field-error" id="locationError"></small>
                     </div>
+                </div>
 
-                    <div class="sit-form-group">
-                        <label for="description" class="sit-form-label">Description *</label>
-                        <textarea id="description" name="description" class="sit-form-input sit-form-textarea" placeholder="Describe the issue in detail..." required rows="4"></textarea>
-                    </div>
+                <div class="sit-input-group">
+                    <label for="description" class="sit-input-label">
+                        Description <span class="sit-required">*</span>
+                    </label>
+                    <textarea id="description" name="description"
+                              class="sit-textarea-field" rows="4"
+                              placeholder="Describe the issue in detail (min 20 characters)…"
+                              required minlength="20" maxlength="500"></textarea>
+                    <small class="sit-char-count" id="descCount">0 / 500</small>
+                    <small class="sit-field-error" id="descError"></small>
+                </div>
 
-                    <div class="sit-form-group">
-                        <label for="urgency" class="sit-form-label">Urgency Level</label>
-                        <select id="urgency" name="urgency" class="sit-form-input">
-                            <option value="low">Low</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                    </div>
-
-                    <!-- TODO: Image Upload - Backend: Accept multipart/form-data with image blob -->
-                    <!-- TODO: Send image via FormData to /api/report endpoint -->
-                    <div class="sit-form-group">
-                        <label for="proofImage" class="sit-form-label">Proof Image git *</label>
-                        <input type="file" id="proofImage" name="proofImage" class="sit-form-input" accept="image/*">
-                        <small class="sit-form-help">Max 5MB. Supported: JPG, PNG, WebP</small>
-                        <div id="imagePreview" class="sit-image-preview" style="display: none;">
+                <div class="sit-input-group">
+                    <label class="sit-input-label">
+                        Attach Photo <span class="sit-optional">(Optional)</span>
+                    </label>
+                    <div class="sit-upload-area" id="uploadArea">
+                        <input type="file" id="issueImage" name="image"
+                               accept="image/*" class="sit-file-input">
+                        <div class="sit-upload-prompt" id="uploadPrompt">
+                            <span class="sit-upload-icon">📷</span>
+                            <p>Click or drag &amp; drop an image here</p>
+                            <small>PNG, JPG, WEBP — max 5 MB</small>
+                        </div>
+                        <div class="sit-image-preview" id="imagePreview" style="display:none;">
                             <img id="previewImg" src="" alt="Preview">
-                            <button type="button" class="sit-preview-remove" id="removeImageBtn">✕ Remove</button>
+                            <button type="button" class="sit-remove-image"
+                                    id="removeImage" aria-label="Remove image">✕</button>
                         </div>
                     </div>
-
-                    <div id="successMsg" class="sit-success-toast" style="display: none;">
-                        ✓ Issue reported successfully!
-                    </div>
-
-                    <div id="errorMsg" class="sit-error-toast" style="display: none;"></div>
-
-                    <button type="submit" class="sit-btn-primary">Submit Report</button>
-                </form>
-            </div>
-        </section>
-
-        <!-- TAB 2: HISTORY -->
-        <section id="history" class="sit-tab-content">
-            <div class="sit-card">
-                <h3 class="sit-card__title">Your Issue Reports</h3>
-
-                <!-- FILTERS -->
-                <div class="sit-filters">
-                    <select id="filterStatus" class="sit-filter-input">
-                        <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="inprogress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                    </select>
-                    <select id="filterCategory" class="sit-filter-input">
-                        <option value="">All Categories</option>
-                        <option value="hostel">Hostel</option>
-                        <option value="mess">Mess/Canteen</option>
-                        <option value="wifi">Wi-Fi Network</option>
-                        <option value="classroom">Classroom</option>
-                        <option value="lab">Lab Equipment</option>
-                        <option value="sports">Sports Facility</option>
-                    </select>
-                    <button id="sortBtn" class="sit-filter-btn">↓ Sort by Upvotes</button>
+                    <small class="sit-field-error" id="imageError"></small>
                 </div>
 
-                <!-- ISSUES TABLE -->
-                <div class="sit-issues-container" id="issuesContainer">
-                    <!-- Populated by JS -->
+                <div class="sit-form-actions">
+                    <button type="reset" class="sit-btn sit-btn--ghost">Clear Form</button>
+                    <button type="submit" class="sit-btn sit-btn--primary"
+                            id="reportSubmitBtn">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- TAB 2: ISSUE HISTORY -->
+    <section id="tab-history" class="sit-tab-content"
+             role="tabpanel" aria-labelledby="btn-history" hidden>
+        <div class="sit-card">
+            <div class="sit-card__toolbar">
+                <h3 class="sit-card__title">My Reported Issues</h3>
+                <div class="sit-toolbar-controls">
+                    <select id="filterStatus" class="sit-select-field sit-select-field--sm"
+                            aria-label="Filter by status">
+                        <option value="ALL">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="RESOLVED">Resolved</option>
+                    </select>
+                    <select id="sortBy" class="sit-select-field sit-select-field--sm"
+                            aria-label="Sort issues">
+                        <option value="DATE_DESC">Newest First</option>
+                        <option value="DATE_ASC">Oldest First</option>
+                        <option value="UPVOTES">Most Upvoted</option>
+                    </select>
                 </div>
             </div>
-        </section>
-    </main>
 
-    <script>
-        // TODO: Replace mockIssues with API call to /api/issues (GET)
-        // TODO: Backend: Provide endpoints:
-        //   GET /api/issues - List all issues
-        //   POST /api/report - Submit new issue (multipart/form-data with image blob)
-        //   POST /api/issues/{id}/upvote - Upvote an issue
-        //   DELETE /api/issues/{id} - Delete issue (only own)
-        //   PUT /api/issues/{id} - Edit issue (only own)
+            <div class="sit-issues-list" id="issuesList">
 
-        // MOCK DATA
-        const mockIssues = [
-            { id: 1, category: 'hostel', location: 'Hostel A, Room 301', description: 'Water leakage in bathroom', status: 'resolved', date: '2026-03-28', upvotes: 5, urgency: 'high', image: null },
-            { id: 2, category: 'wifi', location: 'Classroom Block C', description: 'Wi-Fi signal weak in corner', status: 'inprogress', date: '2026-04-01', upvotes: 8, urgency: 'medium', image: null },
-            { id: 3, category: 'mess', location: 'Canteen', description: 'Food quality issue', status: 'pending', date: '2026-04-04', upvotes: 3, urgency: 'low', image: null },
-            { id: 4, category: 'lab', location: 'Lab 2', description: 'Projector not working', status: 'resolved', date: '2026-03-20', upvotes: 2, urgency: 'medium', image: null },
-            { id: 5, category: 'classroom', location: 'Room 102', description: 'AC temperature too cold', status: 'resolved', date: '2026-03-15', upvotes: 6, urgency: 'low', image: null },
-            { id: 6, category: 'sports', location: 'Basketball Court', description: 'Damaged hoop', status: 'pending', date: '2026-04-03', upvotes: 1, urgency: 'high', image: null }
-        ];
-
-        let allIssues = [...mockIssues];
-        let sortByUpvotes = false;
-        let selectedImage = null;
-        let upvotedIssues = JSON.parse(localStorage.getItem('upvoted')) || [];
-
-        // IMAGE UPLOAD HANDLER
-        document.getElementById('proofImage').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            
-            if (!file) return;
-
-            // Validation
-            if (file.size > 5 * 1024 * 1024) {
-                showToast('Image must be less than 5MB', 'error');
-                return;
-            }
-
-            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-                showToast('Only JPG, PNG, WebP allowed', 'error');
-                return;
-            }
-
-            // Convert to Blob and preview
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                selectedImage = {
-                    blob: file,
-                    data: event.target.result
-                };
-                
-                // Show preview
-                document.getElementById('previewImg').src = event.target.result;
-                document.getElementById('imagePreview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // REMOVE IMAGE
-        document.getElementById('removeImageBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            selectedImage = null;
-            document.getElementById('proofImage').value = '';
-            document.getElementById('imagePreview').style.display = 'none';
-        });
-
-        // TAB SWITCHING
-        document.querySelectorAll('.sit-tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.sit-tab-btn').forEach(b => b.classList.remove('sit-tab-btn--active'));
-                document.querySelectorAll('.sit-tab-content').forEach(c => c.classList.remove('sit-tab-content--active'));
-                
-                btn.classList.add('sit-tab-btn--active');
-                const tabId = btn.dataset.tab;
-                document.getElementById(tabId).classList.add('sit-tab-content--active');
-                
-                if (tabId === 'history') renderIssues();
-            });
-        });
-
-        // UPDATE STATS
-        const updateStats = () => {
-            const resolved = allIssues.filter(i => i.status === 'resolved').length;
-            const pending = allIssues.filter(i => i.status === 'pending').length;
-            const inProgress = allIssues.filter(i => i.status === 'inprogress').length;
-            
-            document.getElementById('statResolved').textContent = resolved;
-            document.getElementById('statPending').textContent = pending;
-            document.getElementById('statInProgress').textContent = inProgress;
-            document.getElementById('statTotal').textContent = allIssues.length;
-        };
-
-        // RENDER ISSUES
-        const renderIssues = () => {
-            const filterStatus = document.getElementById('filterStatus').value;
-            const filterCategory = document.getElementById('filterCategory').value;
-            
-            let filtered = allIssues.filter(issue => {
-                return (!filterStatus || issue.status === filterStatus) &&
-                       (!filterCategory || issue.category === filterCategory);
-            });
-
-            if (sortByUpvotes) {
-                filtered.sort((a, b) => b.upvotes - a.upvotes);
-            } else {
-                filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-            }
-
-            const container = document.getElementById('issuesContainer');
-            container.innerHTML = filtered.map(issue => {
-                const isUpvoted = upvotedIssues.includes(issue.id);
-                return `
-                    <div class="sit-issue-card sit-issue-card--${issue.status}">
-                        <div class="sit-issue-header">
-                            <h4 class="sit-issue-title">${issue.description}</h4>
-                            <span class="sit-issue-status sit-status-${issue.status}">${issue.status.charAt(0).toUpperCase() + issue.status.slice(1)}</span>
-                        </div>
-                        ${issue.image ? `<div class="sit-issue-image"><img src="${issue.image}" alt="Proof"></div>` : ''}
-                        <div class="sit-issue-meta">
-                            <span class="sit-meta-item"><strong>Category:</strong> ${issue.category}</span>
-                            <span class="sit-meta-item"><strong>Location:</strong> ${issue.location}</span>
-                            <span class="sit-meta-item"><strong>Date:</strong> ${issue.date}</span>
-                        </div>
-                        <div class="sit-issue-footer">
-                            <button class="sit-upvote-btn ${isUpvoted ? 'sit-upvote-btn--disabled' : ''}" 
-                                    data-id="${issue.id}" 
-                                    ${isUpvoted ? 'disabled' : ''}>
-                                👍 ${issue.upvotes} ${isUpvoted ? '(Upvoted)' : ''}
-                            </button>
-                            <span class="sit-urgency sit-urgency-${issue.urgency}">${issue.urgency.toUpperCase()}</span>
-                        </div>
+                <!-- ── Thymeleaf: real data rows ── -->
+                <div th:each="issue : ${issues}"
+                     class="sit-issue-card"
+                     th:attr="data-status=${issue.status},data-date=${issue.createdAt},data-upvotes=${issue.upvotes}">
+                    <div class="sit-issue-card__left">
+                        <span class="sit-status-badge"
+                              th:classappend="'sit-status-badge--' + ${#strings.toLowerCase(issue.status)}"
+                              th:text="${issue.status}">STATUS</span>
+                        <h4 class="sit-issue-card__title" th:text="${issue.category}">Category</h4>
+                        <p class="sit-issue-card__location">
+                            📍 <span th:text="${issue.location}">Location</span>
+                        </p>
+                        <p class="sit-issue-card__desc" th:text="${issue.description}">Description</p>
+                        <small class="sit-issue-card__date"
+                               th:text="${#temporals.format(issue.createdAt,'dd MMM yyyy')}">01 Jan 2025</small>
                     </div>
-                `;
-            }).join('');
+                    <div class="sit-issue-card__right">
+                        <button class="sit-upvote-btn"
+                                th:attr="data-id=${issue.id}"
+                                aria-label="Upvote this issue">
+                            <span class="sit-upvote-icon">▲</span>
+                            <span class="sit-upvote-count" th:text="${issue.upvotes}">0</span>
+                        </button>
+                    </div>
+                </div>
 
-            // UPVOTE HANDLERS
-            document.querySelectorAll('.sit-upvote-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = parseInt(e.target.dataset.id);
-                    
-                    // Check if already upvoted
-                    if (upvotedIssues.includes(id)) {
-                        showToast('Already upvoted this issue', 'error');
-                        return;
-                    }
+                <!-- ── Static demo cards (visible on live-server preview) ── -->
+                <div class="sit-issue-card" data-status="PENDING" data-upvotes="4">
+                    <div class="sit-issue-card__left">
+                        <span class="sit-status-badge sit-status-badge--pending">PENDING</span>
+                        <h4 class="sit-issue-card__title">⚡ Electrical</h4>
+                        <p class="sit-issue-card__location">📍 Block B, Room 101</p>
+                        <p class="sit-issue-card__desc">Main light flickering since 3 days. Affects the entire classroom during evening lectures.</p>
+                        <small class="sit-issue-card__date">22 Apr 2025</small>
+                    </div>
+                    <div class="sit-issue-card__right">
+                        <button class="sit-upvote-btn" data-id="demo-1" aria-label="Upvote">
+                            <span class="sit-upvote-icon">▲</span>
+                            <span class="sit-upvote-count">4</span>
+                        </button>
+                    </div>
+                </div>
 
-                    const issue = allIssues.find(i => i.id === id);
-                    if (issue) {
-                        issue.upvotes++;
-                        upvotedIssues.push(id);
-                        localStorage.setItem('upvoted', JSON.stringify(upvotedIssues));
-                        
-                        e.target.disabled = true;
-                        e.target.classList.add('sit-upvote-btn--disabled');
-                        e.target.textContent = `👍 ${issue.upvotes} (Upvoted)`;
-                        
-                        showToast('✓ Upvoted!', 'success');
-                    }
-                });
-            });
-        };
+                <div class="sit-issue-card" data-status="IN_PROGRESS" data-upvotes="11">
+                    <div class="sit-issue-card__left">
+                        <span class="sit-status-badge sit-status-badge--in_progress">IN PROGRESS</span>
+                        <h4 class="sit-issue-card__title">🚰 Plumbing</h4>
+                        <p class="sit-issue-card__location">📍 Library Washroom</p>
+                        <p class="sit-issue-card__desc">Water leaking from overhead pipe near the sink. Floor remains wet constantly.</p>
+                        <small class="sit-issue-card__date">19 Apr 2025</small>
+                    </div>
+                    <div class="sit-issue-card__right">
+                        <button class="sit-upvote-btn" data-id="demo-2" aria-label="Upvote">
+                            <span class="sit-upvote-icon">▲</span>
+                            <span class="sit-upvote-count">11</span>
+                        </button>
+                    </div>
+                </div>
 
-        // SUBMIT REPORT
-        document.getElementById('reportForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // TODO: Backend: Convert Blob to multipart/form-data
-            // TODO: Send to POST /api/report with image blob
-            
-            const newIssue = {
-                id: allIssues.length + 1,
-                category: document.getElementById('category').value,
-                location: document.getElementById('location').value,
-                description: document.getElementById('description').value,
-                urgency: document.getElementById('urgency').value,
-                status: 'pending',
-                date: new Date().toISOString().split('T')[0],
-                upvotes: 0,
-                image: selectedImage ? selectedImage.data : null  // Store base64 for mock
-            };
+                <div class="sit-issue-card" data-status="RESOLVED" data-upvotes="7">
+                    <div class="sit-issue-card__left">
+                        <span class="sit-status-badge sit-status-badge--resolved">RESOLVED</span>
+                        <h4 class="sit-issue-card__title">💻 IT / Network</h4>
+                        <p class="sit-issue-card__location">📍 Computer Lab 2</p>
+                        <p class="sit-issue-card__desc">Wi-Fi completely down on the east side of the lab for 2 days.</p>
+                        <small class="sit-issue-card__date">10 Apr 2025</small>
+                    </div>
+                    <div class="sit-issue-card__right">
+                        <button class="sit-upvote-btn" data-id="demo-3" aria-label="Upvote">
+                            <span class="sit-upvote-icon">▲</span>
+                            <span class="sit-upvote-count">7</span>
+                        </button>
+                    </div>
+                </div>
 
-            allIssues.push(newIssue);
-            updateStats();
-            
-            document.getElementById('reportForm').reset();
-            selectedImage = null;
-            document.getElementById('imagePreview').style.display = 'none';
-            
-            showToast('✓ Issue reported successfully!', 'success');
-            
-            setTimeout(() => {
-                document.querySelector('[data-tab="history"]').click();
-            }, 1500);
+            </div><!-- /issuesList -->
+
+            <div class="sit-empty-state" id="emptyState" style="display:none;" aria-live="polite">
+                <span class="sit-empty-icon">📭</span>
+                <p>No issues match the selected filter.</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- TOAST -->
+<div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+/* ── TAB SWITCHING ── */
+document.querySelectorAll('.sit-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.sit-tab-btn').forEach(b => {
+            b.classList.remove('sit-tab-btn--active');
+            b.setAttribute('aria-selected', 'false');
         });
-
-        // FILTERS
-        document.getElementById('filterStatus').addEventListener('change', renderIssues);
-        document.getElementById('filterCategory').addEventListener('change', renderIssues);
-        
-        document.getElementById('sortBtn').addEventListener('click', () => {
-            sortByUpvotes = !sortByUpvotes;
-            const btn = document.getElementById('sortBtn');
-            btn.textContent = sortByUpvotes ? '↑ Sort by Date' : '↓ Sort by Upvotes';
-            renderIssues();
+        document.querySelectorAll('.sit-tab-content').forEach(p => {
+            p.classList.remove('sit-tab-content--active');
+            p.hidden = true;
         });
+        btn.classList.add('sit-tab-btn--active');
+        btn.setAttribute('aria-selected', 'true');
+        const panel = document.getElementById('tab-' + btn.dataset.tab);
+        panel.classList.add('sit-tab-content--active');
+        panel.hidden = false;
+    });
+});
 
-        // LOGOUT
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm('Logout?')) {
-                // TODO: Backend: Call POST /auth/logout to invalidate session
-                window.location.href = '/auth/login';
-            }
-        });
+/* ── IMAGE UPLOAD PREVIEW ── */
+const uploadArea   = document.getElementById('uploadArea');
+const fileInput    = document.getElementById('issueImage');
+const uploadPrompt = document.getElementById('uploadPrompt');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg   = document.getElementById('previewImg');
+const removeBtn    = document.getElementById('removeImage');
+const imageError   = document.getElementById('imageError');
 
-        // TOAST NOTIFICATIONS
-        const showToast = (msg, type) => {
-            const container = document.querySelector('.sit-form');
-            const toast = document.createElement('div');
-            toast.className = `sit-toast sit-toast--${type}`;
-            toast.textContent = msg;
-            container.insertBefore(toast, container.firstChild);
-            
-            setTimeout(() => toast.remove(), 3000);
-        };
+uploadArea.addEventListener('click', e => {
+    if (!e.target.closest('#removeImage')) fileInput.click();
+});
+uploadArea.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadArea.classList.add('sit-upload-area--drag');
+});
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('sit-upload-area--drag'));
+uploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadArea.classList.remove('sit-upload-area--drag');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+removeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    fileInput.value = '';
+    previewImg.src = '';
+    imagePreview.style.display = 'none';
+    uploadPrompt.style.display  = 'flex';
+    imageError.textContent = '';
+});
 
-        // INIT
-        updateStats();
-        renderIssues();
-    </script>
+function handleFile(file) {
+    imageError.textContent = '';
+    if (!file.type.startsWith('image/')) { imageError.textContent = 'Only image files are allowed.'; return; }
+    if (file.size > 5 * 1024 * 1024)    { imageError.textContent = 'Image must be under 5 MB.'; return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+        previewImg.src = ev.target.result;
+        uploadPrompt.style.display  = 'none';
+        imagePreview.style.display  = 'flex';
+    };
+    reader.readAsDataURL(file);
+}
+
+/* ── CHAR COUNT ── */
+const descTA    = document.getElementById('description');
+const descCount = document.getElementById('descCount');
+descTA.addEventListener('input', () => {
+    const l = descTA.value.length;
+    descCount.textContent = `${l} / 500`;
+    descCount.style.color = l < 20 ? '#ff4d4d' : '#666';
+});
+
+/* ── INLINE VALIDATION ── */
+function validateField(field, errId, ok, msg) {
+    const el = document.getElementById(errId);
+    if (!ok) { el.textContent = msg; field.classList.add('sit-input--error'); return false; }
+    el.textContent = ''; field.classList.remove('sit-input--error'); return true;
+}
+const catSel  = document.getElementById('category');
+const locInp  = document.getElementById('location');
+catSel.addEventListener('change', () => validateField(catSel, 'categoryError', catSel.value !== '', 'Please select a category.'));
+locInp.addEventListener('input',  () => validateField(locInp, 'locationError', locInp.value.trim().length >= 3, 'Location too short.'));
+descTA.addEventListener('input',  () => validateField(descTA,  'descError',    descTA.value.trim().length >= 20, 'Min 20 characters required.'));
+
+/* ── FORM SUBMIT ── */
+document.getElementById('reportForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const ok = [
+        validateField(catSel, 'categoryError', catSel.value !== '', 'Please select a category.'),
+        validateField(locInp, 'locationError',  locInp.value.trim().length >= 3,  'Location too short.'),
+        validateField(descTA, 'descError',      descTA.value.trim().length >= 20, 'Min 20 characters.'),
+    ].every(Boolean);
+    if (!ok) return;
+
+    const btn = document.getElementById('reportSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    try {
+        const res = await fetch('/student/report', { method: 'POST', body: new FormData(e.target) });
+        if (res.ok) {
+            showToast('✅ Issue reported successfully!', 'success');
+            e.target.reset();
+            descCount.textContent = '0 / 500';
+            imagePreview.style.display = 'none';
+            uploadPrompt.style.display  = 'flex';
+            previewImg.src = '';
+        } else {
+            showToast((await res.text()) || '❌ Submission failed. Try again.', 'error');
+        }
+    } catch { showToast('❌ Server connection failed.', 'error'); }
+    finally  { btn.disabled = false; btn.textContent = 'Submit Report'; }
+});
+
+/* ── FILTER & SORT ── */
+const filterSel  = document.getElementById('filterStatus');
+const sortSel    = document.getElementById('sortBy');
+const issuesList = document.getElementById('issuesList');
+const emptyState = document.getElementById('emptyState');
+
+function applyFilter() {
+    const status = filterSel.value;
+    let visible = 0;
+    issuesList.querySelectorAll('.sit-issue-card').forEach(c => {
+        const show = status === 'ALL' || c.dataset.status === status;
+        c.style.display = show ? 'flex' : 'none';
+        if (show) visible++;
+    });
+    emptyState.style.display = visible === 0 ? 'flex' : 'none';
+}
+filterSel.addEventListener('change', applyFilter);
+sortSel.addEventListener('change', () => {
+    const cards = [...issuesList.querySelectorAll('.sit-issue-card')];
+    const mode  = sortSel.value;
+    cards.sort((a, b) => {
+        if (mode === 'UPVOTES') return +b.dataset.upvotes - +a.dataset.upvotes;
+        const da = new Date(a.dataset.date), db = new Date(b.dataset.date);
+        return mode === 'DATE_DESC' ? db - da : da - db;
+    });
+    cards.forEach(c => issuesList.appendChild(c));
+});
+
+/* ── UPVOTE ── */
+issuesList.addEventListener('click', async e => {
+    const btn = e.target.closest('.sit-upvote-btn');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    const countEl = btn.querySelector('.sit-upvote-count');
+    try {
+        const res = await fetch(`/student/upvote/${btn.dataset.id}`, { method: 'POST' });
+        if (res.ok) {
+            const newVal = +countEl.textContent + 1;
+            countEl.textContent = newVal;
+            btn.dataset.upvotes = newVal;
+            btn.classList.add('sit-upvote-btn--active');
+            showToast('👍 Upvoted!', 'success');
+        } else {
+            showToast('Already upvoted or an error occurred.', 'error');
+            btn.disabled = false;
+        }
+    } catch { showToast('Connection failed.', 'error'); btn.disabled = false; }
+});
+
+/* ── TOAST ── */
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('sit-toast');
+    t.textContent = msg;
+    t.className   = `sit-toast sit-toast--${type} sit-toast--show`;
+    setTimeout(() => t.classList.remove('sit-toast--show'), 3500);
+}
+</script>
 </body>
 </html>
