@@ -198,3 +198,11 @@
     background-color: var(--sit-primary);
     color: var(--sit-text-light);
 }
+
+/* Disabled submit state (shared across all auth pages) */
+.sit-auth-card__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.8);
+    transform: none !important;
+}
