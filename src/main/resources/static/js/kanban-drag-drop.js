@@ -6,26 +6,26 @@
 (function () {
     'use strict';
 
-    const STATUSES  = ['PENDING', 'IN_PROGRESS', 'RESOLVED'];
-    const board     = document.getElementById('kanbanBoard');
+    const STATUSES = ['PENDING', 'IN_PROGRESS', 'RESOLVED'];
+    const board = document.getElementById('kanbanBoard');
     if (!board) return;
 
-    let dragCard    = null;
+    let dragCard = null;
     let placeholder = null;
 
     /* ── Pending move state (held while modal is open) ── */
-    let pendingCard      = null;
+    let pendingCard = null;
     let pendingNewStatus = null;
     let pendingOldStatus = null;
-    let pendingBody      = null;
-    let pendingAfter     = null;
+    let pendingBody = null;
+    let pendingAfter = null;
 
     /* ── Toast ── */
     function showToast(msg, type = 'success') {
         const t = document.getElementById('sit-toast');
         if (!t) return;
         t.textContent = msg;
-        t.className   = `sit-toast sit-toast--${type} sit-toast--show`;
+        t.className = `sit-toast sit-toast--${type} sit-toast--show`;
         clearTimeout(t._timer);
         t._timer = setTimeout(() => t.classList.remove('sit-toast--show'), 3500);
     }
@@ -33,7 +33,7 @@
     /* ── Column counts ── */
     function updateCounts() {
         STATUSES.forEach(status => {
-            const body  = document.getElementById('body-' + status);
+            const body = document.getElementById('body-' + status);
             const badge = document.getElementById('count-' + status);
             if (body && badge)
                 badge.textContent = body.querySelectorAll('.sit-kanban-card').length;
@@ -49,17 +49,17 @@
     /* ── Attach drag to card ── */
     function attachDrag(card) {
         card.addEventListener('dragstart', onDragStart);
-        card.addEventListener('dragend',   onDragEnd);
+        card.addEventListener('dragend', onDragEnd);
     }
 
     document.querySelectorAll('.sit-kanban-card').forEach(attachDrag);
     updateCounts();
 
     document.querySelectorAll('.sit-kanban-col__body').forEach(body => {
-        body.addEventListener('dragover',  onDragOver);
+        body.addEventListener('dragover', onDragOver);
         body.addEventListener('dragenter', onDragEnter);
         body.addEventListener('dragleave', onDragLeave);
-        body.addEventListener('drop',      onDrop);
+        body.addEventListener('drop', onDrop);
     });
 
     /* ────────── DRAG EVENTS ────────── */
@@ -76,7 +76,7 @@
         dragCard && dragCard.classList.remove('sit-dragging');
         placeholder && placeholder.remove();
         placeholder = null;
-        dragCard    = null;
+        dragCard = null;
         document.querySelectorAll('.sit-kanban-col')
             .forEach(c => c.classList.remove('sit-drop-over'));
     }
@@ -105,8 +105,8 @@
         e.preventDefault();
         if (!dragCard) return;
 
-        const body      = this;
-        const col       = body.closest('.sit-kanban-col');
+        const body = this;
+        const col = body.closest('.sit-kanban-col');
         const newStatus = col.dataset.status;
         const oldStatus = dragCard.dataset.status;
 
@@ -115,16 +115,23 @@
 
         if (newStatus === oldStatus) return;
 
+        /* ── Block reverse moves (only forward: PENDING → IN_PROGRESS → RESOLVED) ── */
+        const STATUS_ORDER = { 'PENDING': 0, 'IN_PROGRESS': 1, 'RESOLVED': 2 };
+        if (STATUS_ORDER[newStatus] < STATUS_ORDER[oldStatus]) {
+            showToast('Cannot move issues backwards. Status can only move forward.', 'error');
+            return;
+        }
+
         const afterCard = getDragAfterCard(body, e.clientY);
 
         /* Moves to IN_PROGRESS or RESOLVED require a proof image */
         if (newStatus === 'IN_PROGRESS' || newStatus === 'RESOLVED') {
             /* Store pending move details */
-            pendingCard      = dragCard;
+            pendingCard = dragCard;
             pendingNewStatus = newStatus;
             pendingOldStatus = oldStatus;
-            pendingBody      = body;
-            pendingAfter     = afterCard;
+            pendingBody = body;
+            pendingAfter = afterCard;
             openModal(newStatus);
         } else {
             /* PENDING — no image needed */
@@ -134,18 +141,18 @@
 
     /* ────────── MODAL ────────── */
 
-    const modal         = document.getElementById('statusModal');
-    const modalClose    = document.getElementById('modalClose');
-    const modalCancel   = document.getElementById('modalCancelBtn');
-    const modalConfirm  = document.getElementById('modalConfirmBtn');
+    const modal = document.getElementById('statusModal');
+    const modalClose = document.getElementById('modalClose');
+    const modalCancel = document.getElementById('modalCancelBtn');
+    const modalConfirm = document.getElementById('modalConfirmBtn');
     const modalSubtitle = document.getElementById('modalSubtitle');
-    const modalUpload   = document.getElementById('modalUploadArea');
-    const modalFileIn   = document.getElementById('modalFileInput');
-    const modalPrompt   = document.getElementById('modalUploadPrompt');
-    const modalPreview  = document.getElementById('modalImagePreview');
-    const modalImg      = document.getElementById('modalPreviewImg');
-    const modalRemove   = document.getElementById('modalRemoveImage');
-    const modalError    = document.getElementById('modalImageError');
+    const modalUpload = document.getElementById('modalUploadArea');
+    const modalFileIn = document.getElementById('modalFileInput');
+    const modalPrompt = document.getElementById('modalUploadPrompt');
+    const modalPreview = document.getElementById('modalImagePreview');
+    const modalImg = document.getElementById('modalPreviewImg');
+    const modalRemove = document.getElementById('modalRemoveImage');
+    const modalError = document.getElementById('modalImageError');
 
     let modalFile = null;
 
@@ -154,9 +161,9 @@
         modalFileIn.value = '';
         modalImg.src = '';
         modalPreview.style.display = 'none';
-        modalPrompt.style.display  = 'flex';
-        modalError.textContent     = '';
-        modalConfirm.disabled      = true;
+        modalPrompt.style.display = 'flex';
+        modalError.textContent = '';
+        modalConfirm.disabled = true;
         modalUpload.classList.remove('sit-upload-area--error');
 
         const label = newStatus === 'IN_PROGRESS' ? 'In Progress' : 'Resolved';
@@ -170,10 +177,10 @@
     function closeModal() {
         modal.hidden = true;
         pendingCard = pendingNewStatus = pendingOldStatus = pendingBody = pendingAfter = null;
-        modalFile   = null;
+        modalFile = null;
     }
 
-    modalClose.addEventListener('click',  closeModal);
+    modalClose.addEventListener('click', closeModal);
     modalCancel.addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
@@ -204,10 +211,10 @@
         modalFileIn.value = '';
         modalImg.src = '';
         modalPreview.style.display = 'none';
-        modalPrompt.style.display  = 'flex';
-        modalError.textContent     = 'A proof image is required.';
+        modalPrompt.style.display = 'flex';
+        modalError.textContent = 'A proof image is required.';
         modalUpload.classList.add('sit-upload-area--error');
-        modalConfirm.disabled      = true;
+        modalConfirm.disabled = true;
     });
 
     function handleModalFile(file) {
@@ -229,7 +236,7 @@
         const reader = new FileReader();
         reader.onload = ev => {
             modalImg.src = ev.target.result;
-            modalPrompt.style.display  = 'none';
+            modalPrompt.style.display = 'none';
             modalPreview.style.display = 'flex';
         };
         reader.readAsDataURL(file);
@@ -244,14 +251,14 @@
             return;
         }
 
-        modalConfirm.disabled    = true;
+        modalConfirm.disabled = true;
         modalConfirm.textContent = 'Saving…';
 
-        const card      = pendingCard;
+        const card = pendingCard;
         const newStatus = pendingNewStatus;
         const oldStatus = pendingOldStatus;
-        const body      = pendingBody;
-        const after     = pendingAfter;
+        const body = pendingBody;
+        const after = pendingAfter;
 
         closeModal();
         await commitMove(card, body, after, oldStatus, newStatus, modalFile);
@@ -286,7 +293,7 @@
         try {
             const res = await fetch(`/dept/issue/${id}/status`, {
                 method: 'PATCH',
-                body:   formData
+                body: formData
             });
             if (res.ok) {
                 showToast(`✅ Issue #${id} → ${newStatus.replace('_', ' ')}`, 'success');
@@ -305,7 +312,7 @@
     function getDragAfterCard(container, y) {
         const cards = [...container.querySelectorAll('.sit-kanban-card:not(.sit-dragging)')];
         return cards.reduce((closest, card) => {
-            const box    = card.getBoundingClientRect();
+            const box = card.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
             if (offset < 0 && offset > closest.offset)
                 return { offset, element: card };

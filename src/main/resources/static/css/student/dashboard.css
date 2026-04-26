@@ -10,6 +10,18 @@
     padding: 2rem;
 }
 
+/* ── CAMPUS FEED HINT ── */
+.sit-feed-hint {
+    background: rgba(0, 51, 102, .05);
+    border-left: 3px solid var(--sit-primary);
+    padding: .65rem 1rem;
+    border-radius: 0 8px 8px 0;
+    font-size: .9rem;
+    color: #4b5563;
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+}
+
 /* Grid: 4-column stat row for student */
 .sit-stats-container { grid-template-columns: repeat(4, 1fr); }
 
