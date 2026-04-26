@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIT Campus App - Department Kanban</title>
+    <link rel="stylesheet" href="../../static/css/shared/base.css"       th:href="@{/css/shared/base.css}">
+    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     th:href="@{/css/shared/navbar.css}">
+    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
+    <link rel="stylesheet" href="../../static/css/dept/kanban.css"       th:href="@{/css/dept/kanban.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar('DEPT')}">
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
+            <div class="navbar-title"><h1>Department Dashboard</h1></div>
+            <div class="navbar-right"><span class="user-name">Dept Admin</span></div>
+        </div>
+    </nav>
+</div>
+
+<main class="sit-kanban-main">
+
+    <!-- PAGE HEADER -->
+    <div class="sit-page-header">
+        <div>
+            <h2 class="sit-page-title">
+                <span th:text="${deptName}">Electrical Dept</span> — Issue Board
+            </h2>
+            <p class="sit-page-subtitle">Drag cards between columns to update issue status.</p>
+        </div>
+        <div class="sit-kanban-legend">
+            <span class="sit-legend-item sit-legend-item--new">New</span>
+            <span class="sit-legend-item sit-legend-item--inprogress">In Progress</span>
+            <span class="sit-legend-item sit-legend-item--resolved">Resolved</span>
+        </div>
+    </div>
+
+    <!-- KANBAN BOARD -->
+    <div class="sit-kanban-board" id="kanbanBoard">
+
+        <!-- COLUMN: NEW / PENDING -->
+        <div class="sit-kanban-col" data-status="PENDING" id="col-PENDING">
+            <div class="sit-kanban-col__header sit-kanban-col__header--pending">
+                <span>🆕 New Reports</span>
+                <span class="sit-kanban-col__count" id="count-PENDING">0</span>
+            </div>
+            <div class="sit-kanban-col__body" id="body-PENDING"
+                 aria-label="New issues column" role="list">
+
+                <!-- Thymeleaf cards -->
+                <div th:each="issue : ${newIssues}"
+                     class="sit-kanban-card"
+                     draggable="true"
+                     th:attr="data-id=${issue.id},data-status='PENDING'"
+                     role="listitem">
+                    <div class="sit-kanban-card__top">
+                        <span class="sit-kanban-card__id" th:text="'#' + ${issue.id}">#001</span>
+                        <span class="sit-kanban-card__upvotes" th:text="'▲ ' + ${issue.upvotes}">▲ 0</span>
+                    </div>
+                    <h4 class="sit-kanban-card__title" th:text="${issue.category}">Category</h4>
+                    <p class="sit-kanban-card__location">📍 <span th:text="${issue.location}">Location</span></p>
+                    <p class="sit-kanban-card__desc" th:text="${issue.description}">Description preview</p>
+                    <div class="sit-kanban-card__footer">
+                        <span class="sit-kanban-card__reporter" th:text="${issue.reporterName}">Student</span>
+                        <span class="sit-kanban-card__date" th:text="${#temporals.format(issue.createdAt,'dd MMM')}">01 Jan</span>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- COLUMN: IN PROGRESS -->
+        <div class="sit-kanban-col" data-status="IN_PROGRESS" id="col-IN_PROGRESS">
+            <div class="sit-kanban-col__header sit-kanban-col__header--inprogress">
+                <span>🔧 In Progress</span>
+                <span class="sit-kanban-col__count" id="count-IN_PROGRESS">0</span>
+            </div>
+            <div class="sit-kanban-col__body" id="body-IN_PROGRESS"
+                 aria-label="In progress column" role="list">
+
+                <!-- Thymeleaf cards -->
+                <div th:each="issue : ${inProgressIssues}"
+                     class="sit-kanban-card"
+                     draggable="true"
+                     th:attr="data-id=${issue.id},data-status='IN_PROGRESS'"
+                     role="listitem">
+                    <div class="sit-kanban-card__top">
+                        <span class="sit-kanban-card__id" th:text="'#' + ${issue.id}">#001</span>
+                        <span class="sit-kanban-card__upvotes" th:text="'▲ ' + ${issue.upvotes}">▲ 0</span>
+                    </div>
+                    <h4 class="sit-kanban-card__title" th:text="${issue.category}">Category</h4>
+                    <p class="sit-kanban-card__location">📍 <span th:text="${issue.location}">Location</span></p>
+                    <p class="sit-kanban-card__desc" th:text="${issue.description}">Description</p>
+                    <div class="sit-kanban-card__footer">
+                        <span class="sit-kanban-card__reporter" th:text="${issue.reporterName}">Student</span>
+                        <span class="sit-kanban-card__date" th:text="${#temporals.format(issue.createdAt,'dd MMM')}">01 Jan</span>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- COLUMN: RESOLVED -->
+        <div class="sit-kanban-col" data-status="RESOLVED" id="col-RESOLVED">
+            <div class="sit-kanban-col__header sit-kanban-col__header--resolved">
+                <span>✅ Resolved</span>
+                <span class="sit-kanban-col__count" id="count-RESOLVED">0</span>
+            </div>
+            <div class="sit-kanban-col__body" id="body-RESOLVED"
+                 aria-label="Resolved column" role="list">
+
+                <!-- Thymeleaf cards -->
+                <div th:each="issue : ${resolvedIssues}"
+                     class="sit-kanban-card sit-kanban-card--resolved"
+                     draggable="true"
+                     th:attr="data-id=${issue.id},data-status='RESOLVED'"
+                     role="listitem">
+                    <div class="sit-kanban-card__top">
+                        <span class="sit-kanban-card__id" th:text="'#' + ${issue.id}">#001</span>
+                        <span class="sit-kanban-card__upvotes" th:text="'▲ ' + ${issue.upvotes}">▲ 0</span>
+                    </div>
+                    <h4 class="sit-kanban-card__title" th:text="${issue.category}">Category</h4>
+                    <p class="sit-kanban-card__location">📍 <span th:text="${issue.location}">Location</span></p>
+                    <p class="sit-kanban-card__desc" th:text="${issue.description}">Description</p>
+                    <div class="sit-kanban-card__footer">
+                        <span class="sit-kanban-card__reporter" th:text="${issue.reporterName}">Student</span>
+                        <span class="sit-kanban-card__date" th:text="${#temporals.format(issue.createdAt,'dd MMM')}">01 Jan</span>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div><!-- /kanbanBoard -->
+    <!-- STATUS CHANGE MODAL (image proof required) -->
+    <div id="statusModal" class="sit-modal-overlay" role="dialog"
+        aria-modal="true" aria-labelledby="modalTitle" hidden>
+        <div class="sit-modal">
+            <div class="sit-modal__header">
+                <h3 id="modalTitle" class="sit-modal__title">📸 Attach Proof Image</h3>
+                <button class="sit-modal__close" id="modalClose" aria-label="Cancel">✕</button>
+            </div>
+            <p class="sit-modal__subtitle" id="modalSubtitle">
+                Moving this issue requires a photo as proof of action.
+            </p>
+
+            <div class="sit-upload-area" id="modalUploadArea">
+                <input type="file" id="modalFileInput" accept="image/*" class="sit-file-input">
+                <div class="sit-upload-prompt" id="modalUploadPrompt">
+                    <span class="sit-upload-icon">📷</span>
+                    <p>Click or drag &amp; drop a photo here</p>
+                    <small>PNG, JPG, WEBP — max 5 MB</small>
+                </div>
+                <div class="sit-image-preview" id="modalImagePreview" style="display:none;">
+                    <img id="modalPreviewImg" src="" alt="Proof preview">
+                    <button type="button" class="sit-remove-image"
+                            id="modalRemoveImage" aria-label="Remove image">✕</button>
+                </div>
+            </div>
+            <small class="sit-field-error" id="modalImageError"></small>
+
+            <div class="sit-modal__actions">
+                <button class="sit-btn sit-btn--ghost" id="modalCancelBtn">Cancel</button>
+                <button class="sit-btn sit-btn--primary" id="modalConfirmBtn" disabled>
+                    Confirm Move
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="../../static/js/kanban-drag-drop.js" th:src="@{/js/kanban-drag-drop.js}"></script>
+</body>
+</html>
