@@ -36,22 +36,22 @@
     <section class="sit-stats-container" aria-label="Issue Statistics">
         <div class="sit-stat-card sit-stat-card--total">
             <div class="sit-stat-icon">📋</div>
-            <div class="sit-stat-number" th:text="${totalReports}">12</div>
+            <div class="sit-stat-number" th:text="${totalReports}">0</div>
             <div class="sit-stat-label">Total Reports</div>
         </div>
         <div class="sit-stat-card sit-stat-card--pending">
             <div class="sit-stat-icon">⏳</div>
-            <div class="sit-stat-number" th:text="${pendingReports}">4</div>
+            <div class="sit-stat-number" th:text="${pendingReports}">0</div>
             <div class="sit-stat-label">Pending</div>
         </div>
         <div class="sit-stat-card sit-stat-card--inprogress">
             <div class="sit-stat-icon">🔧</div>
-            <div class="sit-stat-number" th:text="${inProgressReports}">5</div>
+            <div class="sit-stat-number" th:text="${inProgressReports}">0</div>
             <div class="sit-stat-label">In Progress</div>
         </div>
         <div class="sit-stat-card sit-stat-card--resolved">
             <div class="sit-stat-icon">✅</div>
-            <div class="sit-stat-number" th:text="${resolvedReports}">3</div>
+            <div class="sit-stat-number" th:text="${resolvedReports}">0</div>
             <div class="sit-stat-label">Resolved</div>
         </div>
     </section>
@@ -202,54 +202,7 @@
                     </div>
                 </div>
 
-                <!-- ── Static demo cards (visible on live-server preview) ── -->
-                <div class="sit-issue-card" data-status="PENDING" data-upvotes="4">
-                    <div class="sit-issue-card__left">
-                        <span class="sit-status-badge sit-status-badge--pending">PENDING</span>
-                        <h4 class="sit-issue-card__title">⚡ Electrical</h4>
-                        <p class="sit-issue-card__location">📍 Block B, Room 101</p>
-                        <p class="sit-issue-card__desc">Main light flickering since 3 days. Affects the entire classroom during evening lectures.</p>
-                        <small class="sit-issue-card__date">22 Apr 2025</small>
-                    </div>
-                    <div class="sit-issue-card__right">
-                        <button class="sit-upvote-btn" data-id="demo-1" aria-label="Upvote">
-                            <span class="sit-upvote-icon">▲</span>
-                            <span class="sit-upvote-count">4</span>
-                        </button>
-                    </div>
-                </div>
 
-                <div class="sit-issue-card" data-status="IN_PROGRESS" data-upvotes="11">
-                    <div class="sit-issue-card__left">
-                        <span class="sit-status-badge sit-status-badge--in_progress">IN PROGRESS</span>
-                        <h4 class="sit-issue-card__title">🚰 Plumbing</h4>
-                        <p class="sit-issue-card__location">📍 Library Washroom</p>
-                        <p class="sit-issue-card__desc">Water leaking from overhead pipe near the sink. Floor remains wet constantly.</p>
-                        <small class="sit-issue-card__date">19 Apr 2025</small>
-                    </div>
-                    <div class="sit-issue-card__right">
-                        <button class="sit-upvote-btn" data-id="demo-2" aria-label="Upvote">
-                            <span class="sit-upvote-icon">▲</span>
-                            <span class="sit-upvote-count">11</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="sit-issue-card" data-status="RESOLVED" data-upvotes="7">
-                    <div class="sit-issue-card__left">
-                        <span class="sit-status-badge sit-status-badge--resolved">RESOLVED</span>
-                        <h4 class="sit-issue-card__title">💻 IT / Network</h4>
-                        <p class="sit-issue-card__location">📍 Computer Lab 2</p>
-                        <p class="sit-issue-card__desc">Wi-Fi completely down on the east side of the lab for 2 days.</p>
-                        <small class="sit-issue-card__date">10 Apr 2025</small>
-                    </div>
-                    <div class="sit-issue-card__right">
-                        <button class="sit-upvote-btn" data-id="demo-3" aria-label="Upvote">
-                            <span class="sit-upvote-icon">▲</span>
-                            <span class="sit-upvote-count">7</span>
-                        </button>
-                    </div>
-                </div>
 
             </div><!-- /issuesList -->
 

@@ -41,27 +41,27 @@
     <section class="sit-stats-container" aria-label="System-wide Statistics">
         <div class="sit-stat-card sit-stat-card--total">
             <div class="sit-stat-icon">📊</div>
-            <div class="sit-stat-number" th:text="${totalIssues}">58</div>
+            <div class="sit-stat-number" th:text="${totalIssues}">0</div>
             <div class="sit-stat-label">Total Reports</div>
         </div>
         <div class="sit-stat-card sit-stat-card--pending">
             <div class="sit-stat-icon">⏳</div>
-            <div class="sit-stat-number" th:text="${pendingCount}">18</div>
+            <div class="sit-stat-number" th:text="${pendingCount}">0</div>
             <div class="sit-stat-label">Pending</div>
         </div>
         <div class="sit-stat-card sit-stat-card--inprogress">
             <div class="sit-stat-icon">🔧</div>
-            <div class="sit-stat-number" th:text="${inProgressCount}">22</div>
+            <div class="sit-stat-number" th:text="${inProgressCount}">0</div>
             <div class="sit-stat-label">In Progress</div>
         </div>
         <div class="sit-stat-card sit-stat-card--resolved">
             <div class="sit-stat-icon">✅</div>
-            <div class="sit-stat-number" th:text="${resolvedCount}">18</div>
+            <div class="sit-stat-number" th:text="${resolvedCount}">0</div>
             <div class="sit-stat-label">Resolved</div>
         </div>
         <div class="sit-stat-card sit-stat-card--depts">
             <div class="sit-stat-icon">🏢</div>
-            <div class="sit-stat-number" th:text="${activeDepts}">5</div>
+            <div class="sit-stat-number" th:text="${activeDepts}">0</div>
             <div class="sit-stat-label">Active Depts</div>
         </div>
     </section>
@@ -126,52 +126,6 @@
                             </td>
                         </tr>
 
-                        <!-- Static demo rows -->
-                        <tr data-status="PENDING" data-dept="ELECTRICAL">
-                            <td class="sit-table__id">#042</td>
-                            <td>⚡ Electrical</td>
-                            <td>Block B, Rm 101</td>
-                            <td>R. Sharma</td>
-                            <td><span class="sit-status-badge sit-status-badge--pending">PENDING</span></td>
-                            <td>22 Apr 25</td>
-                            <td><span class="sit-upvote-pill">▲ 4</span></td>
-                        </tr>
-                        <tr data-status="IN_PROGRESS" data-dept="PLUMBING">
-                            <td class="sit-table__id">#041</td>
-                            <td>🚰 Plumbing</td>
-                            <td>Library WR</td>
-                            <td>A. Patil</td>
-                            <td><span class="sit-status-badge sit-status-badge--in_progress">IN PROGRESS</span></td>
-                            <td>19 Apr 25</td>
-                            <td><span class="sit-upvote-pill">▲ 11</span></td>
-                        </tr>
-                        <tr data-status="RESOLVED" data-dept="IT">
-                            <td class="sit-table__id">#039</td>
-                            <td>💻 IT / Network</td>
-                            <td>Computer Lab 2</td>
-                            <td>S. Kulkarni</td>
-                            <td><span class="sit-status-badge sit-status-badge--resolved">RESOLVED</span></td>
-                            <td>10 Apr 25</td>
-                            <td><span class="sit-upvote-pill">▲ 7</span></td>
-                        </tr>
-                        <tr data-status="PENDING" data-dept="CIVIL">
-                            <td class="sit-table__id">#038</td>
-                            <td>🏗️ Civil</td>
-                            <td>Canteen Roof</td>
-                            <td>M. Desai</td>
-                            <td><span class="sit-status-badge sit-status-badge--pending">PENDING</span></td>
-                            <td>08 Apr 25</td>
-                            <td><span class="sit-upvote-pill">▲ 19</span></td>
-                        </tr>
-                        <tr data-status="IN_PROGRESS" data-dept="CLEANLINESS">
-                            <td class="sit-table__id">#035</td>
-                            <td>🧹 Cleanliness</td>
-                            <td>Ground Floor WR</td>
-                            <td>P. Joshi</td>
-                            <td><span class="sit-status-badge sit-status-badge--in_progress">IN PROGRESS</span></td>
-                            <td>05 Apr 25</td>
-                            <td><span class="sit-upvote-pill">▲ 3</span></td>
-                        </tr>
 
                     </tbody>
                 </table>
@@ -208,77 +162,6 @@
                     </div>
                 </div>
 
-                <!-- Static demo dept rows -->
-                <div class="sit-dept-row">
-                    <div class="sit-dept-row__header">
-                        <span class="sit-dept-name">⚡ Electrical</span>
-                        <span class="sit-dept-total">16 issues</span>
-                    </div>
-                    <div class="sit-progress-bar">
-                        <div class="sit-progress-bar__fill" style="width:62%"
-                             role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="sit-dept-row__meta">
-                        <span class="sit-dept-resolved">10 resolved</span>
-                        <span class="sit-dept-pct">62%</span>
-                    </div>
-                </div>
-                <div class="sit-dept-row">
-                    <div class="sit-dept-row__header">
-                        <span class="sit-dept-name">🚰 Plumbing</span>
-                        <span class="sit-dept-total">9 issues</span>
-                    </div>
-                    <div class="sit-progress-bar">
-                        <div class="sit-progress-bar__fill" style="width:33%"
-                             role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="sit-dept-row__meta">
-                        <span class="sit-dept-resolved">3 resolved</span>
-                        <span class="sit-dept-pct">33%</span>
-                    </div>
-                </div>
-                <div class="sit-dept-row">
-                    <div class="sit-dept-row__header">
-                        <span class="sit-dept-name">💻 IT</span>
-                        <span class="sit-dept-total">12 issues</span>
-                    </div>
-                    <div class="sit-progress-bar">
-                        <div class="sit-progress-bar__fill" style="width:83%"
-                             role="progressbar" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="sit-dept-row__meta">
-                        <span class="sit-dept-resolved">10 resolved</span>
-                        <span class="sit-dept-pct">83%</span>
-                    </div>
-                </div>
-                <div class="sit-dept-row">
-                    <div class="sit-dept-row__header">
-                        <span class="sit-dept-name">🏗️ Civil</span>
-                        <span class="sit-dept-total">14 issues</span>
-                    </div>
-                    <div class="sit-progress-bar">
-                        <div class="sit-progress-bar__fill" style="width:28%"
-                             role="progressbar" aria-valuenow="28" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="sit-dept-row__meta">
-                        <span class="sit-dept-resolved">4 resolved</span>
-                        <span class="sit-dept-pct">28%</span>
-                    </div>
-                </div>
-                <div class="sit-dept-row">
-                    <div class="sit-dept-row__header">
-                        <span class="sit-dept-name">🧹 Cleanliness</span>
-                        <span class="sit-dept-total">7 issues</span>
-                    </div>
-                    <div class="sit-progress-bar">
-                        <div class="sit-progress-bar__fill" style="width:71%"
-                             role="progressbar" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="sit-dept-row__meta">
-                        <span class="sit-dept-resolved">5 resolved</span>
-                        <span class="sit-dept-pct">71%</span>
-                    </div>
-                </div>
 
             </div>
         </div>
