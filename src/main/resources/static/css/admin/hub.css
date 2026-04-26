@@ -1,0 +1,100 @@
+/* =====================================================
+   ADMIN HUB — Page-specific styles only.
+   Shared styles live in shared/navbar.css & shared/components.css
+   ===================================================== */
+
+/* ── ADMIN LAYOUT ── */
+.sit-admin-main {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+.sit-header-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+
+/* Grid: 5-column stat row for admin */
+.sit-stats-container { grid-template-columns: repeat(5, 1fr); }
+
+/* ── ADMIN GRID ── */
+.sit-admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* ── TABLE ── */
+.sit-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.sit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+}
+.sit-table th {
+    background: var(--sit-bg-light);
+    color: var(--sit-text-dark);
+    font-weight: 700;
+    text-align: left;
+    padding: .7rem 1rem;
+    white-space: nowrap;
+    border-bottom: 2px solid #e5e7eb;
+}
+.sit-table td {
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+    vertical-align: middle;
+}
+.sit-table tbody tr:hover { background: rgba(0,51,102,.03); }
+.sit-table__id { font-weight: 700; color: var(--sit-primary); white-space: nowrap; }
+
+.sit-upvote-pill {
+    background: var(--sit-bg-light);
+    padding: .2rem .55rem;
+    border-radius: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--sit-primary);
+    white-space: nowrap;
+}
+
+/* ── DEPT PERFORMANCE ── */
+.sit-dept-list { display: flex; flex-direction: column; gap: 1rem; }
+.sit-dept-row  { display: flex; flex-direction: column; gap: .4rem; }
+.sit-dept-row__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.sit-dept-name  { font-size: .92rem; font-weight: 700; color: var(--sit-text-dark); }
+.sit-dept-total { font-size: .8rem; color: #9ca3af; }
+.sit-progress-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.sit-progress-bar__fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sit-primary), #0055aa);
+    border-radius: 4px;
+    transition: width .6s ease;
+}
+.sit-dept-row__meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: .78rem;
+    color: #6b7280;
+}
+.sit-dept-pct { font-weight: 700; color: var(--sit-primary); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+    .sit-admin-grid       { grid-template-columns: 1fr; }
+    .sit-stats-container  { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+    .sit-admin-main      { padding: 1rem; }
+    .sit-stats-container { grid-template-columns: repeat(2, 1fr); }
+    .sit-page-header     { flex-direction: column; }
+    .sit-toast           { right: 1rem; left: 1rem; max-width: unset; }
+}
