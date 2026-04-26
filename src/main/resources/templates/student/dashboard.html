@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIT Campus App - Student Dashboard</title>
+    <link rel="stylesheet" href="../../static/css/shared/base.css"       th:href="@{/css/shared/base.css}">
+    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     th:href="@{/css/shared/navbar.css}">
+    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
+    <link rel="stylesheet" href="../../static/css/student/dashboard.css" th:href="@{/css/student/dashboard.css}">
+</head>
+<body>
+
+<!-- NAVBAR: th:replace runs on server; inner div is the live-server fallback -->
+<div th:replace="~{fragments/navbar :: navbar('STUDENT')}">
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
+            <div class="navbar-title"><h1>Student Dashboard</h1></div>
+            <div class="navbar-right"><span class="user-name">Student</span></div>
+        </div>
+    </nav>
+</div>
+
+<main class="sit-dashboard-main">
+
+    <!-- PAGE HEADER -->
+    <div class="sit-page-header">
+        <div>
+            <h2 class="sit-page-title">Welcome back, <span th:text="${userName}" class="sit-highlight">Student</span> 👋</h2>
+            <p class="sit-page-subtitle">Track and manage your campus issue reports.</p>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <section class="sit-stats-container" aria-label="Issue Statistics">
+        <div class="sit-stat-card sit-stat-card--total">
+            <div class="sit-stat-icon">📋</div>
+            <div class="sit-stat-number" th:text="${totalReports}">0</div>
+            <div class="sit-stat-label">Total Reports</div>
+        </div>
+        <div class="sit-stat-card sit-stat-card--pending">
+            <div class="sit-stat-icon">⏳</div>
+            <div class="sit-stat-number" th:text="${pendingReports}">0</div>
+            <div class="sit-stat-label">Pending</div>
+        </div>
+        <div class="sit-stat-card sit-stat-card--inprogress">
+            <div class="sit-stat-icon">🔧</div>
+            <div class="sit-stat-number" th:text="${inProgressReports}">0</div>
+            <div class="sit-stat-label">In Progress</div>
+        </div>
+        <div class="sit-stat-card sit-stat-card--resolved">
+            <div class="sit-stat-icon">✅</div>
+            <div class="sit-stat-number" th:text="${resolvedReports}">0</div>
+            <div class="sit-stat-label">Resolved</div>
+        </div>
+    </section>
+
+    <!-- TABS -->
+    <div class="sit-tabs" role="tablist" aria-label="Dashboard Sections">
+        <button class="sit-tab-btn sit-tab-btn--active" role="tab" aria-selected="true"
+                aria-controls="tab-report" id="btn-report" data-tab="report">
+            📝 Report an Issue
+        </button>
+        <button class="sit-tab-btn" role="tab" aria-selected="false"
+                aria-controls="tab-history" id="btn-history" data-tab="history">
+            📁 My Issues
+        </button>
+    </div>
+
+    <!-- TAB 1: REPORT FORM -->
+    <section id="tab-report" class="sit-tab-content sit-tab-content--active"
+             role="tabpanel" aria-labelledby="btn-report">
+        <div class="sit-card">
+            <h3 class="sit-card__title">Report a Campus Issue</h3>
+
+            <form id="reportForm" class="sit-report-form"
+                  th:action="@{/student/report}" action="#"
+                  method="POST" enctype="multipart/form-data">
+
+                <div class="sit-form-grid">
+                    <div class="sit-input-group">
+                        <label for="category" class="sit-input-label">
+                            Category <span class="sit-required">*</span>
+                        </label>
+                        <select id="category" name="category" class="sit-select-field" required>
+                            <option value="" disabled selected>Select a category…</option>
+                            <option value="ELECTRICAL">Electrical</option>
+                            <option value="PLUMBING">Plumbing</option>
+                            <option value="CIVIL">Civil / Structural</option>
+                            <option value="CLEANLINESS">Cleanliness</option>
+                            <option value="IT">IT / Network</option>
+                            <option value="FURNITURE">Furniture</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                        <small class="sit-field-error" id="categoryError"></small>
+                    </div>
+
+                    <div class="sit-input-group">
+                        <label for="location" class="sit-input-label">
+                            Location <span class="sit-required">*</span>
+                        </label>
+                        <input type="text" id="location" name="location"
+                               class="sit-input-field"
+                               placeholder="e.g., Block A, Room 203"
+                               required maxlength="100">
+                        <small class="sit-field-error" id="locationError"></small>
+                    </div>
+                </div>
+
+                <div class="sit-input-group">
+                    <label for="description" class="sit-input-label">
+                        Description <span class="sit-required">*</span>
+                    </label>
+                    <textarea id="description" name="description"
+                              class="sit-textarea-field" rows="4"
+                              placeholder="Describe the issue in detail (min 20 characters)…"
+                              required minlength="20" maxlength="500"></textarea>
+                    <small class="sit-char-count" id="descCount">0 / 500</small>
+                    <small class="sit-field-error" id="descError"></small>
+                </div>
+
+                <div class="sit-input-group">
+                <label class="sit-input-label">
+                    Attach Photo <span class="sit-required">*</span>
+                    <small class="sit-input-label-hint">Required — helps the department assess the issue faster.</small>
+                </label>
+                <div class="sit-upload-area" id="uploadArea">
+                    <input type="file" id="issueImage" name="image"
+                        accept="image/*" class="sit-file-input" required>
+                    <div class="sit-upload-prompt" id="uploadPrompt">
+                        <span class="sit-upload-icon">📷</span>
+                        <p>Click or drag &amp; drop an image here</p>
+                        <small>PNG, JPG, WEBP — max 5 MB</small>
+                    </div>
+                    <div class="sit-image-preview" id="imagePreview" style="display:none;">
+                        <img id="previewImg" src="" alt="Preview">
+                        <button type="button" class="sit-remove-image"
+                                id="removeImage" aria-label="Remove image">✕</button>
+                    </div>
+                </div>
+                <small class="sit-field-error" id="imageError"></small>
+            </div>
+
+                <div class="sit-form-actions">
+                    <button type="reset" class="sit-btn sit-btn--ghost">Clear Form</button>
+                    <button type="submit" class="sit-btn sit-btn--primary"
+                            id="reportSubmitBtn">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- TAB 2: ISSUE HISTORY -->
+    <section id="tab-history" class="sit-tab-content"
+             role="tabpanel" aria-labelledby="btn-history" hidden>
+        <div class="sit-card">
+            <div class="sit-card__toolbar">
+                <h3 class="sit-card__title">My Reported Issues</h3>
+                <div class="sit-toolbar-controls">
+                    <select id="filterStatus" class="sit-select-field sit-select-field--sm"
+                            aria-label="Filter by status">
+                        <option value="ALL">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="RESOLVED">Resolved</option>
+                    </select>
+                    <select id="sortBy" class="sit-select-field sit-select-field--sm"
+                            aria-label="Sort issues">
+                        <option value="DATE_DESC">Newest First</option>
+                        <option value="DATE_ASC">Oldest First</option>
+                        <option value="UPVOTES">Most Upvoted</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="sit-issues-list" id="issuesList">
+
+                <!-- ── Thymeleaf: real data rows ── -->
+                <div th:each="issue : ${issues}"
+                     class="sit-issue-card"
+                     th:attr="data-status=${issue.status},data-date=${issue.createdAt},data-upvotes=${issue.upvotes}">
+                    <div class="sit-issue-card__left">
+                        <span class="sit-status-badge"
+                              th:classappend="'sit-status-badge--' + ${#strings.toLowerCase(issue.status)}"
+                              th:text="${issue.status}">STATUS</span>
+                        <h4 class="sit-issue-card__title" th:text="${issue.category}">Category</h4>
+                        <p class="sit-issue-card__location">
+                            📍 <span th:text="${issue.location}">Location</span>
+                        </p>
+                        <p class="sit-issue-card__desc" th:text="${issue.description}">Description</p>
+                        <small class="sit-issue-card__date"
+                               th:text="${#temporals.format(issue.createdAt,'dd MMM yyyy')}">01 Jan 2025</small>
+                    </div>
+                    <div class="sit-issue-card__right">
+                        <button class="sit-upvote-btn"
+                                th:attr="data-id=${issue.id}"
+                                aria-label="Upvote this issue">
+                            <span class="sit-upvote-icon">▲</span>
+                            <span class="sit-upvote-count" th:text="${issue.upvotes}">0</span>
+                        </button>
+                    </div>
+                </div>
+
+
+
+            </div><!-- /issuesList -->
+
+            <div class="sit-empty-state" id="emptyState" style="display:none;" aria-live="polite">
+                <span class="sit-empty-icon">📭</span>
+                <p>No issues match the selected filter.</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- TOAST -->
+<div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+/* ── TAB SWITCHING ── */
+document.querySelectorAll('.sit-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.sit-tab-btn').forEach(b => {
+            b.classList.remove('sit-tab-btn--active');
+            b.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.sit-tab-content').forEach(p => {
+            p.classList.remove('sit-tab-content--active');
+            p.hidden = true;
+        });
+        btn.classList.add('sit-tab-btn--active');
+        btn.setAttribute('aria-selected', 'true');
+        const panel = document.getElementById('tab-' + btn.dataset.tab);
+        panel.classList.add('sit-tab-content--active');
+        panel.hidden = false;
+    });
+});
+
+/* ── IMAGE UPLOAD PREVIEW ── */
+const uploadArea   = document.getElementById('uploadArea');
+const fileInput    = document.getElementById('issueImage');
+const uploadPrompt = document.getElementById('uploadPrompt');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg   = document.getElementById('previewImg');
+const removeBtn    = document.getElementById('removeImage');
+const imageError   = document.getElementById('imageError');
+
+uploadArea.addEventListener('click', e => {
+    if (!e.target.closest('#removeImage')) fileInput.click();
+});
+uploadArea.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadArea.classList.add('sit-upload-area--drag');
+});
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('sit-upload-area--drag'));
+uploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadArea.classList.remove('sit-upload-area--drag');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+removeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    fileInput.value = '';
+    previewImg.src = '';
+    imagePreview.style.display = 'none';
+    uploadPrompt.style.display  = 'flex';
+    imageError.textContent = 'A photo is required to submit a report.';
+    uploadArea.classList.add('sit-upload-area--error');
+});
+
+function handleFile(file) {
+    imageError.textContent = '';
+    uploadArea.classList.remove('sit-upload-area--error');
+    if (!file.type.startsWith('image/')) {
+        imageError.textContent = 'Only image files are allowed.';
+        uploadArea.classList.add('sit-upload-area--error');
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        imageError.textContent = 'Image must be under 5 MB.';
+        uploadArea.classList.add('sit-upload-area--error');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+        previewImg.src = ev.target.result;
+        uploadPrompt.style.display  = 'none';
+        imagePreview.style.display  = 'flex';
+    };
+    reader.readAsDataURL(file);
+}
+
+/* ── CHAR COUNT ── */
+const descTA    = document.getElementById('description');
+const descCount = document.getElementById('descCount');
+descTA.addEventListener('input', () => {
+    const l = descTA.value.length;
+    descCount.textContent = `${l} / 500`;
+    descCount.style.color = l < 20 ? '#ff4d4d' : '#666';
+});
+
+/* ── INLINE VALIDATION ── */
+function validateField(field, errId, ok, msg) {
+    const el = document.getElementById(errId);
+    if (!ok) { el.textContent = msg; field.classList.add('sit-input--error'); return false; }
+    el.textContent = ''; field.classList.remove('sit-input--error'); return true;
+}
+const catSel  = document.getElementById('category');
+const locInp  = document.getElementById('location');
+catSel.addEventListener('change', () => validateField(catSel, 'categoryError', catSel.value !== '', 'Please select a category.'));
+locInp.addEventListener('input',  () => validateField(locInp, 'locationError', locInp.value.trim().length >= 3, 'Location too short.'));
+descTA.addEventListener('input',  () => validateField(descTA,  'descError',    descTA.value.trim().length >= 20, 'Min 20 characters required.'));
+
+/* ── FORM SUBMIT ── */
+document.getElementById('reportForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const hasImage = fileInput.files && fileInput.files.length > 0;
+    const ok = [
+        validateField(catSel, 'categoryError', catSel.value !== '', 'Please select a category.'),
+        validateField(locInp, 'locationError', locInp.value.trim().length >= 3, 'Location too short.'),
+        validateField(descTA, 'descError', descTA.value.trim().length >= 20, 'Min 20 characters.'),
+    ].every(Boolean);
+
+    if (!hasImage) {
+        imageError.textContent = 'A photo is required to submit a report.';
+        uploadArea.classList.add('sit-upload-area--error');
+        if (ok) uploadArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+    if (!ok) return;
+
+    const btn = document.getElementById('reportSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    try {
+        const res = await fetch('/student/report', { method: 'POST', body: new FormData(e.target) });
+        if (res.ok) {
+            showToast('✅ Issue reported successfully!', 'success');
+            e.target.reset();
+            descCount.textContent = '0 / 500';
+            imagePreview.style.display = 'none';
+            uploadPrompt.style.display  = 'flex';
+            previewImg.src = '';
+            uploadArea.classList.remove('sit-upload-area--error');
+        } else {
+            showToast((await res.text()) || '❌ Submission failed. Try again.', 'error');
+        }
+    } catch { showToast('❌ Server connection failed.', 'error'); }
+    finally  { btn.disabled = false; btn.textContent = 'Submit Report'; }
+});
+/* ── FILTER & SORT ── */
+const filterSel  = document.getElementById('filterStatus');
+const sortSel    = document.getElementById('sortBy');
+const issuesList = document.getElementById('issuesList');
+const emptyState = document.getElementById('emptyState');
+
+function applyFilter() {
+    const status = filterSel.value;
+    let visible = 0;
+    issuesList.querySelectorAll('.sit-issue-card').forEach(c => {
+        const show = status === 'ALL' || c.dataset.status === status;
+        c.style.display = show ? 'flex' : 'none';
+        if (show) visible++;
+    });
+    emptyState.style.display = visible === 0 ? 'flex' : 'none';
+}
+filterSel.addEventListener('change', applyFilter);
+sortSel.addEventListener('change', () => {
+    const cards = [...issuesList.querySelectorAll('.sit-issue-card')];
+    const mode  = sortSel.value;
+    cards.sort((a, b) => {
+        if (mode === 'UPVOTES') return +b.dataset.upvotes - +a.dataset.upvotes;
+        const da = new Date(a.dataset.date), db = new Date(b.dataset.date);
+        return mode === 'DATE_DESC' ? db - da : da - db;
+    });
+    cards.forEach(c => issuesList.appendChild(c));
+});
+
+/* ── UPVOTE ── */
+issuesList.addEventListener('click', async e => {
+    const btn = e.target.closest('.sit-upvote-btn');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    const countEl = btn.querySelector('.sit-upvote-count');
+    try {
+        const res = await fetch(`/student/upvote/${btn.dataset.id}`, { method: 'POST' });
+        if (res.ok) {
+            const newVal = +countEl.textContent + 1;
+            countEl.textContent = newVal;
+            btn.dataset.upvotes = newVal;
+            btn.classList.add('sit-upvote-btn--active');
+            showToast('👍 Upvoted!', 'success');
+        } else {
+            showToast('Already upvoted or an error occurred.', 'error');
+            btn.disabled = false;
+        }
+    } catch { showToast('Connection failed.', 'error'); btn.disabled = false; }
+});
+
+/* ── TOAST ── */
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('sit-toast');
+    t.textContent = msg;
+    t.className   = `sit-toast sit-toast--${type} sit-toast--show`;
+    setTimeout(() => t.classList.remove('sit-toast--show'), 3500);
+}
+</script>
+</body>
+</html>
