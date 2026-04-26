@@ -1,0 +1,305 @@
+/* =====================================================
+   SHARED COMPONENTS
+   Extracted from hub.css, dashboard.css, kanban.css
+   to eliminate duplication across page-specific CSS.
+   ===================================================== */
+
+/* ── PAGE HEADER ── */
+.sit-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+.sit-page-title    { font-size: 1.6rem; font-weight: 700; color: var(--sit-text-dark); }
+.sit-page-subtitle { font-size: 1rem; color: #6b7280; margin-top: .25rem; }
+.sit-highlight     { color: var(--sit-primary); }
+
+/* ── STAT CARDS ── */
+.sit-stats-container {
+    display: grid;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+.sit-stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.3rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    border-top: 4px solid transparent;
+    transition: transform .2s, box-shadow .2s;
+}
+.sit-stat-card:hover   { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.1); }
+.sit-stat-card--total      { border-color: var(--sit-primary); }
+.sit-stat-card--pending    { border-color: #f59e0b; }
+.sit-stat-card--inprogress { border-color: #7c3aed; }
+.sit-stat-card--resolved   { border-color: #10b981; }
+.sit-stat-card--depts      { border-color: var(--sit-secondary); }
+.sit-stat-icon   { font-size: 1.7rem; margin-bottom: .45rem; }
+.sit-stat-number { font-size: 2rem; font-weight: 800; color: var(--sit-primary); line-height: 1; }
+.sit-stat-label  { font-size: .85rem; color: #6b7280; margin-top: .35rem; font-weight: 600; }
+
+/* ── CARDS ── */
+.sit-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+}
+.sit-card--stretch { min-width: 0; }
+.sit-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--sit-primary);
+    margin-bottom: 1.15rem;
+}
+.sit-card__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+.sit-toolbar-controls { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+/* ── BUTTONS ── */
+.sit-btn {
+    padding: .65rem 1.5rem;
+    border-radius: 8px;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    border: 2px solid transparent;
+    text-decoration: none;
+    display: inline-block;
+}
+.sit-btn--primary {
+    background: var(--sit-primary);
+    color: var(--sit-text-light);
+    border-color: var(--sit-primary);
+}
+.sit-btn--primary:hover:not(:disabled) { background: #002244; transform: translateY(-1px); }
+.sit-btn--primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.sit-btn--outline {
+    background: transparent;
+    color: var(--sit-primary);
+    border-color: var(--sit-primary);
+}
+.sit-btn--outline:hover { background: var(--sit-primary); color: var(--sit-text-light); }
+.sit-btn--ghost {
+    background: transparent;
+    color: var(--sit-primary);
+    border-color: var(--sit-primary);
+}
+.sit-btn--ghost:hover { background: var(--sit-primary); color: var(--sit-text-light); }
+
+/* ── SELECT FIELDS ── */
+.sit-select-field,
+.sit-select-field--sm {
+    padding: .45rem .75rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: .9rem;
+    font-family: var(--font-family);
+    background: #fff;
+    color: var(--sit-text-dark);
+    cursor: pointer;
+}
+.sit-select-field:focus { outline: none; border-color: var(--sit-primary); }
+
+/* ── STATUS BADGES ── */
+.sit-status-badge {
+    display: inline-block;
+    padding: .2rem .7rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    width: fit-content;
+}
+.sit-status-badge--pending     { background: #fef3c7; color: #92400e; }
+.sit-status-badge--in_progress { background: #ede9fe; color: #5b21b6; }
+.sit-status-badge--resolved    { background: #d1fae5; color: #065f46; }
+
+/* ── TOAST NOTIFICATIONS ── */
+.sit-toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: .85rem 1.5rem;
+    border-radius: 10px;
+    font-size: .95rem;
+    font-weight: 600;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .3s, transform .3s;
+    pointer-events: none;
+    z-index: 9999;
+    max-width: 340px;
+}
+.sit-toast--show    { opacity: 1; transform: translateY(0); }
+.sit-toast--success { background: #10b981; }
+.sit-toast--error   { background: var(--sit-error); }
+
+/* ── EMPTY STATE ── */
+.sit-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem;
+    padding: 2.5rem 1rem;
+    color: #9ca3af;
+}
+.sit-empty-icon { font-size: 2.5rem; }
+
+/* ── FORM ELEMENTS ── */
+.sit-input-group { margin-bottom: 1.25rem; }
+.sit-input-label {
+    display: block;
+    font-weight: 600;
+    font-size: .95rem;
+    margin-bottom: .45rem;
+    color: var(--sit-text-dark);
+}
+.sit-input-label-hint {
+    display: block;
+    font-size: .78rem;
+    color: #6b7280;
+    font-weight: 400;
+    margin-top: .2rem;
+}
+.sit-required { color: var(--sit-error); }
+.sit-optional { color: #9ca3af; font-size: .8rem; font-weight: 400; }
+
+.sit-input-field,
+.sit-textarea-field {
+    width: 100%;
+    padding: .7rem 1rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    color: var(--sit-text-dark);
+    background: #fff;
+    transition: border-color .25s, box-shadow .25s;
+}
+.sit-input-field:focus,
+.sit-textarea-field:focus {
+    outline: none;
+    border-color: var(--sit-primary);
+    box-shadow: 0 0 0 3px rgba(0,51,102,.1);
+}
+.sit-input--error { border-color: var(--sit-error) !important; }
+.sit-textarea-field { resize: vertical; min-height: 110px; }
+
+.sit-field-error {
+    display: block;
+    color: var(--sit-error);
+    font-size: .8rem;
+    margin-top: .3rem;
+    font-weight: 500;
+    min-height: 1em;
+}
+.sit-char-count {
+    display: block;
+    font-size: .78rem;
+    color: #9ca3af;
+    text-align: right;
+    margin-top: .25rem;
+}
+
+/* ── IMAGE UPLOAD ── */
+.sit-upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: border-color .25s, background .25s;
+    position: relative;
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sit-upload-area:hover,
+.sit-upload-area--drag {
+    border-color: var(--sit-primary);
+    background: rgba(0,51,102,.03);
+}
+.sit-upload-area--error {
+    border-color: var(--sit-error) !important;
+    background: rgba(204, 0, 0, .03);
+}
+.sit-file-input { display: none; }
+.sit-upload-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .35rem;
+    color: #6b7280;
+    text-align: center;
+    pointer-events: none;
+}
+.sit-upload-icon { font-size: 2rem; }
+.sit-upload-prompt p  { font-size: .95rem; font-weight: 500; margin: 0; }
+.sit-upload-prompt small { font-size: .8rem; }
+
+.sit-image-preview {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+.sit-image-preview img {
+    max-height: 180px;
+    max-width: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+}
+.sit-remove-image {
+    position: absolute;
+    top: -10px; right: -10px;
+    background: var(--sit-error);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 26px; height: 26px;
+    font-size: .85rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+}
+
+/* ── ERROR / HELP (auth flows) ── */
+.error-container {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: rgba(255, 77, 77, 0.1);
+    border-radius: 4px;
+    border-left: 3px solid #ff4d4d;
+}
+.error-message {
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    margin: 0;
+    font-weight: 500;
+}
+.sit-input-help {
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    color: #666;
+    font-weight: 500;
+}
