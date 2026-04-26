@@ -26,8 +26,8 @@
     <!-- PAGE HEADER -->
     <div class="sit-page-header">
         <div>
-            <h2 class="sit-page-title">
-                <span th:text="${deptName}">Electrical Dept</span> — Issue Board
+            <h2 class="sit-page-title" th:text="${deptName != null ? deptName + ' Dept — Issue Board' : 'Department — Issue Board'}">
+                Electrical Dept — Issue Board
             </h2>
             <p class="sit-page-subtitle">Drag cards between columns to update issue status.</p>
         </div>

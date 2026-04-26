@@ -101,6 +101,7 @@
                             <th>Status</th>
                             <th>Date</th>
                             <th>Upvotes</th>
+                            <th class="sit-table__actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="adminIssuesTbody">
@@ -108,18 +109,23 @@
                         <!-- Thymeleaf rows -->
                         <tr th:each="issue : ${recentIssues}"
                             th:attr="data-status=${issue.status},data-dept=${issue.category}">
-                            <td class="sit-table__id" th:text="'#' + ${issue.id}">#001</td>
-                            <td th:text="${issue.category}">Electrical</td>
-                            <td th:text="${issue.location}">Block A</td>
-                            <td th:text="${issue.reporterName}">Student</td>
+                            <td class="sit-table__id" th:text="'#' + ${issue.id}">ID</td>
+                            <td th:text="${issue.category}">Category</td>
+                            <td th:text="${issue.location}">Location</td>
+                            <td th:text="${issue.reporterName}">Reporter</td>
                             <td>
                                 <span class="sit-status-badge"
                                       th:classappend="'sit-status-badge--' + ${#strings.toLowerCase(issue.status)}"
-                                      th:text="${issue.status}">PENDING</span>
+                                      th:text="${issue.status}">STATUS</span>
                             </td>
-                            <td th:text="${#temporals.format(issue.createdAt,'dd MMM yy')}">01 Jan 25</td>
+                            <td th:text="${#temporals.format(issue.createdAt,'dd MMM yy')}">Date</td>
                             <td>
                                 <span class="sit-upvote-pill" th:text="'▲ ' + ${issue.upvotes}">▲ 0</span>
+                            </td>
+                            <td>
+                                <button class="sit-btn-icon sit-btn-icon--danger" 
+                                        th:onclick="'deleteIssue(' + ${issue.id} + ')'"
+                                        title="Delete Report">🗑️</button>
                             </td>
                         </tr>
 

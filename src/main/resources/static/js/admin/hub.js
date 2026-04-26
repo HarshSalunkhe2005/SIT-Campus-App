@@ -27,4 +27,25 @@
 
     adminFilter.addEventListener('change', applyAdminFilter);
     adminDeptFilter.addEventListener('change', applyAdminFilter);
+
+    /* ── DELETE ISSUE ── */
+    window.deleteIssue = async function(id) {
+        if (!confirm(`Are you sure you want to delete report #${id}? This cannot be undone.`)) return;
+
+        try {
+            const res = await fetch(`/admin/issue/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast(`Report #${id} deleted.`, 'success');
+                // Remove row from table
+                const row = document.querySelector(`tr[data-id="${id}"]`) || 
+                            Array.from(tbody.querySelectorAll('tr')).find(r => r.textContent.includes('#' + id));
+                if (row) row.remove();
+                applyAdminFilter();
+            } else {
+                showToast('Failed to delete report.', 'error');
+            }
+        } catch {
+            showToast('Connection error.', 'error');
+        }
+    };
 })();

@@ -107,8 +107,11 @@
 
         if (newStatus === oldStatus) return;
 
-        /* Block reverse moves (only forward: PENDING → IN_PROGRESS → RESOLVED) */
-        if (STATUS_ORDER[newStatus] < STATUS_ORDER[oldStatus]) {
+        /* Block reverse moves (only forward: PENDING (0) → IN_PROGRESS (1) → RESOLVED (2)) */
+        const oldIdx = STATUS_ORDER[oldStatus];
+        const newIdx = STATUS_ORDER[newStatus];
+
+        if (newIdx < oldIdx) {
             showToast('Cannot move issues backwards. Status can only move forward.', 'error');
             return;
         }
