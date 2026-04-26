@@ -1,39 +1,31 @@
 /**
  * SIT Campus App — Kanban Drag & Drop
  * Requires proof image when moving to IN_PROGRESS or RESOLVED.
+ * Depends on: shared/toast.js, shared/image-upload.js
  */
 
 (function () {
     'use strict';
 
-    const STATUSES = ['PENDING', 'IN_PROGRESS', 'RESOLVED'];
-    const board = document.getElementById('kanbanBoard');
+    const STATUSES     = ['PENDING', 'IN_PROGRESS', 'RESOLVED'];
+    const STATUS_ORDER = { PENDING: 0, IN_PROGRESS: 1, RESOLVED: 2 };
+    const board        = document.getElementById('kanbanBoard');
     if (!board) return;
 
-    let dragCard = null;
+    let dragCard    = null;
     let placeholder = null;
 
-    /* ── Pending move state (held while modal is open) ── */
+    /* Pending move state (held while modal is open) */
     let pendingCard = null;
     let pendingNewStatus = null;
     let pendingOldStatus = null;
-    let pendingBody = null;
+    let pendingBody  = null;
     let pendingAfter = null;
-
-    /* ── Toast ── */
-    function showToast(msg, type = 'success') {
-        const t = document.getElementById('sit-toast');
-        if (!t) return;
-        t.textContent = msg;
-        t.className = `sit-toast sit-toast--${type} sit-toast--show`;
-        clearTimeout(t._timer);
-        t._timer = setTimeout(() => t.classList.remove('sit-toast--show'), 3500);
-    }
 
     /* ── Column counts ── */
     function updateCounts() {
         STATUSES.forEach(status => {
-            const body = document.getElementById('body-' + status);
+            const body  = document.getElementById('body-' + status);
             const badge = document.getElementById('count-' + status);
             if (body && badge)
                 badge.textContent = body.querySelectorAll('.sit-kanban-card').length;
@@ -115,8 +107,7 @@
 
         if (newStatus === oldStatus) return;
 
-        /* ── Block reverse moves (only forward: PENDING → IN_PROGRESS → RESOLVED) ── */
-        const STATUS_ORDER = { 'PENDING': 0, 'IN_PROGRESS': 1, 'RESOLVED': 2 };
+        /* Block reverse moves (only forward: PENDING → IN_PROGRESS → RESOLVED) */
         if (STATUS_ORDER[newStatus] < STATUS_ORDER[oldStatus]) {
             showToast('Cannot move issues backwards. Status can only move forward.', 'error');
             return;
@@ -126,7 +117,6 @@
 
         /* Moves to IN_PROGRESS or RESOLVED require a proof image */
         if (newStatus === 'IN_PROGRESS' || newStatus === 'RESOLVED') {
-            /* Store pending move details */
             pendingCard = dragCard;
             pendingNewStatus = newStatus;
             pendingOldStatus = oldStatus;
@@ -134,37 +124,35 @@
             pendingAfter = afterCard;
             openModal(newStatus);
         } else {
-            /* PENDING — no image needed */
             commitMove(dragCard, body, afterCard, oldStatus, newStatus, null);
         }
     }
 
     /* ────────── MODAL ────────── */
 
-    const modal = document.getElementById('statusModal');
-    const modalClose = document.getElementById('modalClose');
-    const modalCancel = document.getElementById('modalCancelBtn');
+    const modal        = document.getElementById('statusModal');
+    const modalClose   = document.getElementById('modalClose');
+    const modalCancel  = document.getElementById('modalCancelBtn');
     const modalConfirm = document.getElementById('modalConfirmBtn');
     const modalSubtitle = document.getElementById('modalSubtitle');
-    const modalUpload = document.getElementById('modalUploadArea');
-    const modalFileIn = document.getElementById('modalFileInput');
-    const modalPrompt = document.getElementById('modalUploadPrompt');
-    const modalPreview = document.getElementById('modalImagePreview');
-    const modalImg = document.getElementById('modalPreviewImg');
-    const modalRemove = document.getElementById('modalRemoveImage');
-    const modalError = document.getElementById('modalImageError');
 
-    let modalFile = null;
+    /* Use shared image-upload helper for modal upload */
+    const modalUploader = initImageUpload({
+        areaId:      'modalUploadArea',
+        inputId:     'modalFileInput',
+        promptId:    'modalUploadPrompt',
+        previewId:   'modalImagePreview',
+        imgId:       'modalPreviewImg',
+        removeId:    'modalRemoveImage',
+        errorId:     'modalImageError',
+        requiredMsg: 'A proof image is required.',
+        onSelect:    () => { modalConfirm.disabled = false; },
+        onRemove:    () => { modalConfirm.disabled = true; }
+    });
 
     function openModal(newStatus) {
-        modalFile = null;
-        modalFileIn.value = '';
-        modalImg.src = '';
-        modalPreview.style.display = 'none';
-        modalPrompt.style.display = 'flex';
-        modalError.textContent = '';
+        modalUploader.reset();
         modalConfirm.disabled = true;
-        modalUpload.classList.remove('sit-upload-area--error');
 
         const label = newStatus === 'IN_PROGRESS' ? 'In Progress' : 'Resolved';
         modalSubtitle.textContent =
@@ -177,7 +165,6 @@
     function closeModal() {
         modal.hidden = true;
         pendingCard = pendingNewStatus = pendingOldStatus = pendingBody = pendingAfter = null;
-        modalFile = null;
     }
 
     modalClose.addEventListener('click', closeModal);
@@ -185,69 +172,10 @@
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
 
-    /* Upload area click */
-    modalUpload.addEventListener('click', e => {
-        if (!e.target.closest('#modalRemoveImage')) modalFileIn.click();
-    });
-
-    /* Drag-over inside modal */
-    modalUpload.addEventListener('dragover', e => {
-        e.preventDefault(); modalUpload.classList.add('sit-upload-area--drag');
-    });
-    modalUpload.addEventListener('dragleave', () => modalUpload.classList.remove('sit-upload-area--drag'));
-    modalUpload.addEventListener('drop', e => {
-        e.preventDefault();
-        modalUpload.classList.remove('sit-upload-area--drag');
-        if (e.dataTransfer.files[0]) handleModalFile(e.dataTransfer.files[0]);
-    });
-
-    modalFileIn.addEventListener('change', () => {
-        if (modalFileIn.files[0]) handleModalFile(modalFileIn.files[0]);
-    });
-
-    modalRemove.addEventListener('click', e => {
-        e.stopPropagation();
-        modalFile = null;
-        modalFileIn.value = '';
-        modalImg.src = '';
-        modalPreview.style.display = 'none';
-        modalPrompt.style.display = 'flex';
-        modalError.textContent = 'A proof image is required.';
-        modalUpload.classList.add('sit-upload-area--error');
-        modalConfirm.disabled = true;
-    });
-
-    function handleModalFile(file) {
-        modalError.textContent = '';
-        modalUpload.classList.remove('sit-upload-area--error');
-
-        if (!file.type.startsWith('image/')) {
-            modalError.textContent = 'Only image files are allowed.';
-            modalUpload.classList.add('sit-upload-area--error');
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            modalError.textContent = 'Image must be under 5 MB.';
-            modalUpload.classList.add('sit-upload-area--error');
-            return;
-        }
-
-        modalFile = file;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            modalImg.src = ev.target.result;
-            modalPrompt.style.display = 'none';
-            modalPreview.style.display = 'flex';
-        };
-        reader.readAsDataURL(file);
-        modalConfirm.disabled = false;
-    }
-
     /* Confirm button */
     modalConfirm.addEventListener('click', async () => {
-        if (!modalFile) {
-            modalError.textContent = 'Please attach a proof image before confirming.';
-            modalUpload.classList.add('sit-upload-area--error');
+        if (!modalUploader.hasFile()) {
+            modalUploader.setError('Please attach a proof image before confirming.');
             return;
         }
 
@@ -259,9 +187,10 @@
         const oldStatus = pendingOldStatus;
         const body = pendingBody;
         const after = pendingAfter;
+        const file = modalUploader.getFile();
 
         closeModal();
-        await commitMove(card, body, after, oldStatus, newStatus, modalFile);
+        await commitMove(card, body, after, oldStatus, newStatus, file);
         modalConfirm.textContent = 'Confirm Move';
     });
 
@@ -280,8 +209,8 @@
         updateCounts();
 
         const id = card.dataset.id;
-        if (!id || id.startsWith('demo')) {
-            showToast(`🔄 Moved to ${newStatus.replace('_', ' ')}`, 'success');
+        if (!id) {
+            showToast(`Moved to ${newStatus.replace('_', ' ')}`, 'success');
             return;
         }
 
@@ -296,13 +225,13 @@
                 body: formData
             });
             if (res.ok) {
-                showToast(`✅ Issue #${id} → ${newStatus.replace('_', ' ')}`, 'success');
+                showToast(`Issue #${id} → ${newStatus.replace('_', ' ')}`, 'success');
             } else {
-                showToast(`❌ Failed to update #${id}. Reverted.`, 'error');
+                showToast(`Failed to update #${id}. Reverted.`, 'error');
                 revertCard(card, oldStatus);
             }
         } catch {
-            showToast('❌ Connection failed. Change reverted.', 'error');
+            showToast('Connection failed. Change reverted.', 'error');
             revertCard(card, oldStatus);
         }
     }

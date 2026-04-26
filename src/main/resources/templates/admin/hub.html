@@ -84,11 +84,8 @@
                     <select id="adminDeptFilter" class="sit-select-field sit-select-field--sm"
                             aria-label="Filter by department">
                         <option value="ALL">All Depts</option>
-                        <option value="ELECTRICAL">Electrical</option>
-                        <option value="PLUMBING">Plumbing</option>
-                        <option value="CIVIL">Civil</option>
-                        <option value="IT">IT</option>
-                        <option value="CLEANLINESS">Cleanliness</option>
+                        <option th:each="dept : ${departments}"
+                                th:value="${dept}" th:text="${dept}">Dept</option>
                     </select>
                 </div>
             </div>
@@ -172,35 +169,7 @@
 
 <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<script>
-/* ── TABLE FILTER ── */
-const adminFilter     = document.getElementById('adminFilter');
-const adminDeptFilter = document.getElementById('adminDeptFilter');
-const adminEmptyState = document.getElementById('adminEmptyState');
-const tbody           = document.getElementById('adminIssuesTbody');
-
-function applyAdminFilter() {
-    const status = adminFilter.value;
-    const dept   = adminDeptFilter.value;
-    let vis = 0;
-    tbody.querySelectorAll('tr').forEach(row => {
-        const statusOk = status === 'ALL' || row.dataset.status === status;
-        const deptOk   = dept   === 'ALL' || row.dataset.dept   === dept;
-        row.style.display = statusOk && deptOk ? '' : 'none';
-        if (statusOk && deptOk) vis++;
-    });
-    adminEmptyState.style.display = vis === 0 ? 'flex' : 'none';
-}
-adminFilter.addEventListener('change',     applyAdminFilter);
-adminDeptFilter.addEventListener('change', applyAdminFilter);
-
-/* ── TOAST ── */
-function showToast(msg, type = 'success') {
-    const t = document.getElementById('sit-toast');
-    t.textContent = msg;
-    t.className = `sit-toast sit-toast--${type} sit-toast--show`;
-    setTimeout(() => t.classList.remove('sit-toast--show'), 3500);
-}
-</script>
+<script src="../../static/js/shared/toast.js" th:src="@{/js/shared/toast.js}"></script>
+<script src="../../static/js/admin/hub.js"     th:src="@{/js/admin/hub.js}"></script>
 </body>
 </html>

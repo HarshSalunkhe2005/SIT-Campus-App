@@ -25,8 +25,8 @@
 /* Grid: 4-column stat row for student */
 .sit-stats-container { grid-template-columns: repeat(4, 1fr); }
 
-/* Student dashboard card gets extra bottom spacing */
-.sit-card { margin-bottom: 1.5rem; }
+/* Student dashboard cards get extra bottom spacing */
+.sit-dashboard-main .sit-card { margin-bottom: 1.5rem; }
 
 /* ── TABS ── */
 .sit-tabs {
@@ -65,7 +65,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 1.25rem;
 }
-.sit-select-field--sm { padding: .45rem .75rem; font-size: .9rem; width: auto; }
+
 
 /* ── FORM ACTIONS ── */
 .sit-form-actions {

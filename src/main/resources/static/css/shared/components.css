@@ -112,6 +112,7 @@
     background: #fff;
     color: var(--sit-text-dark);
     cursor: pointer;
+    width: auto;
 }
 .sit-select-field:focus { outline: none; border-color: var(--sit-primary); }
 
