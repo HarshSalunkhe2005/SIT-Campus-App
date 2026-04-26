@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- NAVBAR FRAGMENT -->
+<nav th:fragment="navbar(role)" class="navbar">
+    <div class="navbar-container">
+        <!-- Logo & Brand -->
+        <div class="navbar-brand">
+            <img src="/images/logo.png" alt="Campus" class="logo-img">
+            <span class="brand-text">Campus Portal</span>
+        </div>
+
+        <!-- Center: App Title -->
+        <div class="navbar-title">
+            <h1 th:text="${role == 'ADMIN' ? 'Admin Dashboard' : role == 'DEPT' ? 'Department Dashboard' : 'Student Dashboard'}"></h1>
+        </div>
+
+        <!-- Right: User Menu -->
+        <div class="navbar-right">
+            <!-- Notifications -->
+            <div class="notification-bell">
+                <svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span class="notification-badge" th:if="${unreadCount > 0}" th:text="${unreadCount}">3</span>
+            </div>
+
+            <!-- User Profile Dropdown -->
+            <div class="user-dropdown">
+                <button class="user-button">
+                    <img src="/images/default-avatar.png" alt="User" class="user-avatar">
+                    <span class="user-name" th:text="${userName}">User</span>
+                    <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="dropdown-menu">
+                    <a href="/profile" class="dropdown-item">Profile</a>
+                    <a href="/settings" class="dropdown-item">Settings</a>
+                    <hr class="dropdown-divider">
+                    <form action="/logout" method="POST" style="display:inline;">
+                        <button type="submit" class="dropdown-item logout-btn">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>
