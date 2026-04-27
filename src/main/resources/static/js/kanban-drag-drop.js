@@ -75,13 +75,21 @@
 
     function onDragEnter(e) {
         e.preventDefault();
-        this.closest('.sit-kanban-col').classList.add('sit-drop-over');
+        const col = this.closest('.sit-kanban-col');
+        
+        // Visual feedback: only highlight if it's a valid forward move
+        if (dragCard) {
+            const oldIdx = STATUS_ORDER[dragCard.dataset.status] || 0;
+            const newIdx = STATUS_ORDER[col.dataset.status] || 0;
+            if (newIdx >= oldIdx) {
+                col.classList.add('sit-drop-over');
+            }
+        }
     }
 
     function onDragLeave(e) {
         if (!this.contains(e.relatedTarget)) {
             this.closest('.sit-kanban-col').classList.remove('sit-drop-over');
-            placeholder && placeholder.remove();
         }
     }
 
@@ -89,6 +97,18 @@
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
         if (!dragCard) return;
+
+        const col = this.closest('.sit-kanban-col');
+        const oldIdx = STATUS_ORDER[dragCard.dataset.status] || 0;
+        const newIdx = STATUS_ORDER[col.dataset.status] || 0;
+
+        // BLOCK VISUAL PLACEHOLDER IF BACKWARD
+        if (newIdx < oldIdx) {
+            e.dataTransfer.dropEffect = 'none';
+            placeholder && placeholder.remove();
+            return;
+        }
+
         const afterCard = getDragAfterCard(this, e.clientY);
         afterCard ? this.insertBefore(placeholder, afterCard) : this.appendChild(placeholder);
     }
@@ -108,11 +128,11 @@
         if (newStatus === oldStatus) return;
 
         /* Block reverse moves (only forward: PENDING (0) → IN_PROGRESS (1) → RESOLVED (2)) */
-        const oldIdx = STATUS_ORDER[oldStatus];
-        const newIdx = STATUS_ORDER[newStatus];
+        const oldIdx = STATUS_ORDER[oldStatus] || 0;
+        const newIdx = STATUS_ORDER[newStatus] || 0;
 
         if (newIdx < oldIdx) {
-            showToast('Cannot move issues backwards. Status can only move forward.', 'error');
+            showToast('Invalid Move: Status can only move forward (New → In Progress → Resolved).', 'error');
             return;
         }
 
@@ -209,6 +229,7 @@
             card.classList.remove('sit-kanban-card--resolved');
         }
         card.dataset.status = newStatus;
+        card.setAttribute('data-status', newStatus);
         updateCounts();
 
         const id = card.dataset.id;
@@ -257,6 +278,7 @@
         if (oldBody) {
             oldBody.appendChild(card);
             card.dataset.status = oldStatus;
+            card.setAttribute('data-status', oldStatus);
             oldStatus === 'RESOLVED'
                 ? card.classList.add('sit-kanban-card--resolved')
                 : card.classList.remove('sit-kanban-card--resolved');
