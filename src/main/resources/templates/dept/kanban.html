@@ -26,8 +26,8 @@
     <!-- PAGE HEADER -->
     <div class="sit-page-header">
         <div>
-            <h2 class="sit-page-title">
-                <span th:text="${deptName}">Electrical Dept</span> — Issue Board
+            <h2 class="sit-page-title" th:text="${deptName != null ? deptName + ' Dept — Issue Board' : 'Department — Issue Board'}">
+                Electrical Dept — Issue Board
             </h2>
             <p class="sit-page-subtitle">Drag cards between columns to update issue status.</p>
         </div>
@@ -177,6 +177,8 @@
 
 <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<script src="../../static/js/kanban-drag-drop.js" th:src="@{/js/kanban-drag-drop.js}"></script>
+<script src="../../static/js/shared/toast.js"        th:src="@{/js/shared/toast.js}"></script>
+<script src="../../static/js/shared/image-upload.js" th:src="@{/js/shared/image-upload.js}"></script>
+<script src="../../static/js/kanban-drag-drop.js"   th:src="@{/js/kanban-drag-drop.js}"></script>
 </body>
 </html>
