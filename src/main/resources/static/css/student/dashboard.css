@@ -10,11 +10,23 @@
     padding: 2rem;
 }
 
+/* ── CAMPUS FEED HINT ── */
+.sit-feed-hint {
+    background: rgba(0, 51, 102, .05);
+    border-left: 3px solid var(--sit-primary);
+    padding: .65rem 1rem;
+    border-radius: 0 8px 8px 0;
+    font-size: .9rem;
+    color: #4b5563;
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+}
+
 /* Grid: 4-column stat row for student */
 .sit-stats-container { grid-template-columns: repeat(4, 1fr); }
 
-/* Student dashboard card gets extra bottom spacing */
-.sit-card { margin-bottom: 1.5rem; }
+/* Student dashboard cards get extra bottom spacing */
+.sit-dashboard-main .sit-card { margin-bottom: 1.5rem; }
 
 /* ── TABS ── */
 .sit-tabs {
@@ -53,7 +65,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 1.25rem;
 }
-.sit-select-field--sm { padding: .45rem .75rem; font-size: .9rem; width: auto; }
+
 
 /* ── FORM ACTIONS ── */
 .sit-form-actions {
