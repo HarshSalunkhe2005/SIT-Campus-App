@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIT Campus App - Manage Departments</title>
+    <link rel="stylesheet" href="../../static/css/shared/base.css"       th:href="@{/css/shared/base.css}">
+    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     th:href="@{/css/shared/navbar.css}">
+    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar('ADMIN')}"></div>
+    <main class="sit-admin-main" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
+        <div class="sit-page-header">
+            <div>
+                <h2 class="sit-page-title">Manage Departments</h2>
+                <p class="sit-page-subtitle">Add or edit campus departments and their heads.</p>
+            </div>
+            <a href="/admin/hub" th:href="@{/admin/hub}" class="sit-btn sit-btn--outline">Back to Hub</a>
+        </div>
+        <div class="sit-card">
+            <p style="text-align: center; padding: 3rem; color: #666;">Department management interface coming soon.</p>
+        </div>
+    </main>
+</body>
+</html>
