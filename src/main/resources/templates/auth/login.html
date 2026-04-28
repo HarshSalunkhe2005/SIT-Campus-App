@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Login</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css" th:href="@{/css/shared/base.css}">
-    <link rel="stylesheet" href="../../static/css/auth/login.css" th:href="@{/css/auth/login.css}">
+    <link rel="stylesheet" href="../../static/css/shared/base.css"       th:href="@{/css/shared/base.css}">
+    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
+    <link rel="stylesheet" href="../../static/css/auth/login.css"        th:href="@{/css/auth/login.css}">
 </head>
 <body>
     <main class="sit-split-layout">
@@ -45,10 +46,6 @@
                             </svg>
                             <input type="password" id="password" name="password" class="sit-input-field sit-input-field--icon" placeholder="Enter your password" required>
                         </div>
-                    </div>
-
-                    <div class="sit-auth-error" th:if="${param.error}" style="display: none;">
-                        <p class="sit-error-text">Invalid email or password.</p>
                     </div>
 
                     <button type="submit" class="sit-auth-card__submit">Login</button>
