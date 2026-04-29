@@ -38,6 +38,8 @@ public class AdminController {
     @PutMapping("/status")
     public ResponseEntity<ComplaintResponse> updateStatus(
             @Valid @RequestBody StatusUpdateRequest request) {
-        return ResponseEntity.ok(complaintService.updateStatus(request.complaintId(), request.status()));
+        com.sit.campusbackend.complaint.entity.ComplaintStatus statusEnum = 
+            com.sit.campusbackend.complaint.entity.ComplaintStatus.valueOf(request.status().toUpperCase());
+        return ResponseEntity.ok(complaintService.updateStatus(request.complaintId(), statusEnum));
     }
 }
