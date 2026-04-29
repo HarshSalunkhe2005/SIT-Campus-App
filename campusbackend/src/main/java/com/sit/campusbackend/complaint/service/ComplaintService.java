@@ -68,33 +68,27 @@ public class ComplaintService {
      *  d. Default priority to MEDIUM when not provided.
      *  e. Set initial status to ASSIGNED.
      */
-    public ComplaintResponse createComplaint(ComplaintRequest req) {
-
-        // Guard — controller already validates but service should be self-contained.
-        if (req.getEmail() == null || req.getTitle() == null || req.getDescription() == null) {
-            throw new IllegalArgumentException("email, title, and description are required");
+    public ComplaintResponse createComplaint(ComplaintRequest req, org.springframework.web.multipart.MultipartFile image, String email) {
+        if (email == null || req.location() == null || req.description() == null) {
+            throw new IllegalArgumentException("email, location, and description are required");
         }
 
-        Student student = studentRepository.findById(req.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Student not found: " + req.getEmail()));
+        Student student = studentRepository.findById(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + email));
 
-        String     category = detectCategory(req.getDescription());
-        Department dept     = departmentRepository.findByType(category)
+        String category = detectCategory(req.description());
+        Department dept = departmentRepository.findByType(category)
                 .orElseGet(() -> departmentRepository.findByType("General")
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "No department configured for category: " + category)));
+                        .orElseThrow(() -> new ResourceNotFoundException("No department configured for category: " + category)));
 
-        ComplaintPriority priority = req.getPriority() != null
-                ? req.getPriority()
-                : ComplaintPriority.MEDIUM;
+        ComplaintPriority priority = req.priority() != null ? req.priority() : ComplaintPriority.MEDIUM;
 
         Complaint complaint = new Complaint();
         complaint.setStudent(student);
-        complaint.setTitle(req.getTitle().trim());
-        complaint.setDescription(req.getDescription().trim());
+        complaint.setTitle(req.location().trim());
+        complaint.setDescription(req.description().trim());
         complaint.setCategory(category);
-        complaint.setImageUrl(req.getImageUrl());
+        complaint.setImageUrl(req.imageUrl());
         complaint.setDepartment(dept);
         complaint.setStatus(ComplaintStatus.ASSIGNED);
         complaint.setPriority(priority);
@@ -102,33 +96,19 @@ public class ComplaintService {
         return toResponse(complaintRepository.save(complaint));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 2. STUDENT — own complaints
-    // ─────────────────────────────────────────────────────────────────────────
-
     public List<ComplaintResponse> getStudentComplaints(String email) {
         return complaintRepository.findByStudentEmail(email)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 3. ADMIN — all complaints
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /** Paginated — preferred for admin list view. */
     public Page<ComplaintResponse> getAllComplaints(Pageable pageable) {
         return complaintRepository.findAll(pageable).map(this::toResponse);
     }
 
-    /** Non-paginated — kept for backward compatibility with existing tests. */
     public List<ComplaintResponse> getAllComplaints() {
         return complaintRepository.findAll()
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // 4. ADMIN — update status
-    // ─────────────────────────────────────────────────────────────────────────
 
     public ComplaintResponse updateStatus(Long complaintId, ComplaintStatus status) {
         Complaint complaint = findComplaint(complaintId);
@@ -136,33 +116,21 @@ public class ComplaintService {
         return toResponse(complaintRepository.save(complaint));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 5. ADMIN — dashboard stats
-    // ─────────────────────────────────────────────────────────────────────────
-
     public DashboardStatsResponse getDashboardStats() {
-        long total      = complaintRepository.count();
-        long pending    = complaintRepository.countByStatus(ComplaintStatus.PENDING);
-        long assigned   = complaintRepository.countByStatus(ComplaintStatus.ASSIGNED);
-        long inProgress = complaintRepository.countByStatus(ComplaintStatus.IN_PROGRESS);
-        long resolved   = complaintRepository.countByStatus(ComplaintStatus.RESOLVED);
-        long closed     = complaintRepository.countByStatus(ComplaintStatus.CLOSED);
-
-        return new DashboardStatsResponse(total, pending, assigned, inProgress, resolved, closed);
+        return new DashboardStatsResponse(
+            complaintRepository.count(),
+            complaintRepository.countByStatus(ComplaintStatus.PENDING),
+            complaintRepository.countByStatus(ComplaintStatus.ASSIGNED),
+            complaintRepository.countByStatus(ComplaintStatus.IN_PROGRESS),
+            complaintRepository.countByStatus(ComplaintStatus.RESOLVED),
+            complaintRepository.countByStatus(ComplaintStatus.CLOSED)
+        );
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // 6. DEPARTMENT — assigned complaints
-    // ─────────────────────────────────────────────────────────────────────────
 
     public List<ComplaintResponse> getDepartmentComplaints(Long departmentId) {
         return complaintRepository.findByDepartmentId(departmentId)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // 7. DEPARTMENT — resolve complaint + email student
-    // ─────────────────────────────────────────────────────────────────────────
 
     public ComplaintResponse resolveComplaint(Long complaintId, String resolvedImageUrl) {
         Complaint complaint = findComplaint(complaintId);
@@ -170,70 +138,22 @@ public class ComplaintService {
         complaint.setStatus(ComplaintStatus.RESOLVED);
         ComplaintResponse saved = toResponse(complaintRepository.save(complaint));
 
-        sendResolutionEmail(
-            complaint.getStudent().getEmail(),
-            complaint.getTitle()
-        );
+        sendResolutionEmail(complaint.getStudent().getEmail(), complaint.getTitle());
         return saved;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 8. DEPARTMENT — login (BCrypt verification)
-    // ─────────────────────────────────────────────────────────────────────────
+    String detectCategory(String description) {
+        if (description == null || description.isBlank()) return "General";
+        String text = description.toLowerCase();
 
-    public LoginResponse departmentLogin(String email, String rawPassword) {
-        Department dept = departmentRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "No department found with email: " + email));
+        if (containsAny(text, "fan", "light", "electricity", "switch", "socket", "power", "wiring", "bulb", "voltage")) return "Electrical";
+        if (containsAny(text, "wifi", "internet", "network", "router", "laptop", "computer", "printer", "server", "cable", "portal", "system", "connection")) return "IT";
+        if (containsAny(text, "clean", "garbage", "waste", "trash", "dirt", "sweep", "toilet", "bathroom", "dustbin", "smell", "hygiene")) return "Cleaning";
+        if (containsAny(text, "pipe", "water", "tap", "leak", "drain", "plumber", "flush", "seepage")) return "Plumbing";
+        if (containsAny(text, "hostel", "room", "bed", "mattress", "mess", "canteen", "food", "warden", "dorm")) return "Hostel";
 
-        if (dept.getPasswordHash() == null || dept.getPasswordHash().isBlank()) {
-            throw new IllegalStateException(
-                    "Department account has no password configured. Contact admin.");
-        }
-
-        if (!passwordEncoder.matches(rawPassword, dept.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid email or password");
-        }
-
-        return new LoginResponse("DEPARTMENT", dept.getId(), dept.getName(), jwtUtil.generateToken(email, "DEPARTMENT"));
+        return "General";
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // PACKAGE-PRIVATE — keyword-based category detection (testable)
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Detects the complaint category from description keywords.
-     * Package-private so ComplaintServiceTest can call it directly.
-     */
-String detectCategory(String description) {
-    if (description == null || description.isBlank()) return "General";
-    String text = description.toLowerCase();
-
-    if (containsAny(text, "fan", "light", "electricity", "switch",
-            "socket", "power", "wiring", "bulb", "voltage"))       return "Electrical";
-
-    if (containsAny(text, "wifi", "internet", "network", "router",
-            "laptop", "computer", "printer", "server",
-            "cable", "portal", "system", "connection"))            return "IT";
-
-    if (containsAny(text, "clean", "garbage", "waste", "trash",
-            "dirt", "sweep", "toilet", "bathroom",
-            "dustbin", "smell", "hygiene"))                        return "Cleaning";
-
-    // 🔥 MOVE THIS UP
-    if (containsAny(text, "pipe", "water", "tap", "leak",
-            "drain", "plumber", "flush", "seepage"))               return "Plumbing";
-
-    if (containsAny(text, "hostel", "room", "bed", "mattress",
-            "mess", "canteen", "food", "warden", "dorm"))          return "Hostel";
-
-    return "General";
-}
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // PRIVATE helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
     private boolean containsAny(String text, String... keywords) {
         for (String kw : keywords) {
@@ -243,48 +163,27 @@ String detectCategory(String description) {
     }
 
     private Complaint findComplaint(Long id) {
-        return complaintRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Complaint not found with id: " + id));
+        return complaintRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Complaint not found with id: " + id));
     }
 
     private void sendResolutionEmail(String to, String complaintTitle) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);
         msg.setSubject("Complaint Resolved — " + complaintTitle);
-        msg.setText(
-            "Dear Student,\n\n" +
-            "Your complaint \"" + complaintTitle + "\" has been successfully resolved.\n\n" +
-            "If the issue persists, please raise a new complaint with updated details.\n\n" +
-            "Regards,\nCampus Management Team"
-        );
+        msg.setText("Dear Student,\n\nYour complaint \"" + complaintTitle + "\" has been successfully resolved.\n\nIf the issue persists, please raise a new complaint with updated details.\n\nRegards,\nCampus Management Team");
         mailSender.send(msg);
     }
 
-    /**
-     * Maps a {@link Complaint} entity to a {@link ComplaintResponse} DTO.
-     * Uses explicit field access to avoid LazyInitializationException on proxies.
-     */
     private ComplaintResponse toResponse(Complaint c) {
-        ComplaintResponse r = new ComplaintResponse();
-        r.setId(c.getId());
-        r.setTitle(c.getTitle());
-        r.setDescription(c.getDescription());
-        r.setCategory(c.getCategory());
-        r.setImageUrl(c.getImageUrl());
-        r.setResolvedImageUrl(c.getResolvedImageUrl());
-        r.setStatus(c.getStatus());
-        r.setPriority(c.getPriority());
-        r.setCreatedAt(c.getCreatedAt());
-        r.setUpdatedAt(c.getUpdatedAt());
-
-        if (c.getStudent() != null) {
-            r.setStudentEmail(c.getStudent().getEmail());
-            r.setStudentName(c.getStudent().getFirstName() + " " + c.getStudent().getLastName());
-        }
-        if (c.getDepartment() != null) {
-            r.setDepartmentName(c.getDepartment().getName());
-        }
-        return r;
+        String studentEmail = c.getStudent() != null ? c.getStudent().getEmail() : null;
+        String studentName = c.getStudent() != null ? c.getStudent().getFirstName() + " " + c.getStudent().getLastName() : null;
+        String deptName = c.getDepartment() != null ? c.getDepartment().getName() : null;
+        
+        return new ComplaintResponse(
+            c.getId(), c.getTitle(), c.getDescription(), c.getCategory(),
+            c.getImageUrl(), c.getResolvedImageUrl(), c.getStatus(),
+            c.getPriority(), c.getCreatedAt(), c.getUpdatedAt(),
+            studentEmail, studentName, deptName
+        );
     }
 }

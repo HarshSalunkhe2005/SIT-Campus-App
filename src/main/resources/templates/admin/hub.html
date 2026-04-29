@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Admin Hub</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css"       th:href="@{/css/shared/base.css}">
-    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     th:href="@{/css/shared/navbar.css}">
-    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
-    <link rel="stylesheet" href="../../static/css/admin/hub.css"         th:href="@{/css/admin/hub.css}">
+    <link rel="stylesheet" href="../../static/css/shared/base.css"       >
+    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     >
+    <link rel="stylesheet" href="../../static/css/shared/components.css" >
+    <link rel="stylesheet" href="../../static/css/admin/hub.css"         >
 </head>
 <body>
 
-<div th:replace="~{fragments/navbar :: navbar('ADMIN')}">
+<div >
     <nav class="navbar">
         <div class="navbar-container">
             <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
@@ -39,9 +39,9 @@
             <p class="sit-page-subtitle">Monitor all campus reports and department performance.</p>
         </div>
         <div class="sit-header-actions">
-            <a href="departments.html" th:href="@{/admin/departments}"
+            <a href="departments.html" 
                class="sit-btn sit-btn--outline">Manage Depts</a>
-            <a href="users.html" th:href="@{/admin/users}"
+            <a href="users.html" 
                class="sit-btn sit-btn--primary">Manage Users</a>
         </div>
     </div>
@@ -50,27 +50,27 @@
     <section class="sit-stats-container" aria-label="System-wide Statistics">
         <div class="sit-stat-card sit-stat-card--total">
             <div class="sit-stat-icon">📊</div>
-            <div class="sit-stat-number" th:text="${totalIssues}">0</div>
+            <div class="sit-stat-number" >0</div>
             <div class="sit-stat-label">Total Reports</div>
         </div>
         <div class="sit-stat-card sit-stat-card--pending">
             <div class="sit-stat-icon">⏳</div>
-            <div class="sit-stat-number" th:text="${pendingCount}">0</div>
+            <div class="sit-stat-number" >0</div>
             <div class="sit-stat-label">Pending</div>
         </div>
         <div class="sit-stat-card sit-stat-card--inprogress">
             <div class="sit-stat-icon">🔧</div>
-            <div class="sit-stat-number" th:text="${inProgressCount}">0</div>
+            <div class="sit-stat-number" >0</div>
             <div class="sit-stat-label">In Progress</div>
         </div>
         <div class="sit-stat-card sit-stat-card--resolved">
             <div class="sit-stat-icon">✅</div>
-            <div class="sit-stat-number" th:text="${resolvedCount}">0</div>
+            <div class="sit-stat-number" >0</div>
             <div class="sit-stat-label">Resolved</div>
         </div>
         <div class="sit-stat-card sit-stat-card--depts">
             <div class="sit-stat-icon">🏢</div>
-            <div class="sit-stat-number" th:text="${activeDepts}">0</div>
+            <div class="sit-stat-number" >0</div>
             <div class="sit-stat-label">Active Depts</div>
         </div>
     </section>
@@ -93,8 +93,8 @@
                     <select id="adminDeptFilter" class="sit-select-field sit-select-field--sm"
                             aria-label="Filter by department">
                         <option value="ALL">All Depts</option>
-                        <option th:each="dept : ${departments}"
-                                th:value="${dept}" th:text="${dept}">Dept</option>
+                        <option 
+                                 >Dept</option>
                     </select>
                 </div>
             </div>
@@ -116,24 +116,24 @@
                     <tbody id="adminIssuesTbody">
 
                         <!-- Thymeleaf rows -->
-                        <tr th:each="issue : ${recentIssues}"
-                            th:attr="data-status=${issue.status},data-dept=${issue.category}">
-                            <td class="sit-table__id" th:text="'#' + ${issue.id}">ID</td>
-                            <td th:text="${issue.category}">Category</td>
-                            <td th:text="${issue.location}">Location</td>
-                            <td th:text="${issue.reporterName}">Reporter</td>
+                        <tr 
+                            >
+                            <td class="sit-table__id" >ID</td>
+                            <td >Category</td>
+                            <td >Location</td>
+                            <td >Reporter</td>
                             <td>
                                 <span class="sit-status-badge"
-                                      th:classappend="'sit-status-badge--' + ${#strings.toLowerCase(issue.status)}"
-                                      th:text="${issue.status}">STATUS</span>
+                                      
+                                      >STATUS</span>
                             </td>
-                            <td th:text="${#temporals.format(issue.createdAt,'dd MMM yy')}">Date</td>
+                            <td >Date</td>
                             <td>
-                                <span class="sit-upvote-pill" th:text="'▲ ' + ${issue.upvotes}">▲ 0</span>
+                                <span class="sit-upvote-pill" >▲ 0</span>
                             </td>
                             <td>
                                 <button class="sit-btn-icon sit-btn-icon--danger" 
-                                        th:onclick="'deleteIssue(' + ${issue.id} + ')'"
+                                        
                                         title="Delete Report">🗑️</button>
                             </td>
                         </tr>
@@ -156,21 +156,21 @@
             <div class="sit-dept-list" id="deptList">
 
                 <!-- Thymeleaf dept rows -->
-                <div th:each="dept : ${deptStats}" class="sit-dept-row">
+                <div  class="sit-dept-row">
                     <div class="sit-dept-row__header">
-                        <span class="sit-dept-name" th:text="${dept.name}">Department</span>
-                        <span class="sit-dept-total" th:text="${dept.total} + ' issues'">0 issues</span>
+                        <span class="sit-dept-name" >Department</span>
+                        <span class="sit-dept-total" >0 issues</span>
                     </div>
                     <div class="sit-progress-bar">
                         <div class="sit-progress-bar__fill"
-                             th:style="'width:' + ${dept.resolvedPct} + '%'"
-                             th:attr="aria-valuenow=${dept.resolvedPct}"
+                             
+                             
                              aria-valuemin="0" aria-valuemax="100"
                              role="progressbar"></div>
                     </div>
                     <div class="sit-dept-row__meta">
-                        <span class="sit-dept-resolved" th:text="${dept.resolved} + ' resolved'">0 resolved</span>
-                        <span class="sit-dept-pct" th:text="${dept.resolvedPct} + '%'">0%</span>
+                        <span class="sit-dept-resolved" >0 resolved</span>
+                        <span class="sit-dept-pct" >0%</span>
                     </div>
                 </div>
 
@@ -184,7 +184,7 @@
 
 <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<script src="../../static/js/shared/toast.js" th:src="@{/js/shared/toast.js}"></script>
-<script src="../../static/js/admin/hub.js"     th:src="@{/js/admin/hub.js}"></script>
+<script src="../../static/js/shared/toast.js" ></script>
+<script src="../../static/js/admin/hub.js"     ></script>
 </body>
 </html>
