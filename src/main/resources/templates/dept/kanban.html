@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Department Kanban</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css"       th:href="@{/css/shared/base.css}">
-    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     th:href="@{/css/shared/navbar.css}">
-    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
-    <link rel="stylesheet" href="../../static/css/dept/kanban.css"       th:href="@{/css/dept/kanban.css}">
+    <link rel="stylesheet" href="../../static/css/shared/base.css"       >
+    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     >
+    <link rel="stylesheet" href="../../static/css/shared/components.css" >
+    <link rel="stylesheet" href="../../static/css/dept/kanban.css"       >
 </head>
 <body>
 
-<div th:replace="~{fragments/navbar :: navbar('DEPT')}">
+<div >
     <nav class="navbar">
         <div class="navbar-container">
             <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
@@ -35,7 +35,7 @@
     <!-- PAGE HEADER -->
     <div class="sit-page-header">
         <div>
-            <h2 class="sit-page-title" th:text="${deptName != null ? deptName + ' Dept — Issue Board' : 'Department — Issue Board'}">
+            <h2 class="sit-page-title" >
                 Electrical Dept — Issue Board
             </h2>
             <p class="sit-page-subtitle">Drag cards between columns to update issue status.</p>
@@ -60,21 +60,21 @@
                  aria-label="New issues column" role="list">
 
                 <!-- Thymeleaf cards -->
-                <div th:each="issue : ${newIssues}"
+                <div 
                      class="sit-kanban-card"
                      draggable="true"
-                     th:attr="data-id=${issue.id},data-status='PENDING'"
+                     
                      role="listitem">
                     <div class="sit-kanban-card__top">
-                        <span class="sit-kanban-card__id" th:text="'#' + ${issue.id}">#001</span>
-                        <span class="sit-kanban-card__upvotes" th:text="'▲ ' + ${issue.upvotes}">▲ 0</span>
+                        <span class="sit-kanban-card__id" >#001</span>
+                        <span class="sit-kanban-card__upvotes" >▲ 0</span>
                     </div>
-                    <h4 class="sit-kanban-card__title" th:text="${issue.category}">Category</h4>
-                    <p class="sit-kanban-card__location">📍 <span th:text="${issue.location}">Location</span></p>
-                    <p class="sit-kanban-card__desc" th:text="${issue.description}">Description preview</p>
+                    <h4 class="sit-kanban-card__title" >Category</h4>
+                    <p class="sit-kanban-card__location">📍 <span >Location</span></p>
+                    <p class="sit-kanban-card__desc" >Description preview</p>
                     <div class="sit-kanban-card__footer">
-                        <span class="sit-kanban-card__reporter" th:text="${issue.reporterName}">Student</span>
-                        <span class="sit-kanban-card__date" th:text="${#temporals.format(issue.createdAt,'dd MMM')}">01 Jan</span>
+                        <span class="sit-kanban-card__reporter" >Student</span>
+                        <span class="sit-kanban-card__date" >01 Jan</span>
                     </div>
                 </div>
 
@@ -92,21 +92,21 @@
                  aria-label="In progress column" role="list">
 
                 <!-- Thymeleaf cards -->
-                <div th:each="issue : ${inProgressIssues}"
+                <div 
                      class="sit-kanban-card"
                      draggable="true"
-                     th:attr="data-id=${issue.id},data-status='IN_PROGRESS'"
+                     
                      role="listitem">
                     <div class="sit-kanban-card__top">
-                        <span class="sit-kanban-card__id" th:text="'#' + ${issue.id}">#001</span>
-                        <span class="sit-kanban-card__upvotes" th:text="'▲ ' + ${issue.upvotes}">▲ 0</span>
+                        <span class="sit-kanban-card__id" >#001</span>
+                        <span class="sit-kanban-card__upvotes" >▲ 0</span>
                     </div>
-                    <h4 class="sit-kanban-card__title" th:text="${issue.category}">Category</h4>
-                    <p class="sit-kanban-card__location">📍 <span th:text="${issue.location}">Location</span></p>
-                    <p class="sit-kanban-card__desc" th:text="${issue.description}">Description</p>
+                    <h4 class="sit-kanban-card__title" >Category</h4>
+                    <p class="sit-kanban-card__location">📍 <span >Location</span></p>
+                    <p class="sit-kanban-card__desc" >Description</p>
                     <div class="sit-kanban-card__footer">
-                        <span class="sit-kanban-card__reporter" th:text="${issue.reporterName}">Student</span>
-                        <span class="sit-kanban-card__date" th:text="${#temporals.format(issue.createdAt,'dd MMM')}">01 Jan</span>
+                        <span class="sit-kanban-card__reporter" >Student</span>
+                        <span class="sit-kanban-card__date" >01 Jan</span>
                     </div>
                 </div>
 
@@ -124,21 +124,21 @@
                  aria-label="Resolved column" role="list">
 
                 <!-- Thymeleaf cards -->
-                <div th:each="issue : ${resolvedIssues}"
+                <div 
                      class="sit-kanban-card sit-kanban-card--resolved"
                      draggable="true"
-                     th:attr="data-id=${issue.id},data-status='RESOLVED'"
+                     
                      role="listitem">
                     <div class="sit-kanban-card__top">
-                        <span class="sit-kanban-card__id" th:text="'#' + ${issue.id}">#001</span>
-                        <span class="sit-kanban-card__upvotes" th:text="'▲ ' + ${issue.upvotes}">▲ 0</span>
+                        <span class="sit-kanban-card__id" >#001</span>
+                        <span class="sit-kanban-card__upvotes" >▲ 0</span>
                     </div>
-                    <h4 class="sit-kanban-card__title" th:text="${issue.category}">Category</h4>
-                    <p class="sit-kanban-card__location">📍 <span th:text="${issue.location}">Location</span></p>
-                    <p class="sit-kanban-card__desc" th:text="${issue.description}">Description</p>
+                    <h4 class="sit-kanban-card__title" >Category</h4>
+                    <p class="sit-kanban-card__location">📍 <span >Location</span></p>
+                    <p class="sit-kanban-card__desc" >Description</p>
                     <div class="sit-kanban-card__footer">
-                        <span class="sit-kanban-card__reporter" th:text="${issue.reporterName}">Student</span>
-                        <span class="sit-kanban-card__date" th:text="${#temporals.format(issue.createdAt,'dd MMM')}">01 Jan</span>
+                        <span class="sit-kanban-card__reporter" >Student</span>
+                        <span class="sit-kanban-card__date" >01 Jan</span>
                     </div>
                 </div>
 
@@ -186,8 +186,8 @@
 
 <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<script src="../../static/js/shared/toast.js"        th:src="@{/js/shared/toast.js}"></script>
-<script src="../../static/js/shared/image-upload.js" th:src="@{/js/shared/image-upload.js}"></script>
-<script src="../../static/js/kanban-drag-drop.js"   th:src="@{/js/kanban-drag-drop.js}"></script>
+<script src="../../static/js/shared/toast.js"        ></script>
+<script src="../../static/js/shared/image-upload.js" ></script>
+<script src="../../static/js/kanban-drag-drop.js"   ></script>
 </body>
 </html>

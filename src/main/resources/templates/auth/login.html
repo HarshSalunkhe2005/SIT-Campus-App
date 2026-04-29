@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Login</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css"       th:href="@{/css/shared/base.css}">
-    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
-    <link rel="stylesheet" href="../../static/css/auth/login.css"        th:href="@{/css/auth/login.css}">
+    <link rel="stylesheet" href="../../static/css/shared/base.css"       >
+    <link rel="stylesheet" href="../../static/css/shared/components.css" >
+    <link rel="stylesheet" href="../../static/css/auth/login.css"        >
 </head>
 <body>
     <main class="sit-split-layout">
         
         <section class="sit-brand-pane">
             <div class="sit-brand-content">
-                <img src="../../static/images/Symlogo333.jpg" th:src="@{/images/Symlogo333.jpg}" alt="SIT Pune Logo" class="sit-brand-logo">
+                <img src="../../static/images/Symlogo333.jpg"  alt="SIT Pune Logo" class="sit-brand-logo">
                 <h1 class="sit-brand-title">SIT Pune</h1>
                 <h2 class="sit-brand-subtitle">Campus App</h2>
                 <p class="sit-brand-description">A transparent, high-speed portal to report and track infrastructure issues across the campus.</p>
@@ -24,7 +24,7 @@
             <div class="sit-auth-card">
                 <h3 class="sit-auth-card__header">Login to Your Portal</h3>
                 
-                <form class="sit-auth-form" th:action="@{/login}" method="POST">
+                <form class="sit-auth-form"  method="POST">
                     
                     <div class="sit-input-group">
                         <label for="email" class="sit-input-label">SIT Email Address</label>
@@ -57,7 +57,7 @@
 
                 <div class="sit-auth-footer">
                     <p class="sit-auth-footer__text">New Student?</p>
-                    <a th:href="@{/auth/verify-prn}" href="verify-prn.html" class="sit-btn-secondary">Verify PRN & Setup Account</a>
+                    <a  href="verify-prn.html" class="sit-btn-secondary">Verify PRN & Setup Account</a>
                 </div>
             </div>
         </section>
