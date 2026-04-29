@@ -11,6 +11,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import com.sit.campusbackend.auth.security.JwtUtil;
 
 
 import java.util.Map;
@@ -26,7 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *  - set-password  → BCrypt encodes before persisting
  *  - login         → BCrypt matches() — never plain-text compare
  *
- * TODO: replace role strings with JWT tokens once JwtUtil is complete.
+ *
+ * JWT tokens are now fully integrated.
  */
 @RestController
 @RequestMapping("/auth")
@@ -37,6 +39,7 @@ public class AuthController {
     private final AdminRepository       adminRepository;
     private final JavaMailSender        mailSender;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtil               jwtUtil;
 
     /** In-memory OTP store. Keyed by email. Thread-safe. */
     private final Map<String, String> otpStorage = new ConcurrentHashMap<>();
@@ -44,11 +47,13 @@ public class AuthController {
     public AuthController(StudentRepository studentRepository,
                           AdminRepository adminRepository,
                           JavaMailSender mailSender,
-                          BCryptPasswordEncoder passwordEncoder) {
+                          BCryptPasswordEncoder passwordEncoder,
+                          JwtUtil jwtUtil) {
         this.studentRepository = studentRepository;
         this.adminRepository   = adminRepository;
         this.mailSender        = mailSender;
         this.passwordEncoder   = passwordEncoder;
+        this.jwtUtil           = jwtUtil;
     }
 
     // ── Dev helper ────────────────────────────────────────────────────────────
@@ -179,8 +184,7 @@ public class AuthController {
      *
      * Checks admins table first, then students table.
      * Returns: { "role": "ADMIN"|"STUDENT", "email": "..." }
-     *
-     * TODO: once JwtUtil is complete, add "token" to response.
+     * Returns: { "role": "ADMIN"|"STUDENT", "email": "...", "token": "..." }
      */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> body) {
@@ -203,7 +207,11 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("error", "Invalid credentials"));
             }
-            return ResponseEntity.ok(Map.of("role", "ADMIN", "email", email));
+            return ResponseEntity.ok(Map.of(
+                    "role", "ADMIN",
+                    "email", email,
+                    "token", jwtUtil.generateToken(email, "ADMIN")
+            ));
         }
 
         // 2. Check student table
@@ -222,7 +230,11 @@ public class AuthController {
                     .body(Map.of("error", "Invalid password"));
         }
 
-        return ResponseEntity.ok(Map.of("role", "STUDENT", "email", email));
+        return ResponseEntity.ok(Map.of(
+                "role", "STUDENT",
+                "email", email,
+                "token", jwtUtil.generateToken(email, "STUDENT")
+        ));
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────

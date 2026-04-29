@@ -44,37 +44,30 @@ public class JwtUtil {
      * </pre>
      */
     public String generateToken(String email, String role) {
-        // TODO: replace with real jjwt implementation (see Javadoc above)
-        return "JWT_PLACEHOLDER_FOR_" + role + "_" + email;
+        return io.jsonwebtoken.Jwts.builder()
+            .setSubject(email)
+            .claim("role", role)
+            .setIssuedAt(new java.util.Date())
+            .setExpiration(new java.util.Date(System.currentTimeMillis() + expiryMs))
+            .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes()), io.jsonwebtoken.SignatureAlgorithm.HS256)
+            .compact();
     }
 
-    /**
-     * Validate a JWT and return the embedded subject (email).
-     *
-     * @param token JWT from the Authorization header
-     * @return email embedded in the token
-     *
-     * TODO:
-     * <pre>
-     * return Jwts.parserBuilder()
-     *     .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
-     *     .build()
-     *     .parseClaimsJws(token)
-     *     .getBody()
-     *     .getSubject();
-     * </pre>
-     */
     public String validateAndGetEmail(String token) {
-        throw new UnsupportedOperationException(
-            "JWT validation not yet implemented — add jjwt dependency first.");
+        return io.jsonwebtoken.Jwts.parserBuilder()
+            .setSigningKey(io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes()))
+            .build()
+            .parseClaimsJws(token)
+            .getBody()
+            .getSubject();
     }
 
-    /**
-     * Extract the role claim from a validated token.
-     * TODO: implement after adding jjwt.
-     */
     public String extractRole(String token) {
-        throw new UnsupportedOperationException(
-            "JWT role extraction not yet implemented — add jjwt dependency first.");
+        return io.jsonwebtoken.Jwts.parserBuilder()
+            .setSigningKey(io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes()))
+            .build()
+            .parseClaimsJws(token)
+            .getBody()
+            .get("role", String.class);
     }
 }

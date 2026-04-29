@@ -33,9 +33,7 @@ public class DepartmentController {
      * Authenticates a department using email + BCrypt password.
      * Body: { "email": "it@sitpune.edu.in", "password": "dept@123" }
      * Response: { "role": "DEPARTMENT", "departmentId": 2,
-     *             "departmentName": "IT Department", "token": null }
-     *
-     * TODO: once JwtUtil is complete, token will contain a signed JWT.
+     *             "departmentName": "IT Department", "token": "jwt.token.here" }
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {

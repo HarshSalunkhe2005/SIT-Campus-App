@@ -14,6 +14,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.sit.campusbackend.auth.security.JwtUtil;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,17 +38,20 @@ public class ComplaintService {
     private final StudentRepository     studentRepository;
     private final JavaMailSender        mailSender;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtil               jwtUtil;
 
     public ComplaintService(ComplaintRepository complaintRepository,
                             DepartmentRepository departmentRepository,
                             StudentRepository studentRepository,
                             JavaMailSender mailSender,
-                            BCryptPasswordEncoder passwordEncoder) {
+                            BCryptPasswordEncoder passwordEncoder,
+                            JwtUtil jwtUtil) {
         this.complaintRepository  = complaintRepository;
         this.departmentRepository = departmentRepository;
         this.studentRepository    = studentRepository;
         this.mailSender           = mailSender;
         this.passwordEncoder      = passwordEncoder;
+        this.jwtUtil              = jwtUtil;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -190,8 +195,7 @@ public class ComplaintService {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
-        // TODO: replace null token with jwtUtil.generateToken(email, "DEPARTMENT")
-        return new LoginResponse("DEPARTMENT", dept.getId(), dept.getName(), null);
+        return new LoginResponse("DEPARTMENT", dept.getId(), dept.getName(), jwtUtil.generateToken(email, "DEPARTMENT"));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
