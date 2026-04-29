@@ -138,8 +138,8 @@
 
         const afterCard = getDragAfterCard(body, e.clientY);
 
-        /* Moves to IN_PROGRESS or RESOLVED require a proof image */
-        if (newStatus === 'IN_PROGRESS' || newStatus === 'RESOLVED') {
+        /* Moves to RESOLVED require a proof image */
+        if (newStatus === 'RESOLVED') {
             pendingCard = dragCard;
             pendingNewStatus = newStatus;
             pendingOldStatus = oldStatus;
