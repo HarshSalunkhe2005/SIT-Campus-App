@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" >
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Student Dashboard</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css" th:href="@{/css/shared/base.css}">
-    <link rel="stylesheet" href="../../static/css/shared/navbar.css" th:href="@{/css/shared/navbar.css}">
-    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
-    <link rel="stylesheet" href="../../static/css/student/dashboard.css" th:href="@{/css/student/dashboard.css}">
+    <link rel="stylesheet" href="../../static/css/shared/base.css" >
+    <link rel="stylesheet" href="../../static/css/shared/navbar.css" >
+    <link rel="stylesheet" href="../../static/css/shared/components.css" >
+    <link rel="stylesheet" href="../../static/css/student/dashboard.css" >
 </head>
 
 <body>
 
     <!-- NAVBAR: th:replace runs on server; inner div is the live-server fallback -->
-    <div th:replace="~{fragments/navbar :: navbar('STUDENT')}">
+    <div >
         <nav class="navbar">
             <div class="navbar-container">
                 <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
@@ -40,7 +40,7 @@
         <!-- PAGE HEADER -->
         <div class="sit-page-header">
             <div>
-                <h2 class="sit-page-title">Welcome back, <span th:text="${userName}"
+                <h2 class="sit-page-title">Welcome back, <span 
                         class="sit-highlight">Student</span> 👋</h2>
                 <p class="sit-page-subtitle">Track and manage your campus issue reports.</p>
             </div>
@@ -50,22 +50,22 @@
         <section class="sit-stats-container" aria-label="Issue Statistics">
             <div class="sit-stat-card sit-stat-card--total">
                 <div class="sit-stat-icon">📋</div>
-                <div class="sit-stat-number" th:text="${totalReports}">0</div>
+                <div class="sit-stat-number" >0</div>
                 <div class="sit-stat-label">Total Reports</div>
             </div>
             <div class="sit-stat-card sit-stat-card--pending">
                 <div class="sit-stat-icon">⏳</div>
-                <div class="sit-stat-number" th:text="${pendingReports}">0</div>
+                <div class="sit-stat-number" >0</div>
                 <div class="sit-stat-label">Pending</div>
             </div>
             <div class="sit-stat-card sit-stat-card--inprogress">
                 <div class="sit-stat-icon">🔧</div>
-                <div class="sit-stat-number" th:text="${inProgressReports}">0</div>
+                <div class="sit-stat-number" >0</div>
                 <div class="sit-stat-label">In Progress</div>
             </div>
             <div class="sit-stat-card sit-stat-card--resolved">
                 <div class="sit-stat-icon">✅</div>
-                <div class="sit-stat-number" th:text="${resolvedReports}">0</div>
+                <div class="sit-stat-number" >0</div>
                 <div class="sit-stat-label">Resolved</div>
             </div>
         </section>
@@ -92,7 +92,7 @@
             <div class="sit-card">
                 <h3 class="sit-card__title">Report a Campus Issue</h3>
 
-                <form id="reportForm" class="sit-report-form" th:action="@{/student/report}" action="#" method="POST"
+                <form id="reportForm" class="sit-report-form"  action="#" method="POST"
                     enctype="multipart/form-data">
 
                     <div class="sit-form-grid">
@@ -204,26 +204,26 @@
                 <div class="sit-issues-list" id="feedList">
 
                     <!-- Thymeleaf: all campus issues -->
-                    <div th:each="issue : ${allIssues}" class="sit-issue-card"
-                        th:attr="data-status=${issue.status},data-category=${issue.category},data-date=${issue.createdAt},data-upvotes=${issue.upvotes}">
+                    <div  class="sit-issue-card"
+                        >
                         <div class="sit-issue-card__left">
                             <span class="sit-status-badge"
-                                th:classappend="'sit-status-badge--' + ${#strings.toLowerCase(issue.status)}"
-                                th:text="${issue.status}">STATUS</span>
-                            <h4 class="sit-issue-card__title" th:text="${issue.category}">Category</h4>
+                                
+                                >STATUS</span>
+                            <h4 class="sit-issue-card__title" >Category</h4>
                             <p class="sit-issue-card__location">
-                                📍 <span th:text="${issue.location}">Location</span>
+                                📍 <span >Location</span>
                             </p>
-                            <p class="sit-issue-card__desc" th:text="${issue.description}">Description</p>
+                            <p class="sit-issue-card__desc" >Description</p>
                             <small class="sit-issue-card__date">
-                                Reported by <strong th:text="${issue.reporterName}">Student</strong>
-                                · <span th:text="${#temporals.format(issue.createdAt,'dd MMM yyyy')}">01 Jan 2025</span>
+                                Reported by <strong >Student</strong>
+                                · <span >01 Jan 2025</span>
                             </small>
                         </div>
                         <div class="sit-issue-card__right">
-                            <button class="sit-upvote-btn" th:attr="data-id=${issue.id}" aria-label="Upvote this issue">
+                            <button class="sit-upvote-btn"  aria-label="Upvote this issue">
                                 <span class="sit-upvote-icon">▲</span>
-                                <span class="sit-upvote-count" th:text="${issue.upvotes}">0</span>
+                                <span class="sit-upvote-count" >0</span>
                             </button>
                         </div>
                     </div>
@@ -261,24 +261,24 @@
                 <div class="sit-issues-list" id="issuesList">
 
                     <!-- ── Thymeleaf: real data rows ── -->
-                    <div th:each="issue : ${issues}" class="sit-issue-card"
-                        th:attr="data-status=${issue.status},data-date=${issue.createdAt},data-upvotes=${issue.upvotes}">
+                    <div  class="sit-issue-card"
+                        >
                         <div class="sit-issue-card__left">
                             <span class="sit-status-badge"
-                                th:classappend="'sit-status-badge--' + ${#strings.toLowerCase(issue.status)}"
-                                th:text="${issue.status}">STATUS</span>
-                            <h4 class="sit-issue-card__title" th:text="${issue.category}">Category</h4>
+                                
+                                >STATUS</span>
+                            <h4 class="sit-issue-card__title" >Category</h4>
                             <p class="sit-issue-card__location">
-                                📍 <span th:text="${issue.location}">Location</span>
+                                📍 <span >Location</span>
                             </p>
-                            <p class="sit-issue-card__desc" th:text="${issue.description}">Description</p>
+                            <p class="sit-issue-card__desc" >Description</p>
                             <small class="sit-issue-card__date"
-                                th:text="${#temporals.format(issue.createdAt,'dd MMM yyyy')}">01 Jan 2025</small>
+                                >01 Jan 2025</small>
                         </div>
                         <div class="sit-issue-card__right">
-                            <button class="sit-upvote-btn" th:attr="data-id=${issue.id}" aria-label="Upvote this issue">
+                            <button class="sit-upvote-btn"  aria-label="Upvote this issue">
                                 <span class="sit-upvote-icon">▲</span>
-                                <span class="sit-upvote-count" th:text="${issue.upvotes}">0</span>
+                                <span class="sit-upvote-count" >0</span>
                             </button>
                         </div>
                     </div>
@@ -299,9 +299,9 @@
     <!-- TOAST -->
     <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <script src="../../static/js/shared/toast.js"        th:src="@{/js/shared/toast.js}"></script>
-    <script src="../../static/js/shared/image-upload.js" th:src="@{/js/shared/image-upload.js}"></script>
-    <script src="../../static/js/student/dashboard.js"   th:src="@{/js/student/dashboard.js}"></script>
+    <script src="../../static/js/shared/toast.js"        ></script>
+    <script src="../../static/js/shared/image-upload.js" ></script>
+    <script src="../../static/js/student/dashboard.js"   ></script>
 </body>
 
 </html>

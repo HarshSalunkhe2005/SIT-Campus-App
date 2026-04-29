@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Manage Users</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css"       th:href="@{/css/shared/base.css}">
-    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     th:href="@{/css/shared/navbar.css}">
-    <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
+    <link rel="stylesheet" href="../../static/css/shared/base.css"       >
+    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     >
+    <link rel="stylesheet" href="../../static/css/shared/components.css" >
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: navbar('ADMIN')}">
+    <div >
         <nav class="navbar">
             <div class="navbar-container">
                 <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
@@ -33,7 +33,7 @@
                 <h2 class="sit-page-title">Manage Users</h2>
                 <p class="sit-page-subtitle">View and manage student and staff accounts.</p>
             </div>
-            <a href="hub.html" th:href="@{/admin/hub}" class="sit-btn sit-btn--outline">Back to Hub</a>
+            <a href="hub.html"  class="sit-btn sit-btn--outline">Back to Hub</a>
         </div>
         <div class="sit-card">
             <p style="text-align: center; padding: 3rem; color: #666;">User management interface coming soon.</p>

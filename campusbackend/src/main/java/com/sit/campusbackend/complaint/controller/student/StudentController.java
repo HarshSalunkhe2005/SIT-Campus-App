@@ -4,54 +4,49 @@ import com.sit.campusbackend.complaint.dto.ComplaintRequest;
 import com.sit.campusbackend.complaint.dto.ComplaintResponse;
 import com.sit.campusbackend.complaint.service.ComplaintService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-/**
- * Student-facing endpoints.
- * Base path: /student
- */
 @RestController
 @RequestMapping("/student")
 @CrossOrigin(origins = "http://127.0.0.1:5500")
 public class StudentController {
 
     private final ComplaintService complaintService;
+    private final com.sit.campusbackend.auth.security.JwtUtil jwtUtil;
 
-    public StudentController(ComplaintService complaintService) {
+    public StudentController(ComplaintService complaintService, com.sit.campusbackend.auth.security.JwtUtil jwtUtil) {
         this.complaintService = complaintService;
+        this.jwtUtil = jwtUtil;
     }
 
-    /**
-     * POST /student/complaint
-     *
-     * Submit a new complaint. All @NotBlank / @Size / @Email constraints
-     * in ComplaintRequest are enforced by @Valid.
-     *
-     * Body: { email, title, description, imageUrl?, priority? }
-     * Returns: 201 Created with full ComplaintResponse.
-     */
-    @PostMapping("/complaint")
+    @PostMapping("/report")
     public ResponseEntity<ComplaintResponse> submitComplaint(
-            @Valid @RequestBody ComplaintRequest request) {
+            @Valid @RequestPart("complaint") ComplaintRequest request,
+            @RequestPart("image") MultipartFile image,
+            @RequestHeader("Authorization") String token) {
 
-        ComplaintResponse response = complaintService.createComplaint(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        String email = extractEmailFromToken(token);
+        return ResponseEntity.ok(complaintService.createComplaint(request, image, email));
     }
 
-    /**
-     * GET /student/complaints/{email}
-     *
-     * Fetch all complaints submitted by the given student.
-     * Returns: 200 OK with list (empty list when no complaints exist).
-     */
-    @GetMapping("/complaints/{email}")
+    @GetMapping("/my-reports")
     public ResponseEntity<List<ComplaintResponse>> getMyComplaints(
-            @PathVariable String email) {
+            @RequestHeader("Authorization") String token) {
 
+        String email = extractEmailFromToken(token);
         return ResponseEntity.ok(complaintService.getStudentComplaints(email));
+    }
+
+
+
+    private String extractEmailFromToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid or missing Authorization header");
+        }
+        return jwtUtil.validateAndGetEmail(authHeader.substring(7));
     }
 }
