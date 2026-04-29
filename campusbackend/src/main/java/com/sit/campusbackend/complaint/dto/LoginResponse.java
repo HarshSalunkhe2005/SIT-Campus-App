@@ -17,8 +17,7 @@ public class LoginResponse {
     private String departmentName;
 
     /**
-     * Placeholder for future JWT token.
-     * TODO: populate once JwtUtil is complete.
+     * JWT token for the authenticated department.
      */
     private String token;
 }
