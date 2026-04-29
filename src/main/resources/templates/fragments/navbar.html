@@ -31,20 +31,18 @@
             </div>
 
             <!-- Direct Logout Button -->
-            <form th:action="@{/logout}" action="/logout" method="POST" style="display:flex; align-items:center;">
-                <button type="submit" class="logout-icon-btn" title="Logout">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                </button>
-            </form>
+            <button type="button" class="logout-icon-btn" title="Logout" onclick="handleLogout()" style="display:flex; align-items:center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </button>
 
             <!-- User Profile Dropdown -->
             <div class="user-dropdown">
                 <button class="user-button">
-                    <img src="/images/default-avatar.png" alt="User" class="user-avatar">
+                    <img src="/images/default-avatar.png" alt="User" class="user-avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff'">
                     <span class="user-name" th:text="${userName}">User</span>
                     <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <polyline points="6 9 12 15 18 9"></polyline>
@@ -54,14 +52,22 @@
                     <a th:href="${role == 'ADMIN' ? '/admin/hub' : role == 'DEPT' ? '/dept/kanban' : '/student/dashboard'}"
                        class="dropdown-item">Dashboard</a>
                     <hr class="dropdown-divider">
-                    <form th:action="@{/logout}" action="/logout" method="POST" style="display:inline;">
-                        <button type="submit" class="dropdown-item logout-btn">Logout</button>
-                    </form>
+                    <button type="button" class="dropdown-item logout-btn" onclick="handleLogout()">Logout</button>
                 </div>
             </div>
         </div>
     </div>
 </nav>
+
+<script>
+    function handleLogout() {
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('departmentId');
+        window.location.href = '/auth/login.html'; 
+    }
+</script>
 
 </body>
 </html>

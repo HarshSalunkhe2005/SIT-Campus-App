@@ -30,6 +30,12 @@
             <p class="sit-page-subtitle">Monitor all campus reports and department performance.</p>
         </div>
         <div class="sit-header-actions">
+            <!-- Portal Previews -->
+            <a href="/student/dashboard" th:href="@{/student/dashboard}"
+               class="sit-btn sit-btn--outline" target="_blank" title="Preview Student Portal">🎓 Student Portal</a>
+            <a href="/dept/kanban" th:href="@{/dept/kanban}"
+               class="sit-btn sit-btn--outline" target="_blank" title="Preview Dept Kanban">🏢 Dept Portal</a>
+            <!-- Admin Actions -->
             <a href="/admin/departments" th:href="@{/admin/departments}"
                class="sit-btn sit-btn--outline">Manage Depts</a>
             <a href="/admin/users" th:href="@{/admin/users}"
