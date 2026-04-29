@@ -9,14 +9,31 @@
     <link rel="stylesheet" href="../../static/css/shared/components.css" th:href="@{/css/shared/components.css}">
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: navbar('ADMIN')}"></div>
+    <div th:replace="~{fragments/navbar :: navbar('ADMIN')}">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
+                <div class="navbar-title"><h1>Manage Departments</h1></div>
+                <div class="navbar-right">
+                    <span class="user-name">Admin</span>
+                    <a href="../auth/login.html" class="logout-icon-btn" title="Logout" style="margin-left: 1rem; color: var(--danger-color); display: flex; align-items: center;" onclick="localStorage.clear();">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
     <main class="sit-admin-main" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
         <div class="sit-page-header">
             <div>
                 <h2 class="sit-page-title">Manage Departments</h2>
                 <p class="sit-page-subtitle">Add or edit campus departments and their heads.</p>
             </div>
-            <a href="/admin/hub" th:href="@{/admin/hub}" class="sit-btn sit-btn--outline">Back to Hub</a>
+            <a href="hub.html" th:href="@{/admin/hub}" class="sit-btn sit-btn--outline">Back to Hub</a>
         </div>
         <div class="sit-card">
             <p style="text-align: center; padding: 3rem; color: #666;">Department management interface coming soon.</p>
