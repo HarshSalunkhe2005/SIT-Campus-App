@@ -1,8 +1,7 @@
 package com.sit.campusbackend.auth.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.sit.campusbackend.auth.entity.Student;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
