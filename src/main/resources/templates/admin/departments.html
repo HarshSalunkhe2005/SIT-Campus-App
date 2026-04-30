@@ -57,38 +57,16 @@
                     </tr>
                 </thead>
                 <tbody id="deptTableBody">
-                    <tr>
-                        <td>1</td>
-                        <td><strong>Electrical Maintenance</strong></td>
-                        <td><span class="dept-type-badge">Electrical</span></td>
-                        <td>elec@sit.edu</td>
-                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td><strong>IT Support Desk</strong></td>
-                        <td><span class="dept-type-badge">IT</span></td>
-                        <td>it@sit.edu</td>
-                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td><strong>Campus Cleaning</strong></td>
-                        <td><span class="dept-type-badge">Cleaning</span></td>
-                        <td>cleaning@sit.edu</td>
-                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td><strong>Plumbing Services</strong></td>
-                        <td><span class="dept-type-badge">Plumbing</span></td>
-                        <td>plumbing@sit.edu</td>
-                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Edit</button></td>
-                    </tr>
+                    <!-- Dynamic depts -->
                 </tbody>
             </table>
         </div>
     </main>
 
+    <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="../../static/js/shared/toast.js"       ></script>
+    <script src="../../static/js/shared/api.js"         ></script>
+    <script src="../../static/js/admin/departments.js"   ></script>
 </body>
 </html>
