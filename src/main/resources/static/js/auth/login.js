@@ -31,10 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Save the JWT token
             localStorage.setItem('jwt_token', response.token);
             
-            // Save user details for the UI (optional but helpful)
-            localStorage.setItem('user_name', response.name);
+            // Save user details for the UI
+            const nameToSave = response.departmentName || response.name || response.first_name || 'User';
+            const idToSave = response.departmentId || response.userId || '';
+            
+            localStorage.setItem('user_name', nameToSave);
             localStorage.setItem('user_role', response.role);
-            localStorage.setItem('user_id', response.userId);
+            localStorage.setItem('user_id', idToSave);
 
             showToast('Login successful! Redirecting...', 'success');
 
