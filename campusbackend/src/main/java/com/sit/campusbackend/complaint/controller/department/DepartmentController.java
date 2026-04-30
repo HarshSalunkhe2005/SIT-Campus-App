@@ -32,4 +32,12 @@ public class DepartmentController {
             @Valid @RequestBody ResolveRequest request) {
         return ResponseEntity.ok(complaintService.resolveComplaint(complaintId, request.resolutionNotes()));
     }
+
+    @PutMapping("/status")
+    public ResponseEntity<ComplaintResponse> updateStatus(
+            @Valid @RequestBody com.sit.campusbackend.complaint.dto.StatusUpdateRequest request) {
+        com.sit.campusbackend.complaint.entity.ComplaintStatus statusEnum = 
+            com.sit.campusbackend.complaint.entity.ComplaintStatus.valueOf(request.status().toUpperCase());
+        return ResponseEntity.ok(complaintService.updateStatus(request.complaintId(), statusEnum));
+    }
 }

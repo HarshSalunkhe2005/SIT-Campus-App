@@ -243,17 +243,12 @@
         }
 
         try {
-            // Note: The backend endpoint /dept/{id}/resolve expects JSON payload { resolutionNotes }
-            // For IN_PROGRESS or PENDING, since the user didn't ask to create endpoints for them, 
-            // and the endpoint is specifically /dept/{complaintId}/resolve, we handle RESOLVED:
-            if (newStatus === 'RESOLVED') {
-                const res = await api.post(`/dept/${id}/resolve`, {
-                    resolutionNotes: "Resolved via Kanban board"
-                });
-                showToast(`Issue #${id} → ${newStatus.replace('_', ' ')}`, 'success');
-            } else {
-                showToast(`Note: Issue #${id} moved to ${newStatus}. (Backend expects resolution only)`, 'success');
-            }
+            // Updated to use the generic /dept/status endpoint for all moves
+            await api.put(`/dept/status`, {
+                complaintId: id,
+                status: newStatus
+            });
+            showToast(`Issue #${id} → ${newStatus.replace('_', ' ')}`, 'success');
         } catch(error) {
             showToast(`Failed to update #${id}: ` + error.message, 'error');
             revertCard(card, oldStatus);

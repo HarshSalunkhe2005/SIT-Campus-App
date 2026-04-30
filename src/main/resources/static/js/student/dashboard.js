@@ -132,7 +132,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         feedList.innerHTML = '<p class="sit-loading">Loading campus feed...</p>';
         try {
             const reports = await api.get('/student/all-reports');
-            renderIssues(feedList, reports, 'feedEmptyState', true);
+            // Filter out resolved issues from the global feed
+            const activeReports = reports.filter(r => r.status !== 'RESOLVED');
+            renderIssues(feedList, activeReports, 'feedEmptyState', true);
         } catch (err) {
             feedList.innerHTML = '<p class="sit-error">Failed to load feed.</p>';
         }
@@ -191,10 +193,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     const id = btn.dataset.id;
+                    
+                    // Client-side prevention for multiple clicks
+                    if (localStorage.getItem(`upvoted_${id}`)) {
+                        showToast('You have already upvoted this issue.', 'error');
+                        return;
+                    }
+
                     try {
                         const updated = await api.post(`/student/upvote/${id}`);
                         btn.querySelector('.sit-upvote-count').textContent = updated.upvoteCount;
                         btn.classList.add('sit-upvote-btn--active');
+                        localStorage.setItem(`upvoted_${id}`, 'true');
                         showToast('Upvoted!', 'success');
                     } catch (err) {
                         showToast('Upvote failed.', 'error');
