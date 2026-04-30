@@ -65,4 +65,26 @@ public class AdminController {
         complaintService.deleteComplaint(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/user/{email}/toggle")
+    public ResponseEntity<Void> toggleUserStatus(@PathVariable String email) {
+        complaintService.toggleUserStatus(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/dept")
+    public ResponseEntity<com.sit.campusbackend.complaint.entity.Department> createDept(@RequestBody com.sit.campusbackend.complaint.entity.Department dept) {
+        return ResponseEntity.ok(complaintService.saveDepartment(dept));
+    }
+
+    @PutMapping("/dept/{id}")
+    public ResponseEntity<com.sit.campusbackend.complaint.entity.Department> updateDept(@PathVariable Long id, @RequestBody com.sit.campusbackend.complaint.entity.Department dept) {
+        return ResponseEntity.ok(complaintService.updateDepartment(id, dept));
+    }
+
+    @DeleteMapping("/user/{email}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String email) {
+        complaintService.deleteStudent(email);
+        return ResponseEntity.ok().build();
+    }
 }

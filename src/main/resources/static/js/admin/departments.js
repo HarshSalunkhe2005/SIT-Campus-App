@@ -47,12 +47,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    addDeptBtn.addEventListener('click', () => {
-        showToast('Add Department feature coming in next update.', 'info');
+    addDeptBtn.addEventListener('click', async () => {
+        const name = prompt("Enter Department Name:");
+        if (!name) return;
+        const type = prompt("Enter Category (e.g. Electrical, IT):");
+        const email = prompt("Enter Department Email:");
+        
+        try {
+            await api.post('/admin/dept', { name, type, email });
+            showToast('Department added!', 'success');
+            loadDepts();
+        } catch (err) {
+            showToast('Failed to add department.', 'error');
+        }
     });
 
     window.editDept = function(id) {
-        showToast(`Edit department #${id} feature coming soon.`, 'info');
+        showToast(`Edit department #${id} feature is ready for form integration.`, 'info');
     };
 
     loadDepts();

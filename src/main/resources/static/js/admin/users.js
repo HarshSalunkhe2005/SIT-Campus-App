@@ -41,9 +41,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td>${u.isVerified ? '✅ Verified' : '❌ Pending'}</td>
                     <td>
                         <button class="sit-btn sit-btn--ghost" 
-                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);"
+                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--primary-color);"
                                 onclick="toggleUserStatus('${u.email}')">
                             ${u.isVerified ? 'Disable' : 'Enable'}
+                        </button>
+                        <button class="sit-btn sit-btn--ghost" 
+                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);"
+                                onclick="deleteUser('${u.email}')">
+                            Delete
                         </button>
                     </td>
                 </tr>
@@ -72,8 +77,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (e.key === 'Enter') performSearch();
     });
 
-    window.toggleUserStatus = function(email) {
-        showToast(`User status toggle for ${email} coming in next update.`, 'info');
+    window.toggleUserStatus = async function(email) {
+        try {
+            await api.post(`/admin/user/${email}/toggle`);
+            showToast(`Status toggled for ${email}`, 'success');
+            loadUsers(); // Reload to show new status
+        } catch (err) {
+            showToast('Failed to toggle status.', 'error');
+        }
+    };
+
+    window.deleteUser = async function(email) {
+        if (!confirm(`Permanently delete user ${email}?`)) return;
+        try {
+            await api.request(`/admin/user/${email}`, { method: 'DELETE' });
+            showToast('User deleted.', 'success');
+            loadUsers();
+        } catch (err) {
+            showToast('Failed to delete user.', 'error');
+        }
     };
 
     loadUsers();

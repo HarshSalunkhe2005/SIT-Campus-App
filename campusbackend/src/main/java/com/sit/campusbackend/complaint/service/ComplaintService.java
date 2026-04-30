@@ -116,6 +116,7 @@ public class ComplaintService {
         return toResponse(complaintRepository.save(complaint));
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public DashboardStatsResponse getDashboardStats() {
         return new DashboardStatsResponse(
             complaintRepository.count(),
@@ -138,6 +139,39 @@ public class ComplaintService {
 
     public List<Department> getAllDepartments() {
         return departmentRepository.findAll();
+    }
+
+    public void toggleUserStatus(String email) {
+        com.sit.campusbackend.auth.entity.Student student = studentRepository.findById(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        student.setIsVerified(!student.getIsVerified());
+        studentRepository.save(student);
+    }
+
+    public com.sit.campusbackend.complaint.entity.Department saveDepartment(com.sit.campusbackend.complaint.entity.Department dept) {
+        if (dept.getPasswordHash() == null) {
+            dept.setPasswordHash(new BCryptPasswordEncoder().encode("sit123"));
+        }
+        return departmentRepository.save(dept);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteStudent(String email) {
+        if (!studentRepository.existsById(email)) {
+            throw new ResourceNotFoundException("Student not found: " + email);
+        }
+        // First delete their complaints (due to foreign key)
+        complaintRepository.deleteByStudentEmail(email);
+        studentRepository.deleteById(email);
+    }
+
+    public com.sit.campusbackend.complaint.entity.Department updateDepartment(Long id, com.sit.campusbackend.complaint.entity.Department updated) {
+        com.sit.campusbackend.complaint.entity.Department existing = departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Dept not found"));
+        existing.setName(updated.getName());
+        existing.setType(updated.getType());
+        existing.setEmail(updated.getEmail());
+        return departmentRepository.save(existing);
     }
 
     public ComplaintResponse resolveComplaint(Long complaintId, String resolvedImageUrl) {
