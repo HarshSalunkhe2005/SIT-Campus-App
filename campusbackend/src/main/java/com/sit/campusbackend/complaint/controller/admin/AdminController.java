@@ -82,6 +82,12 @@ public class AdminController {
         return ResponseEntity.ok(complaintService.updateDepartment(id, dept));
     }
 
+    @DeleteMapping("/dept/{id}")
+    public ResponseEntity<Void> deleteDept(@PathVariable Long id) {
+        complaintService.deleteDepartment(id);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/user/{email}")
     public ResponseEntity<Void> deleteUser(@PathVariable String email) {
         complaintService.deleteStudent(email);

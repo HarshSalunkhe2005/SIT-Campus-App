@@ -38,8 +38,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td>${d.email}</td>
                     <td>
                         <button class="sit-btn sit-btn--ghost" 
-                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem;"
+                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--primary-color);"
                                 onclick="editDept(${d.id})">Edit</button>
+                        <button class="sit-btn sit-btn--ghost" 
+                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);"
+                                onclick="deleteDept(${d.id})">Delete</button>
                     </td>
                 </tr>
             `;
@@ -62,8 +65,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    window.editDept = function(id) {
-        showToast(`Edit department #${id} feature is ready for form integration.`, 'info');
+    window.editDept = async function(id) {
+        const name = prompt("New Dept Name:");
+        if (!name) return;
+        const type = prompt("New Category:");
+        const email = prompt("New Email:");
+        
+        try {
+            await api.put(`/admin/dept/${id}`, { name, type, email });
+            showToast('Department updated!', 'success');
+            loadDepts();
+        } catch (err) {
+            showToast('Failed to update department.', 'error');
+        }
+    };
+
+    window.deleteDept = async function(id) {
+        if (!confirm(`Permanently delete department #${id} and all its reports?`)) return;
+        try {
+            await api.request(`/admin/dept/${id}`, { method: 'DELETE' });
+            showToast('Department deleted.', 'success');
+            loadDepts();
+        } catch (err) {
+            showToast('Failed to delete department.', 'error');
+        }
     };
 
     loadDepts();

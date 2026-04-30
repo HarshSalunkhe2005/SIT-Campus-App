@@ -71,8 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const complaintRequest = {
                 location: formData.get('location'),
                 description: formData.get('description'),
-                // Backend detectCategory will override category based on desc keywords
-                // but we can pass it if we want to align with entity fields
+                category: formData.get('category'),
                 priority: 'MEDIUM' 
             };
 
@@ -161,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         emptyState.style.display = 'none';
 
-        issues.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Removed hardcoded sort to allow applyFilters() sorting to take effect
 
         issues.forEach(issue => {
             const dateStr = new Date(issue.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -216,4 +215,59 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initial Load
     loadStats();
+
+    /* ────────── SEARCH & FILTER LOGIC ────────── */
+    const feedFilterStatus = document.getElementById('feedFilterStatus');
+    const feedFilterCategory = document.getElementById('feedFilterCategory');
+    const feedSortBy = document.getElementById('feedSortBy');
+
+    const historyFilterStatus = document.getElementById('filterStatus');
+
+    function applyFilters(containerId, originalIssues, emptyId, showUpvote, statusFilter, categoryFilter = null, sortBy = null) {
+        let filtered = [...originalIssues];
+
+        // 1. Filter by Status
+        if (statusFilter && statusFilter.value !== 'ALL') {
+            filtered = filtered.filter(i => {
+                if (statusFilter.value === 'PENDING') return i.status === 'PENDING' || i.status === 'ASSIGNED';
+                return i.status === statusFilter.value;
+            });
+        }
+
+        // 2. Filter by Category
+        if (categoryFilter && categoryFilter.value !== 'ALL') {
+            filtered = filtered.filter(i => i.category.toUpperCase() === categoryFilter.value);
+        }
+
+        // 3. Sort
+        if (sortBy) {
+            if (sortBy.value === 'UPVOTES') {
+                filtered.sort((a, b) => (b.upvoteCount || 0) - (a.upvoteCount || 0));
+            } else if (sortBy.value === 'DATE_ASC') {
+                filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            } else {
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+        }
+
+        renderIssues(document.getElementById(containerId), filtered, emptyId, showUpvote);
+    }
+
+    // Attach listeners to Feed filters
+    [feedFilterStatus, feedFilterCategory, feedSortBy].forEach(el => {
+        if (!el) return;
+        el.addEventListener('change', async () => {
+            const reports = await api.get('/student/all-reports');
+            const activeReports = reports.filter(r => r.status !== 'RESOLVED' || feedFilterStatus.value === 'RESOLVED');
+            applyFilters('feedList', activeReports, 'feedEmptyState', true, feedFilterStatus, feedFilterCategory, feedSortBy);
+        });
+    });
+
+    // Attach listeners to History filters
+    if (historyFilterStatus) {
+        historyFilterStatus.addEventListener('change', async () => {
+            const reports = await api.get('/student/my-reports');
+            applyFilters('issuesList', reports, 'emptyState', false, historyFilterStatus);
+        });
+    }
 });

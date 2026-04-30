@@ -76,7 +76,11 @@ public class ComplaintService {
         Student student = studentRepository.findById(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + email));
 
-        String category = detectCategory(req.description());
+        // Use student-selected category if provided, otherwise detect via AI
+        String category = (req.category() != null && !req.category().isBlank()) 
+                ? formatCategory(req.category()) 
+                : detectCategory(req.description());
+
         Department dept = departmentRepository.findByType(category)
                 .orElseGet(() -> departmentRepository.findByType("General")
                         .orElseThrow(() -> new ResourceNotFoundException("No department configured for category: " + category)));
@@ -174,6 +178,16 @@ public class ComplaintService {
         return departmentRepository.save(existing);
     }
 
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteDepartment(Long id) {
+        if (!departmentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Department not found: " + id);
+        }
+        // Delete all complaints assigned to this department first
+        complaintRepository.deleteByDepartmentId(id);
+        departmentRepository.deleteById(id);
+    }
+
     public ComplaintResponse resolveComplaint(Long complaintId, String resolvedImageUrl) {
         Complaint complaint = findComplaint(complaintId);
         complaint.setResolvedImageUrl(resolvedImageUrl);
@@ -190,15 +204,24 @@ public class ComplaintService {
         return toResponse(complaintRepository.save(complaint));
     }
 
+    private String formatCategory(String raw) {
+        if (raw == null) return "General";
+        // Convert "ELECTRICAL" to "Electrical" to match DB naming
+        String s = raw.toLowerCase();
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
     String detectCategory(String description) {
         if (description == null || description.isBlank()) return "General";
         String text = description.toLowerCase();
 
-        if (containsAny(text, "fan", "light", "electricity", "switch", "socket", "power", "wiring", "bulb", "voltage")) return "Electrical";
-        if (containsAny(text, "wifi", "internet", "network", "router", "laptop", "computer", "printer", "server", "cable", "portal", "system", "connection")) return "IT";
-        if (containsAny(text, "clean", "garbage", "waste", "trash", "dirt", "sweep", "toilet", "bathroom", "dustbin", "smell", "hygiene")) return "Cleaning";
-        if (containsAny(text, "pipe", "water", "tap", "leak", "drain", "plumber", "flush", "seepage")) return "Plumbing";
-        if (containsAny(text, "hostel", "room", "bed", "mattress", "mess", "canteen", "food", "warden", "dorm")) return "Hostel";
+        if (containsAny(text, "fan", "light", "electricity", "switch", "socket", "power", "wiring", "bulb", "voltage", "electric", "ac", "air conditioner")) return "Electrical";
+        if (containsAny(text, "wifi", "internet", "network", "router", "laptop", "computer", "printer", "server", "cable", "portal", "system", "connection", "it")) return "IT";
+        if (containsAny(text, "clean", "garbage", "waste", "trash", "dirt", "sweep", "toilet", "bathroom", "dustbin", "smell", "hygiene", "floor", "cleaning", "mop")) return "Cleaning";
+        if (containsAny(text, "pipe", "water", "tap", "leak", "drain", "plumber", "flush", "seepage", "tank", "sink", "basin")) return "Plumbing";
+        if (containsAny(text, "hostel", "room", "bed", "mattress", "mess", "canteen", "food", "warden", "dorm", "lift", "elevator")) return "Hostel";
+        if (containsAny(text, "chair", "desk", "bench", "table", "door", "window", "lock", "handle", "cupboard", "almirah", "furniture", "wood")) return "Furniture";
+        if (containsAny(text, "wall", "paint", "crack", "ceiling", "floor", "tiles", "civil", "cement")) return "Civil";
 
         return "General";
     }
