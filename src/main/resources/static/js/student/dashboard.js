@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             multipartBody.append('complaint', new Blob([JSON.stringify(complaintRequest)], { type: 'application/json' }));
             multipartBody.append('image', formData.get('image'));
 
-            const response = await fetch(`${api.BASE_URL}/student/report`, {
+            const response = await fetch(`http://localhost:8080/student/report`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

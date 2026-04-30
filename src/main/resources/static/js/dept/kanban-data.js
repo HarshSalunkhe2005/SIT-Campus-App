@@ -37,8 +37,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         let counts = { PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0 };
 
         complaints.forEach(issue => {
-            const status = issue.status || 'PENDING';
-            counts[status]++;
+            let status = issue.status || 'PENDING';
+            // Map ASSIGNED to PENDING for the Kanban column display
+            if (status === 'ASSIGNED') status = 'PENDING';
+            
+            if (counts[status] !== undefined) counts[status]++;
             
             const cardHTML = `
                 <div class="sit-kanban-card ${status === 'RESOLVED' ? 'sit-kanban-card--resolved' : ''}"
