@@ -1,10 +1,9 @@
 /**
- * SIT Campus App — Admin User Management JS
+ * SIT Campus App — Admin User Management JS (Refactored)
  */
 document.addEventListener('DOMContentLoaded', async () => {
     'use strict';
 
-    // 1. Auth Guard
     const token = localStorage.getItem('jwt_token');
     if (!token || localStorage.getItem('user_role') !== 'ADMIN') {
         window.location.href = '../auth/login.html';
@@ -12,22 +11,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const userTableBody = document.getElementById('userTableBody');
+    const searchInput = document.getElementById('userSearchInput');
+    const searchBtn = document.getElementById('userSearchBtn');
+
+    let allUsers = [];
 
     async function loadUsers() {
         try {
-            const users = await api.get('/admin/users');
-            renderUsers(users);
+            allUsers = await api.get('/admin/users');
+            renderUsers(allUsers);
         } catch (err) {
-            console.error('Failed to load users', err);
             showToast('Failed to load users list.', 'error');
         }
     }
 
     function renderUsers(users) {
         userTableBody.innerHTML = '';
-        
         if (users.length === 0) {
-            userTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No users found.</td></tr>';
+            userTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No users match your search.</td></tr>';
             return;
         }
 
@@ -51,8 +52,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    /* ────────── SEARCH LOGIC ────────── */
+    function performSearch() {
+        const query = searchInput.value.toLowerCase().trim();
+        if (!query) {
+            renderUsers(allUsers);
+            return;
+        }
+        const filtered = allUsers.filter(u => 
+            (u.firstName + ' ' + u.lastName).toLowerCase().includes(query) ||
+            (u.prn && u.prn.toLowerCase().includes(query)) ||
+            u.email.toLowerCase().includes(query)
+        );
+        renderUsers(filtered);
+    }
+
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') performSearch();
+    });
+
     window.toggleUserStatus = function(email) {
-        showToast(`Management for ${email} coming in next update.`, 'info');
+        showToast(`User status toggle for ${email} coming in next update.`, 'info');
     };
 
     loadUsers();

@@ -1,10 +1,9 @@
 /**
- * SIT Campus App — Admin Department Management JS
+ * SIT Campus App — Admin Department Management JS (Refactored)
  */
 document.addEventListener('DOMContentLoaded', async () => {
     'use strict';
 
-    // 1. Auth Guard
     const token = localStorage.getItem('jwt_token');
     if (!token || localStorage.getItem('user_role') !== 'ADMIN') {
         window.location.href = '../auth/login.html';
@@ -12,20 +11,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const deptTableBody = document.getElementById('deptTableBody');
+    const addDeptBtn = document.getElementById('addDeptBtn');
 
     async function loadDepts() {
         try {
             const depts = await api.get('/admin/depts');
             renderDepts(depts);
         } catch (err) {
-            console.error('Failed to load depts', err);
             showToast('Failed to load departments.', 'error');
         }
     }
 
     function renderDepts(depts) {
         deptTableBody.innerHTML = '';
-        
         if (depts.length === 0) {
             deptTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No departments found.</td></tr>';
             return;
@@ -48,6 +46,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             deptTableBody.insertAdjacentHTML('beforeend', row);
         });
     }
+
+    addDeptBtn.addEventListener('click', () => {
+        showToast('Add Department feature coming in next update.', 'info');
+    });
 
     window.editDept = function(id) {
         showToast(`Edit department #${id} feature coming soon.`, 'info');

@@ -188,6 +188,13 @@ public class ComplaintService {
         mailSender.send(msg);
     }
 
+    public void deleteComplaint(Long id) {
+        if (!complaintRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Complaint not found with id: " + id);
+        }
+        complaintRepository.deleteById(id);
+    }
+
     private ComplaintResponse toResponse(Complaint c) {
         String studentEmail = c.getStudent() != null ? c.getStudent().getEmail() : null;
         String studentName = c.getStudent() != null ? c.getStudent().getFirstName() + " " + c.getStudent().getLastName() : null;

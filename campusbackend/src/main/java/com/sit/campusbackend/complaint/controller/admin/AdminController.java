@@ -59,4 +59,10 @@ public class AdminController {
     public ResponseEntity<List<com.sit.campusbackend.complaint.entity.Department>> getAllDepts() {
         return ResponseEntity.ok(complaintService.getAllDepartments());
     }
+
+    @DeleteMapping("/issue/{id}")
+    public ResponseEntity<Void> deleteIssue(@PathVariable Long id) {
+        complaintService.deleteComplaint(id);
+        return ResponseEntity.ok().build();
+    }
 }
