@@ -142,6 +142,12 @@ public class ComplaintService {
         return saved;
     }
 
+    public ComplaintResponse upvoteComplaint(Long complaintId) {
+        Complaint complaint = findComplaint(complaintId);
+        complaint.setUpvoteCount(complaint.getUpvoteCount() + 1);
+        return toResponse(complaintRepository.save(complaint));
+    }
+
     String detectCategory(String description) {
         if (description == null || description.isBlank()) return "General";
         String text = description.toLowerCase();
@@ -183,7 +189,7 @@ public class ComplaintService {
             c.getId(), c.getTitle(), c.getDescription(), c.getCategory(),
             c.getImageUrl(), c.getResolvedImageUrl(), c.getStatus(),
             c.getPriority(), c.getCreatedAt(), c.getUpdatedAt(),
-            studentEmail, studentName, deptName
+            studentEmail, studentName, deptName, c.getUpvoteCount()
         );
     }
 }
