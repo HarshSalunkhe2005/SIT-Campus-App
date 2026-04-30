@@ -1,43 +1,90 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIT Campus App - Manage Users</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css"       >
-    <link rel="stylesheet" href="../../static/css/shared/navbar.css"     >
-    <link rel="stylesheet" href="../../static/css/shared/components.css" >
+    <link rel="stylesheet" href="../../static/css/shared/base.css">
+    <link rel="stylesheet" href="../../static/css/shared/navbar.css">
+    <link rel="stylesheet" href="../../static/css/shared/components.css">
+    <style>
+        .sit-admin-main { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+        .sit-table-container { background: var(--bg-surface); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); margin-top: 2rem; overflow-x: auto; }
+        .sit-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .sit-table th { padding: 1rem; border-bottom: 2px solid var(--border-color); color: var(--text-secondary); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .sit-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+        .sit-table tr:last-child td { border-bottom: none; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; }
+        .role-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 500; background: var(--border-color); color: var(--text-secondary); }
+    </style>
 </head>
 <body>
-    <div >
-        <nav class="navbar">
-            <div class="navbar-container">
-                <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
-                <div class="navbar-title"><h1>Manage Users</h1></div>
-                <div class="navbar-right">
-                    <span class="user-name">Admin</span>
-                    <a href="../auth/login.html" class="logout-icon-btn" title="Logout" style="margin-left: 1rem; color: var(--danger-color); display: flex; align-items: center;" onclick="localStorage.clear();">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                    </a>
-                </div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
+            <div class="navbar-title"><h1>Admin Hub</h1></div>
+            <div class="navbar-right">
+                <a href="hub.html" style="color: white; margin-right: 1.5rem; text-decoration: none; font-weight: 500;">Back to Hub</a>
+                <span class="user-name">Administrator</span>
+                <a href="../auth/login.html" class="logout-icon-btn" title="Logout" style="margin-left: 1rem; color: var(--danger-color); display: flex; align-items: center;" onclick="localStorage.clear();">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </a>
             </div>
-        </nav>
-    </div>
-    <main class="sit-admin-main" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
-        <div class="sit-page-header">
-            <div>
-                <h2 class="sit-page-title">Manage Users</h2>
-                <p class="sit-page-subtitle">View and manage student and staff accounts.</p>
-            </div>
-            <a href="hub.html"  class="sit-btn sit-btn--outline">Back to Hub</a>
         </div>
-        <div class="sit-card">
-            <p style="text-align: center; padding: 3rem; color: #666;">User management interface coming soon.</p>
+    </nav>
+
+    <main class="sit-admin-main">
+        <div class="page-header">
+            <div>
+                <h2 style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">Manage Users</h2>
+                <p style="color: var(--text-secondary);">View registered students and administrators.</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" placeholder="Search by PRN or Name..." class="sit-input" style="width: 250px;">
+                <button class="sit-btn sit-btn--primary">Search</button>
+            </div>
+        </div>
+
+        <div class="sit-table-container">
+            <table class="sit-table">
+                <thead>
+                    <tr>
+                        <th>PRN / Email</th>
+                        <th>Full Name</th>
+                        <th>Role</th>
+                        <th>Registered Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr>
+                        <td><strong>john.doe@sit.edu</strong></td>
+                        <td>John Doe</td>
+                        <td><span class="role-badge">Student</span></td>
+                        <td>2026-04-10</td>
+                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);">Disable</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>jane.smith@sit.edu</strong></td>
+                        <td>Jane Smith</td>
+                        <td><span class="role-badge">Student</span></td>
+                        <td>2026-04-12</td>
+                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);">Disable</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>admin@sit.edu</strong></td>
+                        <td>Campus Admin</td>
+                        <td><span class="role-badge" style="background: var(--primary-light); color: var(--primary-color);">Admin</span></td>
+                        <td>2026-01-01</td>
+                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;" disabled>Edit</button></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </main>
+
 </body>
 </html>
