@@ -60,31 +60,16 @@
                     </tr>
                 </thead>
                 <tbody id="userTableBody">
-                    <tr>
-                        <td><strong>john.doe@sit.edu</strong></td>
-                        <td>John Doe</td>
-                        <td><span class="role-badge">Student</span></td>
-                        <td>2026-04-10</td>
-                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);">Disable</button></td>
-                    </tr>
-                    <tr>
-                        <td><strong>jane.smith@sit.edu</strong></td>
-                        <td>Jane Smith</td>
-                        <td><span class="role-badge">Student</span></td>
-                        <td>2026-04-12</td>
-                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);">Disable</button></td>
-                    </tr>
-                    <tr>
-                        <td><strong>admin@sit.edu</strong></td>
-                        <td>Campus Admin</td>
-                        <td><span class="role-badge" style="background: var(--primary-light); color: var(--primary-color);">Admin</span></td>
-                        <td>2026-01-01</td>
-                        <td><button class="sit-btn sit-btn--ghost" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;" disabled>Edit</button></td>
-                    </tr>
+                    <!-- Dynamic users -->
                 </tbody>
             </table>
         </div>
     </main>
 
+    <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="../../static/js/shared/toast.js" ></script>
+    <script src="../../static/js/shared/api.js"   ></script>
+    <script src="../../static/js/admin/users.js"   ></script>
 </body>
 </html>

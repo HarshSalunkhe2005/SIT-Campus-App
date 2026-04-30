@@ -132,6 +132,14 @@ public class ComplaintService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
+    public List<Student> getAllStudents() {
+        return studentRepository.findAll();
+    }
+
+    public List<Department> getAllDepartments() {
+        return departmentRepository.findAll();
+    }
+
     public ComplaintResponse resolveComplaint(Long complaintId, String resolvedImageUrl) {
         Complaint complaint = findComplaint(complaintId);
         complaint.setResolvedImageUrl(resolvedImageUrl);

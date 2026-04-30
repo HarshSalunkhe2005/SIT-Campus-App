@@ -11,6 +11,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin")
 @CrossOrigin(origins = "http://127.0.0.1:5500")
@@ -41,5 +43,20 @@ public class AdminController {
         com.sit.campusbackend.complaint.entity.ComplaintStatus statusEnum = 
             com.sit.campusbackend.complaint.entity.ComplaintStatus.valueOf(request.status().toUpperCase());
         return ResponseEntity.ok(complaintService.updateStatus(request.complaintId(), statusEnum));
+    }
+
+    @GetMapping("/all-complaints")
+    public ResponseEntity<List<ComplaintResponse>> getAllComplaintsList() {
+        return ResponseEntity.ok(complaintService.getAllComplaints());
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<com.sit.campusbackend.auth.entity.Student>> getAllStudents() {
+        return ResponseEntity.ok(complaintService.getAllStudents());
+    }
+
+    @GetMapping("/depts")
+    public ResponseEntity<List<com.sit.campusbackend.complaint.entity.Department>> getAllDepts() {
+        return ResponseEntity.ok(complaintService.getAllDepartments());
     }
 }
