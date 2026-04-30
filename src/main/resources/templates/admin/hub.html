@@ -114,31 +114,7 @@
                         </tr>
                     </thead>
                     <tbody id="adminIssuesTbody">
-
-                        <!-- Thymeleaf rows -->
-                        <tr 
-                            >
-                            <td class="sit-table__id" >ID</td>
-                            <td >Category</td>
-                            <td >Location</td>
-                            <td >Reporter</td>
-                            <td>
-                                <span class="sit-status-badge"
-                                      
-                                      >STATUS</span>
-                            </td>
-                            <td >Date</td>
-                            <td>
-                                <span class="sit-upvote-pill" >▲ 0</span>
-                            </td>
-                            <td>
-                                <button class="sit-btn-icon sit-btn-icon--danger" 
-                                        
-                                        title="Delete Report">🗑️</button>
-                            </td>
-                        </tr>
-
-
+                        <!-- Dynamic rows -->
                     </tbody>
                 </table>
             </div>
@@ -152,29 +128,8 @@
         <!-- RIGHT: DEPT PERFORMANCE -->
         <div class="sit-card">
             <h3 class="sit-card__title">Dept Performance</h3>
-
             <div class="sit-dept-list" id="deptList">
-
-                <!-- Thymeleaf dept rows -->
-                <div  class="sit-dept-row">
-                    <div class="sit-dept-row__header">
-                        <span class="sit-dept-name" >Department</span>
-                        <span class="sit-dept-total" >0 issues</span>
-                    </div>
-                    <div class="sit-progress-bar">
-                        <div class="sit-progress-bar__fill"
-                             
-                             
-                             aria-valuemin="0" aria-valuemax="100"
-                             role="progressbar"></div>
-                    </div>
-                    <div class="sit-dept-row__meta">
-                        <span class="sit-dept-resolved" >0 resolved</span>
-                        <span class="sit-dept-pct" >0%</span>
-                    </div>
-                </div>
-
-
+                <!-- Dynamic dept rows -->
             </div>
         </div>
 
@@ -185,6 +140,7 @@
 <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="../../static/js/shared/toast.js" ></script>
+<script src="../../static/js/shared/api.js"   ></script>
 <script src="../../static/js/admin/hub.js"     ></script>
 </body>
 </html>

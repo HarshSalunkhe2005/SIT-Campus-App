@@ -16,10 +16,16 @@ public class Admin {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
     /** BCrypt hash of the admin's password. */
-    @Column(nullable = false)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
+
+    @Column(name = "created_at")
+    private java.time.LocalDateTime createdAt;
 }

@@ -35,8 +35,8 @@
     <!-- PAGE HEADER -->
     <div class="sit-page-header">
         <div>
-            <h2 class="sit-page-title" >
-                Electrical Dept — Issue Board
+            <h2 class="sit-page-title" id="dept-board-title">
+                Loading Department... — Issue Board
             </h2>
             <p class="sit-page-subtitle">Drag cards between columns to update issue status.</p>
         </div>
@@ -58,27 +58,6 @@
             </div>
             <div class="sit-kanban-col__body" id="body-PENDING"
                  aria-label="New issues column" role="list">
-
-                <!-- Thymeleaf cards -->
-                <div 
-                     class="sit-kanban-card"
-                     draggable="true"
-                     
-                     role="listitem">
-                    <div class="sit-kanban-card__top">
-                        <span class="sit-kanban-card__id" >#001</span>
-                        <span class="sit-kanban-card__upvotes" >▲ 0</span>
-                    </div>
-                    <h4 class="sit-kanban-card__title" >Category</h4>
-                    <p class="sit-kanban-card__location">📍 <span >Location</span></p>
-                    <p class="sit-kanban-card__desc" >Description preview</p>
-                    <div class="sit-kanban-card__footer">
-                        <span class="sit-kanban-card__reporter" >Student</span>
-                        <span class="sit-kanban-card__date" >01 Jan</span>
-                    </div>
-                </div>
-
-
             </div>
         </div>
 
@@ -90,27 +69,6 @@
             </div>
             <div class="sit-kanban-col__body" id="body-IN_PROGRESS"
                  aria-label="In progress column" role="list">
-
-                <!-- Thymeleaf cards -->
-                <div 
-                     class="sit-kanban-card"
-                     draggable="true"
-                     
-                     role="listitem">
-                    <div class="sit-kanban-card__top">
-                        <span class="sit-kanban-card__id" >#001</span>
-                        <span class="sit-kanban-card__upvotes" >▲ 0</span>
-                    </div>
-                    <h4 class="sit-kanban-card__title" >Category</h4>
-                    <p class="sit-kanban-card__location">📍 <span >Location</span></p>
-                    <p class="sit-kanban-card__desc" >Description</p>
-                    <div class="sit-kanban-card__footer">
-                        <span class="sit-kanban-card__reporter" >Student</span>
-                        <span class="sit-kanban-card__date" >01 Jan</span>
-                    </div>
-                </div>
-
-
             </div>
         </div>
 
@@ -122,27 +80,6 @@
             </div>
             <div class="sit-kanban-col__body" id="body-RESOLVED"
                  aria-label="Resolved column" role="list">
-
-                <!-- Thymeleaf cards -->
-                <div 
-                     class="sit-kanban-card sit-kanban-card--resolved"
-                     draggable="true"
-                     
-                     role="listitem">
-                    <div class="sit-kanban-card__top">
-                        <span class="sit-kanban-card__id" >#001</span>
-                        <span class="sit-kanban-card__upvotes" >▲ 0</span>
-                    </div>
-                    <h4 class="sit-kanban-card__title" >Category</h4>
-                    <p class="sit-kanban-card__location">📍 <span >Location</span></p>
-                    <p class="sit-kanban-card__desc" >Description</p>
-                    <div class="sit-kanban-card__footer">
-                        <span class="sit-kanban-card__reporter" >Student</span>
-                        <span class="sit-kanban-card__date" >01 Jan</span>
-                    </div>
-                </div>
-
-
             </div>
         </div>
 
@@ -187,7 +124,9 @@
 <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="../../static/js/shared/toast.js"        ></script>
+<script src="../../static/js/shared/api.js"          ></script>
 <script src="../../static/js/shared/image-upload.js" ></script>
-<script src="../../static/js/kanban-drag-drop.js"   ></script>
+<script src="../../static/js/kanban-drag-drop.js"    ></script>
+<script src="../../static/js/dept/kanban-data.js"    ></script>
 </body>
 </html>

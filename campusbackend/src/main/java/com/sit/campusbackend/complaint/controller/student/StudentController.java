@@ -41,7 +41,16 @@ public class StudentController {
         return ResponseEntity.ok(complaintService.getStudentComplaints(email));
     }
 
+    @GetMapping("/all-reports")
+    public ResponseEntity<List<ComplaintResponse>> getAllReports() {
+        return ResponseEntity.ok(complaintService.getAllComplaints());
+    }
 
+    @PostMapping("/upvote/{complaintId}")
+    public ResponseEntity<ComplaintResponse> upvoteComplaint(
+            @PathVariable Long complaintId) {
+        return ResponseEntity.ok(complaintService.upvoteComplaint(complaintId));
+    }
 
     private String extractEmailFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

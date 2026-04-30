@@ -15,4 +15,10 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> findByStatus(ComplaintStatus status);
 
     long countByStatus(ComplaintStatus status);
+
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByStudentEmail(String email);
+
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByDepartmentId(Long departmentId);
 }

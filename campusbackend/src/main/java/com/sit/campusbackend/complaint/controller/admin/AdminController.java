@@ -11,6 +11,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin")
 @CrossOrigin(origins = "http://127.0.0.1:5500")
@@ -41,5 +43,54 @@ public class AdminController {
         com.sit.campusbackend.complaint.entity.ComplaintStatus statusEnum = 
             com.sit.campusbackend.complaint.entity.ComplaintStatus.valueOf(request.status().toUpperCase());
         return ResponseEntity.ok(complaintService.updateStatus(request.complaintId(), statusEnum));
+    }
+
+    @GetMapping("/all-complaints")
+    public ResponseEntity<List<ComplaintResponse>> getAllComplaintsList() {
+        return ResponseEntity.ok(complaintService.getAllComplaints());
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<com.sit.campusbackend.auth.entity.Student>> getAllStudents() {
+        return ResponseEntity.ok(complaintService.getAllStudents());
+    }
+
+    @GetMapping("/depts")
+    public ResponseEntity<List<com.sit.campusbackend.complaint.entity.Department>> getAllDepts() {
+        return ResponseEntity.ok(complaintService.getAllDepartments());
+    }
+
+    @DeleteMapping("/issue/{id}")
+    public ResponseEntity<Void> deleteIssue(@PathVariable Long id) {
+        complaintService.deleteComplaint(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/user/{email}/toggle")
+    public ResponseEntity<Void> toggleUserStatus(@PathVariable String email) {
+        complaintService.toggleUserStatus(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/dept")
+    public ResponseEntity<com.sit.campusbackend.complaint.entity.Department> createDept(@RequestBody com.sit.campusbackend.complaint.entity.Department dept) {
+        return ResponseEntity.ok(complaintService.saveDepartment(dept));
+    }
+
+    @PutMapping("/dept/{id}")
+    public ResponseEntity<com.sit.campusbackend.complaint.entity.Department> updateDept(@PathVariable Long id, @RequestBody com.sit.campusbackend.complaint.entity.Department dept) {
+        return ResponseEntity.ok(complaintService.updateDepartment(id, dept));
+    }
+
+    @DeleteMapping("/dept/{id}")
+    public ResponseEntity<Void> deleteDept(@PathVariable Long id) {
+        complaintService.deleteDepartment(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/user/{email}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String email) {
+        complaintService.deleteStudent(email);
+        return ResponseEntity.ok().build();
     }
 }
