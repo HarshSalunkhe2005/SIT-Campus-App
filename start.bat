@@ -13,4 +13,10 @@ echo.
 echo Backend API will be available at: http://localhost:8080
 echo Frontend UI will be available at: http://localhost:5500/templates/auth/login.html
 echo ===================================================
+
+echo Waiting for servers to start...
+timeout /t 3 /nobreak > nul
+echo Opening browser...
+start http://localhost:5500/templates/auth/login.html
+
 pause
