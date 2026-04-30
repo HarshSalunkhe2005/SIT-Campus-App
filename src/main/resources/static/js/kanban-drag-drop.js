@@ -10,7 +10,6 @@
     const STATUSES     = ['PENDING', 'IN_PROGRESS', 'RESOLVED'];
     const STATUS_ORDER = { PENDING: 0, IN_PROGRESS: 1, RESOLVED: 2 };
     const board        = document.getElementById('kanbanBoard');
-    if (!board) return;
 
     let dragCard    = null;
     let placeholder = null;
@@ -40,12 +39,17 @@
 
     /* ── Attach drag to card ── */
     function attachDrag(card) {
+        // Prevent multiple listeners
+        card.removeEventListener('dragstart', onDragStart);
+        card.removeEventListener('dragend', onDragEnd);
         card.addEventListener('dragstart', onDragStart);
         card.addEventListener('dragend', onDragEnd);
     }
 
-    document.querySelectorAll('.sit-kanban-card').forEach(attachDrag);
-    updateCounts();
+    window.initDragAndDrop = function() {
+        document.querySelectorAll('.sit-kanban-card').forEach(attachDrag);
+        updateCounts();
+    };
 
     document.querySelectorAll('.sit-kanban-col__body').forEach(body => {
         body.addEventListener('dragover', onDragOver);
@@ -138,8 +142,8 @@
 
         const afterCard = getDragAfterCard(body, e.clientY);
 
-        /* Moves to IN_PROGRESS or RESOLVED require a proof image */
-        if (newStatus === 'IN_PROGRESS' || newStatus === 'RESOLVED') {
+        /* Moves to RESOLVED require a proof image */
+        if (newStatus === 'RESOLVED') {
             pendingCard = dragCard;
             pendingNewStatus = newStatus;
             pendingOldStatus = oldStatus;
@@ -238,24 +242,15 @@
             return;
         }
 
-        /* Build multipart payload */
-        const formData = new FormData();
-        formData.append('status', newStatus);
-        if (imageFile) formData.append('proofImage', imageFile);
-
         try {
-            const res = await fetch(`/dept/issue/${id}/status`, {
-                method: 'PATCH',
-                body: formData
+            // Updated to use the generic /dept/status endpoint for all moves
+            await api.put(`/dept/status`, {
+                complaintId: id,
+                status: newStatus
             });
-            if (res.ok) {
-                showToast(`Issue #${id} → ${newStatus.replace('_', ' ')}`, 'success');
-            } else {
-                showToast(`Failed to update #${id}. Reverted.`, 'error');
-                revertCard(card, oldStatus);
-            }
-        } catch {
-            showToast('Connection failed. Change reverted.', 'error');
+            showToast(`Issue #${id} → ${newStatus.replace('_', ' ')}`, 'success');
+        } catch(error) {
+            showToast(`Failed to update #${id}: ` + error.message, 'error');
             revertCard(card, oldStatus);
         }
     }
