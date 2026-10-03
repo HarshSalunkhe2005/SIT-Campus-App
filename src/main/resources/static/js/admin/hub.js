@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Load Complaints
             allComplaints = await api.get('/admin/all-complaints');
-            
+
             // Load Departments (for filters and performance)
             const depts = await api.get('/admin/depts');
             populateDeptFilter(depts);
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelector('.sit-stat-card--pending .sit-stat-number').textContent = stats.assigned + stats.pending;
         document.querySelector('.sit-stat-card--inprogress .sit-stat-number').textContent = stats.inProgress;
         document.querySelector('.sit-stat-card--resolved .sit-stat-number').textContent = stats.resolved;
-        
+
         // Active depts stat card (we'll update this after loading depts)
     }
 
@@ -84,17 +84,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         filtered.forEach(c => {
             const dateStr = new Date(c.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            const status = String(c.status || '');
             const row = `
-                <tr data-id="${c.id}" data-status="${c.status}" data-dept="${c.departmentName}">
-                    <td class="sit-table__id">#${c.id}</td>
-                    <td>${c.category}</td>
-                    <td>${c.location}</td>
-                    <td>${c.studentName || 'Anon'}</td>
-                    <td><span class="sit-status-badge sit-status-badge--${c.status.toLowerCase()}">${c.status.replace('_', ' ')}</span></td>
-                    <td>${dateStr}</td>
-                    <td><span class="sit-upvote-pill">▲ ${c.upvoteCount || 0}</span></td>
+                <tr data-id="${Number(c.id)}" data-status="${escapeHtml(status)}" data-dept="${escapeHtml(c.departmentName)}">
+                    <td class="sit-table__id">#${Number(c.id)}</td>
+                    <td>${escapeHtml(c.category)}</td>
+                    <td>${escapeHtml(c.location)}</td>
+                    <td>${escapeHtml(c.studentName || 'Anon')}</td>
+                    <td><span class="sit-status-badge sit-status-badge--${escapeHtml(status.toLowerCase())}">${escapeHtml(status.replace('_', ' '))}</span></td>
+                    <td>${escapeHtml(dateStr)}</td>
+                    <td><span class="sit-upvote-pill">▲ ${Number(c.upvoteCount) || 0}</span></td>
                     <td>
-                        <button class="sit-btn-icon sit-btn-icon--danger" onclick="deleteIssue(${c.id})" title="Delete Report">🗑️</button>
+                        <button class="sit-btn-icon sit-btn-icon--danger" onclick="deleteIssue(${Number(c.id)})" title="Close Report">🗑️</button>
                     </td>
                 </tr>
             `;
@@ -113,11 +114,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const html = `
                 <div class="sit-dept-row">
                     <div class="sit-dept-row__header">
-                        <span class="sit-dept-name">${dept.name}</span>
+                        <span class="sit-dept-name">${escapeHtml(dept.name)}</span>
                         <span class="sit-dept-total">${total} issues</span>
                     </div>
                     <div class="sit-progress-bar">
-                        <div class="sit-progress-bar__fill" style="width: ${pct}%" role="progressbar"></div>
+                        <div class="sit-progress-bar__fill" style="width: ${Number(pct) || 0}%" role="progressbar"></div>
                     </div>
                     <div class="sit-dept-row__meta">
                         <span class="sit-dept-resolved">${resolved} resolved</span>
@@ -146,6 +147,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             showToast('Action failed.', 'error');
         }
     };
+
+    document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+        const currentPassword = prompt('Current password:');
+        if (!currentPassword) return;
+        const newPassword = prompt('New password (at least 8 characters):');
+        if (!newPassword) return;
+        try {
+            await api.post('/admin/password', { currentPassword, newPassword });
+            showToast('Password changed.', 'success');
+        } catch (err) {
+            showToast(err.message || 'Could not change the password.', 'error');
+        }
+    });
 
     // Load everything
     loadAdminData();

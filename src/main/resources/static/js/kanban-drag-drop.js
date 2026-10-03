@@ -80,7 +80,7 @@
     function onDragEnter(e) {
         e.preventDefault();
         const col = this.closest('.sit-kanban-col');
-        
+
         // Visual feedback: only highlight if it's a valid forward move
         if (dragCard) {
             const oldIdx = STATUS_ORDER[dragCard.dataset.status] || 0;
@@ -248,6 +248,17 @@
                 complaintId: id,
                 status: newStatus
             });
+            // the proof photo from the confirmation dialog goes to its own endpoint once the status change is saved
+            if (imageFile) {
+                const form = new FormData();
+                form.append('image', imageFile);
+                try {
+                    await api.postForm(`/dept/${id}/proof`, form);
+                } catch (uploadError) {
+                    showToast(`Status saved, but the proof photo failed to upload: ${uploadError.message}`, 'error');
+                    return;
+                }
+            }
             showToast(`Issue #${id} → ${newStatus.replace('_', ' ')}`, 'success');
         } catch(error) {
             showToast(`Failed to update #${id}: ` + error.message, 'error');

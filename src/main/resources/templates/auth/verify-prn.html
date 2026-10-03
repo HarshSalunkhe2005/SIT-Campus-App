@@ -49,6 +49,7 @@
         </section>
     </main>
 
+    <script src="../../static/js/shared/api.js"></script>
     <script>
         const submitBtn = document.getElementById('submitBtn');
         const prnInput = document.getElementById('prn');
@@ -101,9 +102,9 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending...';
             errorContainer.style.display = 'none';
-            
+
             try {
-                const response = await fetch('http://localhost:8080/auth/register', {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -116,8 +117,7 @@
                     sessionStorage.setItem('tempUserEmail', emailInput.value.toLowerCase().trim());
                     window.location.href = "setup-password.html";
                 } else {
-                    const err = await response.text();
-                    errorMessage.textContent = err || 'Registration failed. Please try again.';
+                    errorMessage.textContent = await readErrorMessage(response, 'Registration failed. Please try again.');
                     errorContainer.style.display = 'block';
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Send Verification Code';

@@ -32,17 +32,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         depts.forEach(d => {
             const row = `
                 <tr>
-                    <td>${d.id}</td>
-                    <td><strong>${d.name}</strong></td>
-                    <td><span class="dept-type-badge">${d.type}</span></td>
-                    <td>${d.email}</td>
+                    <td>${Number(d.id)}</td>
+                    <td><strong>${escapeHtml(d.name)}</strong></td>
+                    <td><span class="dept-type-badge">${escapeHtml(d.type)}</span></td>
+                    <td>${escapeHtml(d.email)}</td>
                     <td>
-                        <button class="sit-btn sit-btn--ghost" 
+                        <button class="sit-btn sit-btn--ghost"
                                 style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--primary-color);"
-                                onclick="editDept(${d.id})">Edit</button>
-                        <button class="sit-btn sit-btn--ghost" 
+                                onclick="editDept(${Number(d.id)})">Edit</button>
+                        <button class="sit-btn sit-btn--ghost"
                                 style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);"
-                                onclick="deleteDept(${d.id})">Delete</button>
+                                onclick="deleteDept(${Number(d.id)})">Delete</button>
                     </td>
                 </tr>
             `;
@@ -55,13 +55,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!name) return;
         const type = prompt("Enter Category (e.g. Electrical, IT):");
         const email = prompt("Enter Department Email:");
-        
+        const password = prompt("Login password for this department (leave blank to generate one):") || '';
+
         try {
-            await api.post('/admin/dept', { name, type, email });
+            const created = await api.post('/admin/dept', { name, type, email, password });
             showToast('Department added!', 'success');
+            if (created.initialPassword) {
+                // shown only this once: the server stores just a hash
+                alert(`Department login created.\n\nEmail: ${created.email}\nPassword: ${created.initialPassword}\n\nCopy this now, it will not be shown again.`);
+            }
             loadDepts();
         } catch (err) {
-            showToast('Failed to add department.', 'error');
+            showToast(err.message || 'Failed to add department.', 'error');
         }
     });
 
@@ -70,13 +75,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!name) return;
         const type = prompt("New Category:");
         const email = prompt("New Email:");
-        
+        const password = prompt("New login password (leave blank to keep the current one):") || '';
+
         try {
-            await api.put(`/admin/dept/${id}`, { name, type, email });
+            await api.put(`/admin/dept/${id}`, { name, type, email, password });
             showToast('Department updated!', 'success');
             loadDepts();
         } catch (err) {
-            showToast('Failed to update department.', 'error');
+            showToast(err.message || 'Failed to update department.', 'error');
         }
     };
 

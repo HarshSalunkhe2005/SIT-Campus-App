@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const reportForm = document.getElementById('reportForm');
     reportForm.addEventListener('submit', async e => {
         e.preventDefault();
-        
+
         const btn = document.getElementById('reportSubmitBtn');
         if (!uploader.hasFile()) {
             uploader.setError('A photo is required to submit a report.');
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const formData = new FormData(reportForm);
-            
+
             // Build the ComplaintRequest JSON
             const complaintRequest = {
                 location: formData.get('location'),
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             multipartBody.append('complaint', new Blob([JSON.stringify(complaintRequest)], { type: 'application/json' }));
             multipartBody.append('image', formData.get('image'));
 
-            const response = await fetch(`http://localhost:8080/student/report`, {
+            const response = await fetch(`${API_BASE_URL}/student/report`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -88,13 +88,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: multipartBody
             });
 
-            if (!response.ok) throw new Error(await response.text());
+            if (!response.ok) throw new Error(await readErrorMessage(response, 'Could not submit the report.'));
 
             showToast('Issue reported successfully!', 'success');
             reportForm.reset();
             uploader.reset();
             document.getElementById('descCount').textContent = '0 / 500';
-            
+
             // Refresh stats
             loadStats();
         } catch (error) {
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderIssues(container, issues, emptyId, showUpvote) {
         container.innerHTML = '';
         const emptyState = document.getElementById(emptyId);
-        
+
         if (!issues || issues.length === 0) {
             emptyState.style.display = 'flex';
             return;
@@ -164,21 +164,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         issues.forEach(issue => {
             const dateStr = new Date(issue.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const photo = uploadUrl(issue.imageUrl);
+            const status = String(issue.status || '');
             const card = `
-                <div class="sit-issue-card" data-status="${issue.status}" data-category="${issue.category}" data-upvotes="${issue.upvoteCount || 0}" data-date="${issue.createdAt}">
+                <div class="sit-issue-card" data-status="${escapeHtml(status)}" data-category="${escapeHtml(issue.category)}" data-upvotes="${Number(issue.upvoteCount) || 0}" data-date="${escapeHtml(issue.createdAt)}">
                     <div class="sit-issue-card__left">
-                        <span class="sit-status-badge sit-status-badge--${issue.status.toLowerCase()}">${issue.status.replace('_', ' ')}</span>
-                        <h4 class="sit-issue-card__title">${issue.category}</h4>
-                        <p class="sit-issue-card__location">📍 <span>${issue.location}</span></p>
-                        <p class="sit-issue-card__desc">${issue.description}</p>
+                        <span class="sit-status-badge sit-status-badge--${escapeHtml(status.toLowerCase())}">${escapeHtml(status.replace('_', ' '))}</span>
+                        <h4 class="sit-issue-card__title">${escapeHtml(issue.category)}</h4>
+                        <p class="sit-issue-card__location">📍 <span>${escapeHtml(issue.location)}</span></p>
+                        <p class="sit-issue-card__desc">${escapeHtml(issue.description)}</p>
                         <small class="sit-issue-card__date">
-                            Reported by <strong>${issue.studentName || 'Anonymous'}</strong> · ${dateStr}
+                            Reported by <strong>${escapeHtml(issue.studentName || 'Anonymous')}</strong> · ${escapeHtml(dateStr)}
+                            ${photo ? `· <a href="${escapeHtml(photo)}" target="_blank" rel="noopener">📷 Photo</a>` : ''}
                         </small>
                     </div>
                     <div class="sit-issue-card__right">
-                        <button class="sit-upvote-btn ${showUpvote ? '' : 'sit-upvote-btn--disabled'}" data-id="${issue.id}" ${showUpvote ? '' : 'disabled'}>
+                        <button class="sit-upvote-btn ${showUpvote ? '' : 'sit-upvote-btn--disabled'}" data-id="${Number(issue.id)}" ${showUpvote ? '' : 'disabled'}>
                             <span class="sit-upvote-icon">▲</span>
-                            <span class="sit-upvote-count">${issue.upvoteCount || 0}</span>
+                            <span class="sit-upvote-count">${Number(issue.upvoteCount) || 0}</span>
                         </button>
                     </div>
                 </div>
@@ -192,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     const id = btn.dataset.id;
-                    
+
                     // Client-side prevention for multiple clicks
                     if (localStorage.getItem(`upvoted_${id}`)) {
                         showToast('You have already upvoted this issue.', 'error');
@@ -206,7 +209,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         localStorage.setItem(`upvoted_${id}`, 'true');
                         showToast('Upvoted!', 'success');
                     } catch (err) {
-                        showToast('Upvote failed.', 'error');
+                        if (/already upvoted/i.test(err.message || '')) localStorage.setItem(`upvoted_${id}`, 'true');
+                        showToast(err.message || 'Upvote failed.', 'error');
                     }
                 });
             });

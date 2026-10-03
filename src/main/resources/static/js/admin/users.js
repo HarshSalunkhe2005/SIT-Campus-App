@@ -35,19 +35,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         users.forEach(u => {
             const row = `
                 <tr>
-                    <td><strong>${u.prn || 'N/A'}</strong><br><small style="color:var(--text-secondary)">${u.email}</small></td>
-                    <td>${u.firstName} ${u.lastName}</td>
+                    <td><strong>${escapeHtml(u.prn || 'N/A')}</strong><br><small style="color:var(--text-secondary)">${escapeHtml(u.email)}</small></td>
+                    <td>${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}</td>
                     <td><span class="role-badge">Student</span></td>
                     <td>${u.isVerified ? '✅ Verified' : '❌ Pending'}</td>
                     <td>
-                        <button class="sit-btn sit-btn--ghost" 
-                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--primary-color);"
-                                onclick="toggleUserStatus('${u.email}')">
+                        <button class="sit-btn sit-btn--ghost" data-action="toggle" data-email="${escapeHtml(u.email)}"
+                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--primary-color);">
                             ${u.isVerified ? 'Disable' : 'Enable'}
                         </button>
-                        <button class="sit-btn sit-btn--ghost" 
-                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);"
-                                onclick="deleteUser('${u.email}')">
+                        <button class="sit-btn sit-btn--ghost" data-action="delete" data-email="${escapeHtml(u.email)}"
+                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);">
                             Delete
                         </button>
                     </td>
@@ -77,26 +75,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (e.key === 'Enter') performSearch();
     });
 
-    window.toggleUserStatus = async function(email) {
+    // one delegated listener instead of inline onclick handlers built from user data
+    userTableBody.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        if (btn.dataset.action === 'toggle') toggleUserStatus(btn.dataset.email);
+        else if (btn.dataset.action === 'delete') deleteUser(btn.dataset.email);
+    });
+
+    async function toggleUserStatus(email) {
         try {
-            await api.post(`/admin/user/${email}/toggle`);
+            await api.post(`/admin/user/${encodeURIComponent(email)}/toggle`);
             showToast(`Status toggled for ${email}`, 'success');
             loadUsers(); // Reload to show new status
         } catch (err) {
             showToast('Failed to toggle status.', 'error');
         }
-    };
+    }
 
-    window.deleteUser = async function(email) {
+    async function deleteUser(email) {
         if (!confirm(`Permanently delete user ${email}?`)) return;
         try {
-            await api.request(`/admin/user/${email}`, { method: 'DELETE' });
+            await api.request(`/admin/user/${encodeURIComponent(email)}`, { method: 'DELETE' });
             showToast('User deleted.', 'success');
             loadUsers();
         } catch (err) {
             showToast('Failed to delete user.', 'error');
         }
-    };
+    }
 
     loadUsers();
 });
