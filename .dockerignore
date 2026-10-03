@@ -1,0 +1,6 @@
+.git
+.env
+campusbackend/target
+campusbackend/uploads
+**/*.log
+README.md

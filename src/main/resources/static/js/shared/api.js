@@ -4,8 +4,14 @@
  * It automatically attaches the JWT token to every request.
  */
 
-// Override before this script loads (window.API_BASE_URL = 'https://api.example.com') to point at another backend.
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:8080';
+// Where the API lives:
+//  - opened from a local static server (e.g. python -m http.server 5500): the backend on localhost:8080
+//  - served by the backend itself (the Docker/Render deployment): the same origin
+// Set window.API_BASE_URL before this script loads to override either.
+const API_BASE_URL = window.API_BASE_URL
+    || (['localhost', '127.0.0.1'].includes(location.hostname) && location.port !== '8080'
+        ? 'http://localhost:8080'
+        : location.origin);
 
 /** Escapes text for safe use inside HTML (element content and quoted attribute values). */
 function escapeHtml(value) {

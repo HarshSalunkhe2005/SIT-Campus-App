@@ -46,7 +46,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/verify-otp", "/auth/set-password", "/auth/login").permitAll()
-                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/", "/templates/**", "/static/**", "/uploads/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/dept/**").hasRole("DEPARTMENT")
                 .requestMatchers("/student/**").hasRole("STUDENT")

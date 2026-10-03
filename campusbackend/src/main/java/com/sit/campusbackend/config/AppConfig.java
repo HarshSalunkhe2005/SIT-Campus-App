@@ -15,9 +15,11 @@ import java.util.concurrent.TimeUnit;
 public class AppConfig implements WebMvcConfigurer {
 
     private final Path uploadRoot;
+    private final Path frontendRoot;
 
-    public AppConfig(@Value("${app.upload-dir}") String uploadDir) {
+    public AppConfig(@Value("${app.upload-dir}") String uploadDir, @Value("${app.frontend-dir:}") String frontendDir) {
         this.uploadRoot = Path.of(uploadDir).toAbsolutePath().normalize();
+        this.frontendRoot = frontendDir.isBlank() ? null : Path.of(frontendDir).toAbsolutePath().normalize();
     }
 
     /** Injectable clock so expiry and rate-limit logic can be tested without sleeping. */
@@ -32,5 +34,16 @@ public class AppConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(uploadRoot.toUri().toString())
                 .setCacheControl(CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic());
+
+        // Single-deployment mode (FRONTEND_DIR set): this app also serves the pages, so the browser and API share an origin.
+        if (frontendRoot != null) {
+            registry.addResourceHandler("/templates/**").addResourceLocations(dirUri(frontendRoot.resolve("templates")));
+            registry.addResourceHandler("/static/**").addResourceLocations(dirUri(frontendRoot.resolve("static")));
+        }
+    }
+
+    private static String dirUri(Path dir) {
+        String uri = dir.toUri().toString();
+        return uri.endsWith("/") ? uri : uri + "/";
     }
 }
