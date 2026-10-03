@@ -37,7 +37,8 @@ class DeploymentTest extends IntegrationTestBase {
     void pagesAndAssetsAreServedWithoutLogin() throws Exception {
         mvc.perform(get("/templates/auth/login.html")).andExpect(status().isOk()).andExpect(content().string(containsString("login")));
         mvc.perform(get("/templates/student/dashboard.html")).andExpect(status().isOk());
-        mvc.perform(get("/static/css/shared/base.css")).andExpect(status().isOk());
+        mvc.perform(get("/static/css/app.css")).andExpect(status().isOk());
+        mvc.perform(get("/static/fonts/source-sans-3-latin-400-normal.woff2")).andExpect(status().isOk());
         mvc.perform(get("/static/js/shared/api.js")).andExpect(status().isOk()).andExpect(content().string(containsString("API_BASE_URL")));
     }
 

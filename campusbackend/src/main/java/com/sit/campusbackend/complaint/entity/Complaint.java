@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -55,6 +57,12 @@ public class Complaint {
     @CollectionTable(name = "complaint_upvoters", joinColumns = @JoinColumn(name = "complaint_id"))
     @Column(name = "student_email", nullable = false)
     private Set<String> upvoters = new HashSet<>();
+
+    /** Status history, oldest first. Complaints created before history existed have none. */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "complaint_id")
+    @OrderBy("at ASC, id ASC")
+    private List<ComplaintEvent> events = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_email", nullable = false)

@@ -1,108 +1,87 @@
 /**
- * SIT Campus App — Admin User Management JS (Refactored)
+ * SIT Campus App - Admin: students list (search, enable/disable, delete).
+ * Depends on: shared/toast.js, shared/api.js, shared/ui.js
  */
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     'use strict';
 
-    const token = localStorage.getItem('jwt_token');
-    if (!token || localStorage.getItem('user_role') !== 'ADMIN') {
+    if (!localStorage.getItem('jwt_token') || localStorage.getItem('user_role') !== 'ADMIN') {
         window.location.href = '../auth/login.html';
         return;
     }
 
-    const userTableBody = document.getElementById('userTableBody');
-    const searchInput = document.getElementById('userSearchInput');
-    const searchBtn = document.getElementById('userSearchBtn');
+    const $ = (id) => document.getElementById(id);
+    const esc = UI.esc;
+    let users = [];
 
-    let allUsers = [];
-
-    async function loadUsers() {
+    async function load() {
+        $('userBody').innerHTML = `<tr><td colspan="5">${UI.skeleton(2)}</td></tr>`;
         try {
-            allUsers = await api.get('/admin/users');
-            renderUsers(allUsers);
+            users = await api.get('/admin/users');
         } catch (err) {
-            showToast('Failed to load users list.', 'error');
+            showToast('Failed to load students.', 'error');
+            users = [];
         }
+        render();
     }
 
-    function renderUsers(users) {
-        userTableBody.innerHTML = '';
-        if (users.length === 0) {
-            userTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No users match your search.</td></tr>';
-            return;
-        }
+    function render() {
+        const q = $('search').value.trim().toLowerCase();
+        const filter = $('statusFilter').value;
+        const rows = users.filter(u =>
+            (filter === 'ALL' || (filter === 'ACTIVE') === !!u.isVerified)
+            && (!q || [u.firstName, u.lastName, u.prn, u.email].join(' ').toLowerCase().includes(q)));
 
-        users.forEach(u => {
-            const row = `
-                <tr>
-                    <td><strong>${escapeHtml(u.prn || 'N/A')}</strong><br><small style="color:var(--text-secondary)">${escapeHtml(u.email)}</small></td>
-                    <td>${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}</td>
-                    <td><span class="role-badge">Student</span></td>
-                    <td>${u.isVerified ? '✅ Verified' : '❌ Pending'}</td>
-                    <td>
-                        <button class="sit-btn sit-btn--ghost" data-action="toggle" data-email="${escapeHtml(u.email)}"
-                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--primary-color);">
-                            ${u.isVerified ? 'Disable' : 'Enable'}
-                        </button>
-                        <button class="sit-btn sit-btn--ghost" data-action="delete" data-email="${escapeHtml(u.email)}"
-                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem; color: var(--danger-color);">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            `;
-            userTableBody.insertAdjacentHTML('beforeend', row);
-        });
+        $('userBody').innerHTML = rows.length ? rows.map(u => `<tr>
+            <td><div class="cell-main">${esc(u.firstName)} ${esc(u.lastName)}</div><div class="cell-sub">${esc(u.email)}</div></td>
+            <td>${esc(u.prn || 'Not given')}</td>
+            <td>${esc(u.batchYear || '')}</td>
+            <td>${u.isVerified
+                ? `<span class="badge st-resolved">${UI.icon('checkCircle')}Active</span>`
+                : `<span class="badge st-closed">${UI.icon('lock')}Inactive</span>`}</td>
+            <td style="white-space:nowrap;text-align:right">
+                <button type="button" class="btn btn-secondary btn-sm" data-action="toggle" data-email="${esc(u.email)}">${u.isVerified ? 'Disable' : 'Enable'}</button>
+                <button type="button" class="btn btn-danger btn-sm" data-action="delete" data-email="${esc(u.email)}">${UI.icon('trash', 'icon-sm')}Delete</button>
+            </td></tr>`).join('')
+            : `<tr><td colspan="5">${UI.empty({ icon: 'users', title: users.length ? 'No students match' : 'No students yet', text: users.length ? 'Try a different search or filter.' : 'Students appear here after they register.' })}</td></tr>`;
     }
 
-    /* ────────── SEARCH LOGIC ────────── */
-    function performSearch() {
-        const query = searchInput.value.toLowerCase().trim();
-        if (!query) {
-            renderUsers(allUsers);
-            return;
-        }
-        const filtered = allUsers.filter(u => 
-            (u.firstName + ' ' + u.lastName).toLowerCase().includes(query) ||
-            (u.prn && u.prn.toLowerCase().includes(query)) ||
-            u.email.toLowerCase().includes(query)
-        );
-        renderUsers(filtered);
-    }
-
-    searchBtn.addEventListener('click', performSearch);
-    searchInput.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') performSearch();
-    });
-
-    // one delegated listener instead of inline onclick handlers built from user data
-    userTableBody.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-action]');
-        if (!btn) return;
-        if (btn.dataset.action === 'toggle') toggleUserStatus(btn.dataset.email);
-        else if (btn.dataset.action === 'delete') deleteUser(btn.dataset.email);
-    });
-
-    async function toggleUserStatus(email) {
+    async function toggle(email) {
+        const u = users.find(x => x.email === email);
+        if (u && u.isVerified && !(await UI.confirm({
+            title: 'Disable this account?', message: `${u.firstName} ${u.lastName} will be logged out and will not be able to log in until you enable the account again.`, confirmText: 'Disable account',
+        }))) return;
         try {
             await api.post(`/admin/user/${encodeURIComponent(email)}/toggle`);
-            showToast(`Status toggled for ${email}`, 'success');
-            loadUsers(); // Reload to show new status
+            showToast('Account updated.', 'success');
+            load();
         } catch (err) {
-            showToast('Failed to toggle status.', 'error');
+            showToast('Could not update the account.', 'error');
         }
     }
 
-    async function deleteUser(email) {
-        if (!confirm(`Permanently delete user ${email}?`)) return;
+    async function remove(email) {
+        const u = users.find(x => x.email === email);
+        if (!(await UI.confirm({
+            title: 'Delete this student?', message: `${u ? `${u.firstName} ${u.lastName}` : email} and every issue they reported will be permanently deleted. This cannot be undone.`, confirmText: 'Delete permanently', danger: true,
+        }))) return;
         try {
             await api.request(`/admin/user/${encodeURIComponent(email)}`, { method: 'DELETE' });
-            showToast('User deleted.', 'success');
-            loadUsers();
+            showToast('Student deleted.', 'success');
+            load();
         } catch (err) {
-            showToast('Failed to delete user.', 'error');
+            showToast('Could not delete the student.', 'error');
         }
     }
 
-    loadUsers();
+    $('userBody').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        if (btn.dataset.action === 'toggle') toggle(btn.dataset.email);
+        else remove(btn.dataset.email);
+    });
+    $('search').addEventListener('input', render);
+    $('statusFilter').addEventListener('change', render);
+
+    load();
 });

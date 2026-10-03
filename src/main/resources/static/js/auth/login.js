@@ -1,62 +1,51 @@
 /**
- * SIT Campus App - Login Logic
+ * SIT Campus App - Login
  * Depends on: shared/api.js, shared/toast.js
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.querySelector('.sit-auth-form');
-    if (!loginForm) return;
+    const form = document.getElementById('loginForm');
+    if (!form) return;
 
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Prevent standard HTML form submission
+    const errorBox = document.getElementById('loginError');
+    const submitBtn = document.getElementById('loginBtn');
+
+    function showError(message) {
+        errorBox.textContent = message;
+        errorBox.hidden = false;
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorBox.hidden = true;
 
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
-        const submitBtn = loginForm.querySelector('button[type="submit"]');
 
         if (!email || !password) {
-            showToast('Email and password are required', 'error');
+            showError('Enter your email and password.');
             return;
         }
 
-        // Visual feedback
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Authenticating...';
+        submitBtn.textContent = 'Logging in…';
         submitBtn.disabled = true;
 
         try {
-            // Call the REST API using our new api wrapper
             const response = await api.post('/auth/login', { email, password });
-            
-            // Save the JWT token
+
             localStorage.setItem('jwt_token', response.token);
-            
-            // Save user details for the UI
-            const nameToSave = response.departmentName || response.name || response.first_name || 'User';
-            const idToSave = response.departmentId || response.userId || '';
-            
-            localStorage.setItem('user_name', nameToSave);
+            localStorage.setItem('user_name', response.departmentName || response.name || (response.role === 'ADMIN' ? 'Administrator' : 'User'));
             localStorage.setItem('user_role', response.role);
-            localStorage.setItem('user_id', idToSave);
+            localStorage.setItem('user_id', response.departmentId || '');
 
-            showToast('Login successful! Redirecting...', 'success');
-
-            // Redirect based on role
-            setTimeout(() => {
-                if (response.role === 'ADMIN') {
-                    window.location.href = '../admin/hub.html';
-                } else if (response.role === 'DEPARTMENT') {
-                    window.location.href = '../dept/kanban.html';
-                } else {
-                    window.location.href = '../student/dashboard.html';
-                }
-            }, 1000);
-
+            const next = response.role === 'ADMIN' ? '../admin/hub.html'
+                : response.role === 'DEPARTMENT' ? '../dept/kanban.html'
+                : '../student/dashboard.html#report';
+            window.location.href = next;
         } catch (error) {
-            // Revert button and show error
-            submitBtn.textContent = originalText;
+            submitBtn.textContent = 'Log in';
             submitBtn.disabled = false;
-            showToast(error.message || 'Invalid email or password', 'error');
+            showError(error.message || 'Invalid email or password.');
         }
     });
 });

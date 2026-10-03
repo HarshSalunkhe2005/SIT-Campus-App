@@ -1,134 +1,125 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIT Campus App - Verify PRN</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css"       >
-    <link rel="stylesheet" href="../../static/css/shared/components.css" >
-    <link rel="stylesheet" href="../../static/css/auth/login.css"        >
-    <link rel="stylesheet" href="../../static/css/auth/verify-prn.css"   >
+    <title>Create your account · SIT Campus App</title>
+    <meta name="theme-color" content="#c52f33">
+    <link rel="icon" href="../../static/images/Symlogo333.jpg">
+    <link rel="stylesheet" href="../../static/css/app.css">
 </head>
 <body>
-    <main class="sit-split-layout">
-        <section class="sit-brand-pane">
-            <div class="sit-brand-content">
-                <img src="../../static/images/Symlogo333.jpg"  alt="SIT Pune Logo" class="sit-brand-logo">
-                <h1 class="sit-brand-title">SIT Pune</h1>
-                <h2 class="sit-brand-subtitle">Campus App</h2>
-                <p class="sit-brand-description">A transparent, high-speed portal to report and track infrastructure issues across the campus.</p>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="auth">
+        <aside class="auth-side">
+            <div class="auth-brand">
+                <img src="../../static/images/Symlogo333.jpg" alt="Symbiosis Institute of Technology logo" width="64" height="64">
+                <div><strong>SIT Campus App</strong><span>Symbiosis Institute of Technology, Pune</span></div>
             </div>
-        </section>
+            <div class="auth-pitch">
+                <h1>One account for everything on campus.</h1>
+                <ul>
+                    <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span>Your PRN and official email confirm that you are an SIT student.</span></li>
+                    <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>We email you a 6-digit code once to verify the address.</span></li>
+                </ul>
+            </div>
+            <p class="auth-foot">Already registered? Use the login page.</p>
+        </aside>
 
-        <section class="sit-form-pane">
-            <div class="sit-auth-card">
-                <h3 class="sit-auth-card__header">Create Your Account</h3>
-                <form id="registrationForm" class="sit-auth-form">
-                    <div class="sit-input-group">
-                        <label for="prn" class="sit-input-label">Permanent Registration Number (PRN)</label>
-                        <div class="sit-input-wrapper">
-                            <input type="text" id="prn" name="prn" class="sit-input-field" placeholder="e.g., 24070126..." required maxlength="11" inputmode="numeric" aria-label="Permanent Registration Number">
-                            <span id="prnCheck" class="validation-checkmark" aria-hidden="true">✓</span>
+        <main class="auth-main" id="main">
+            <div class="auth-card">
+                <ol class="progress-steps" aria-label="Sign-up progress">
+                    <li class="is-current" aria-current="step">1. Your details</li>
+                    <li>2. Email code</li>
+                    <li>3. Password</li>
+                </ol>
+                <h2>Create your account</h2>
+                <p class="sub">Enter your PRN and your official SIT email. We will send a verification code to that address.</p>
+
+                <form id="registrationForm" novalidate>
+                    <div class="field">
+                        <label class="label" for="prn">PRN (Permanent Registration Number)</label>
+                        <div class="input-with-status" id="prnWrap">
+                            <input class="input" id="prn" name="prn" type="text" inputmode="numeric" maxlength="11" autocomplete="off" placeholder="11 digits, e.g. 24070126001" aria-describedby="prnHelp" required>
+                            <svg class="icon ok-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>
                         </div>
-                        <small id="prnHelp" class="sit-input-help"></small>
+                        <span class="hint" id="prnHelp">Your PRN is 11 digits.</span>
                     </div>
-                    <div class="sit-input-group">
-                        <label for="email" class="sit-input-label">Official SIT Email</label>
-                        <div class="sit-input-wrapper">
-                            <input type="email" id="email" name="email" class="sit-input-field" placeholder="firstname.lastname.btech2024@sitpune.edu.in" required aria-label="Official SIT Email Address">
-                            <span id="emailCheck" class="validation-checkmark" aria-hidden="true">✓</span>
+                    <div class="field">
+                        <label class="label" for="email">Official SIT email</label>
+                        <div class="input-with-status" id="emailWrap">
+                            <input class="input" id="email" name="email" type="email" autocomplete="email" placeholder="firstname.lastname.2024@sitpune.edu.in" aria-describedby="emailHelp" required>
+                            <svg class="icon ok-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>
                         </div>
-                        <small id="emailHelp" class="sit-input-help"></small>
+                        <span class="hint" id="emailHelp">Must end with @sitpune.edu.in</span>
                     </div>
-                    <div id="error-container" class="error-container" style="display: none;" role="alert">
-                        <p id="error-message" class="error-message"></p>
-                    </div>
-                    <button type="submit" id="submitBtn" class="sit-auth-card__submit" disabled>Send Verification Code</button>
+                    <div class="alert alert-error" id="formError" role="alert" hidden style="margin-top:16px"></div>
+                    <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="margin-top:20px" disabled>Send verification code</button>
                 </form>
+
+                <p class="auth-links">Already have an account? <a href="login.html">Log in</a></p>
             </div>
-        </section>
-    </main>
+        </main>
+    </div>
 
     <script src="../../static/js/shared/api.js"></script>
     <script>
-        const submitBtn = document.getElementById('submitBtn');
-        const prnInput = document.getElementById('prn');
-        const emailInput = document.getElementById('email');
-        const prnCheck = document.getElementById('prnCheck');
-        const emailCheck = document.getElementById('emailCheck');
-        const prnHelp = document.getElementById('prnHelp');
-        const emailHelp = document.getElementById('emailHelp');
-        const errorContainer = document.getElementById('error-container');
-        const errorMessage = document.getElementById('error-message');
+        (() => {
+            const prnInput = document.getElementById('prn');
+            const emailInput = document.getElementById('email');
+            const submitBtn = document.getElementById('submitBtn');
+            const formError = document.getElementById('formError');
+            const PRN_PATTERN = /^\d{11}$/;
+            const EMAIL_PATTERN = /^[^\s@]+@sitpune\.edu\.in$/i;
 
-        // Validation patterns
-        const PRN_PATTERN = /^\d{11}$/;
-        const EMAIL_PATTERN = /^[a-zA-Z0-9._-]+@sitpune\.edu\.in$/;
+            function validate() {
+                const prn = prnInput.value.trim();
+                const email = emailInput.value.trim();
+                const prnOk = PRN_PATTERN.test(prn);
+                const emailOk = EMAIL_PATTERN.test(email);
 
-        const validate = () => {
-            const prnValue = prnInput.value.trim();
-            const emailValue = emailInput.value.toLowerCase().trim();
+                document.getElementById('prnWrap').classList.toggle('valid', prnOk);
+                document.getElementById('emailWrap').classList.toggle('valid', emailOk);
+                const prnHelp = document.getElementById('prnHelp');
+                prnHelp.textContent = prn && !prnOk
+                    ? (prn.length < 11 ? `${11 - prn.length} more digit${11 - prn.length === 1 ? '' : 's'} needed` : 'PRN must be 11 digits')
+                    : 'Your PRN is 11 digits.';
+                const emailHelp = document.getElementById('emailHelp');
+                emailHelp.textContent = email && !emailOk ? 'Use your official address ending in @sitpune.edu.in' : 'Must end with @sitpune.edu.in';
 
-            // PRN validation
-            const isPrnValid = PRN_PATTERN.test(prnValue);
-            prnCheck.classList.toggle('is-visible', isPrnValid);
-            if (!isPrnValid && prnValue.length > 0) {
-                prnHelp.textContent = prnValue.length < 11 ? `${11 - prnValue.length} digits remaining` : 'PRN must be 11 numeric digits';
-                prnHelp.style.color = '#ff4d4d';
-            } else {
-                prnHelp.textContent = '';
+                submitBtn.disabled = !(prnOk && emailOk);
             }
 
-            // Email validation
-            const isEmailValid = EMAIL_PATTERN.test(emailValue);
-            emailCheck.classList.toggle('is-visible', isEmailValid);
-            if (!isEmailValid && emailValue.length > 0) {
-                emailHelp.textContent = !emailValue.includes('@sitpune.edu.in') ? 'Must use official SIT email' : 'Invalid email format';
-                emailHelp.style.color = '#ff4d4d';
-            } else {
-                emailHelp.textContent = '';
-            }
+            prnInput.addEventListener('input', () => { prnInput.value = prnInput.value.replace(/\D/g, ''); validate(); });
+            emailInput.addEventListener('input', validate);
 
-            submitBtn.disabled = !(isPrnValid && isEmailValid);
-            errorContainer.style.display = 'none';
-        };
+            document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                formError.hidden = true;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending…';
+                const email = emailInput.value.toLowerCase().trim();
 
-        // Clear errors on input
-        prnInput.addEventListener('input', validate);
-        emailInput.addEventListener('input', validate);
-
-        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending...';
-            errorContainer.style.display = 'none';
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: emailInput.value.toLowerCase().trim(), 
-                        prn: prnInput.value.trim() 
-                    })
-                });
-
-                if (response.ok) {
-                    sessionStorage.setItem('tempUserEmail', emailInput.value.toLowerCase().trim());
-                    window.location.href = "setup-password.html";
-                } else {
-                    errorMessage.textContent = await readErrorMessage(response, 'Registration failed. Please try again.');
-                    errorContainer.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Send Verification Code';
+                try {
+                    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, prn: prnInput.value.trim() })
+                    });
+                    if (response.ok) {
+                        sessionStorage.setItem('tempUserEmail', email);
+                        window.location.href = 'setup-password.html';
+                        return;
+                    }
+                    formError.textContent = await readErrorMessage(response, 'Registration failed. Please try again.');
+                } catch (err) {
+                    formError.textContent = 'Could not reach the server. Check your connection and try again.';
                 }
-            } catch (err) {
-                errorMessage.textContent = 'Server connection failed. Please check your connection.';
-                errorContainer.style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Send Verification Code';
-            }
-        });
+                formError.hidden = false;
+                submitBtn.textContent = 'Send verification code';
+                validate();
+            });
+        })();
     </script>
 </body>
 </html>

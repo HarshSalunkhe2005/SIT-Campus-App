@@ -1,308 +1,169 @@
 <!DOCTYPE html>
-<html lang="en" >
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIT Campus App - Student Dashboard</title>
-    <link rel="stylesheet" href="../../static/css/shared/base.css" >
-    <link rel="stylesheet" href="../../static/css/shared/navbar.css" >
-    <link rel="stylesheet" href="../../static/css/shared/components.css" >
-    <link rel="stylesheet" href="../../static/css/student/dashboard.css" >
+    <title>Student dashboard · SIT Campus App</title>
+    <meta name="theme-color" content="#c52f33">
+    <link rel="icon" href="../../static/images/Symlogo333.jpg">
+    <link rel="stylesheet" href="../../static/css/app.css">
 </head>
+<body data-role="student" data-active="report">
+<main id="main" class="page">
 
-<body>
-
-    <!-- NAVBAR: th:replace runs on server; inner div is the live-server fallback -->
-    <div >
-        <nav class="navbar">
-            <div class="navbar-container">
-                <div class="navbar-brand"><span class="brand-text">Campus Portal</span></div>
-                <div class="navbar-title">
-                    <h1>Student Dashboard</h1>
-                </div>
-                <div class="navbar-right">
-                    <span class="user-name">Student</span>
-                    <a href="../auth/login.html" class="logout-icon-btn" title="Logout" style="margin-left: 1rem; color: var(--danger-color); display: flex; align-items: center;" onclick="localStorage.clear();">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </nav>
-    </div>
-
-    <main class="sit-dashboard-main">
-
-        <!-- PAGE HEADER -->
-        <div class="sit-page-header">
+    <!-- ========== Report an issue ========== -->
+    <section id="view-report" data-view="report" aria-labelledby="h-report">
+        <div class="page-head">
             <div>
-                <h2 class="sit-page-title">Welcome back, <span 
-                        class="sit-highlight">Student</span> 👋</h2>
-                <p class="sit-page-subtitle">Track and manage your campus issue reports.</p>
+                <h1 id="h-report">Report an issue</h1>
+                <p>Tell us what is wrong and where. It goes straight to the right department, and you can follow it from start to finish.</p>
             </div>
         </div>
 
-        <!-- STATS -->
-        <section class="sit-stats-container" aria-label="Issue Statistics">
-            <div class="sit-stat-card sit-stat-card--total">
-                <div class="sit-stat-icon">📋</div>
-                <div class="sit-stat-number" >0</div>
-                <div class="sit-stat-label">Total Reports</div>
-            </div>
-            <div class="sit-stat-card sit-stat-card--pending">
-                <div class="sit-stat-icon">⏳</div>
-                <div class="sit-stat-number" >0</div>
-                <div class="sit-stat-label">Pending</div>
-            </div>
-            <div class="sit-stat-card sit-stat-card--inprogress">
-                <div class="sit-stat-icon">🔧</div>
-                <div class="sit-stat-number" >0</div>
-                <div class="sit-stat-label">In Progress</div>
-            </div>
-            <div class="sit-stat-card sit-stat-card--resolved">
-                <div class="sit-stat-icon">✅</div>
-                <div class="sit-stat-number" >0</div>
-                <div class="sit-stat-label">Resolved</div>
-            </div>
-        </section>
+        <div class="grid-2">
+            <div class="card card-pad" id="reportCard">
+                <form id="reportForm" novalidate>
+                    <fieldset class="field" style="border:0;padding:0;margin:0">
+                        <legend class="label">What kind of problem is it?<span class="req" aria-hidden="true">*</span></legend>
+                        <div class="choice-grid" id="categoryGrid" style="margin-top:8px"></div>
+                        <span class="error-text" id="categoryErr" role="alert"></span>
+                    </fieldset>
 
-        <!-- TABS -->
-        <div class="sit-tabs" role="tablist" aria-label="Dashboard Sections">
-            <button class="sit-tab-btn sit-tab-btn--active" role="tab" aria-selected="true" aria-controls="tab-report"
-                id="btn-report" data-tab="report">
-                Report an Issue
-            </button>
-            <button class="sit-tab-btn" role="tab" aria-selected="false" aria-controls="tab-feed" id="btn-feed"
-                data-tab="feed">
-                Campus Feed
-            </button>
-            <button class="sit-tab-btn" role="tab" aria-selected="false" aria-controls="tab-history" id="btn-history"
-                data-tab="history">
-                My Issues
-            </button>
-        </div>
-
-        <!-- TAB 1: REPORT FORM -->
-        <section id="tab-report" class="sit-tab-content sit-tab-content--active" role="tabpanel"
-            aria-labelledby="btn-report">
-            <div class="sit-card">
-                <h3 class="sit-card__title">Report a Campus Issue</h3>
-
-                <form id="reportForm" class="sit-report-form"  action="#" method="POST"
-                    enctype="multipart/form-data">
-
-                    <div class="sit-form-grid">
-                        <div class="sit-input-group">
-                            <label for="category" class="sit-input-label">
-                                Category <span class="sit-required">*</span>
-                            </label>
-                            <select id="category" name="category" class="sit-select-field" required>
-                                <option value="" disabled selected>Select a category…</option>
-                                <option value="ELECTRICAL">Electrical</option>
-                                <option value="PLUMBING">Plumbing</option>
-                                <option value="CIVIL">Civil / Structural</option>
-                                <option value="CLEANLINESS">Cleanliness</option>
-                                <option value="IT">IT / Network</option>
-                                <option value="FURNITURE">Furniture</option>
-                                <option value="OTHER">Other</option>
-                            </select>
-                            <small class="sit-field-error" id="categoryError"></small>
-                        </div>
-
-                        <div class="sit-input-group">
-                            <label for="location" class="sit-input-label">
-                                Location <span class="sit-required">*</span>
-                            </label>
-                            <input type="text" id="location" name="location" class="sit-input-field"
-                                placeholder="e.g., Block A, Room 203" required maxlength="100">
-                            <small class="sit-field-error" id="locationError"></small>
-                        </div>
+                    <div class="field">
+                        <label class="label" for="location">Where is it?<span class="req" aria-hidden="true">*</span></label>
+                        <input class="input" id="location" name="location" type="text" maxlength="100" placeholder="e.g. Block A, Room 203" required aria-describedby="locationErr">
+                        <span class="error-text" id="locationErr" role="alert"></span>
                     </div>
 
-                    <div class="sit-input-group">
-                        <label for="description" class="sit-input-label">
-                            Description <span class="sit-required">*</span>
-                        </label>
-                        <textarea id="description" name="description" class="sit-textarea-field" rows="4"
-                            placeholder="Describe the issue in detail (min 20 characters)…" required minlength="20"
-                            maxlength="500"></textarea>
-                        <small class="sit-char-count" id="descCount">0 / 500</small>
-                        <small class="sit-field-error" id="descError"></small>
-                    </div>
-
-                    <div class="sit-input-group">
-                        <label class="sit-input-label">
-                            Attach Photo <span class="sit-required">*</span>
-                            <small class="sit-input-label-hint">Required — helps the department assess the issue
-                                faster.</small>
-                        </label>
-                        <div class="sit-upload-area" id="uploadArea">
-                            <input type="file" id="issueImage" name="image" accept="image/*" class="sit-file-input"
-                                required>
-                            <div class="sit-upload-prompt" id="uploadPrompt">
-                                <span class="sit-upload-icon">📷</span>
-                                <p>Click or drag &amp; drop an image here</p>
-                                <small>PNG, JPG, WEBP — max 5 MB</small>
-                            </div>
-                            <div class="sit-image-preview" id="imagePreview" style="display:none;">
-                                <img id="previewImg" src="" alt="Preview">
-                                <button type="button" class="sit-remove-image" id="removeImage"
-                                    aria-label="Remove image">✕</button>
-                            </div>
+                    <div class="field">
+                        <label class="label" for="description">What is wrong?<span class="req" aria-hidden="true">*</span></label>
+                        <textarea class="textarea" id="description" name="description" maxlength="500" placeholder="Describe the problem so the department knows what to bring and fix (at least 20 characters)." required aria-describedby="descHint descErr"></textarea>
+                        <div style="display:flex;justify-content:space-between;gap:12px">
+                            <span class="error-text" id="descErr" role="alert"></span>
+                            <span class="counter" id="descCount" aria-live="off">0 / 500</span>
                         </div>
-                        <small class="sit-field-error" id="imageError"></small>
+                        <span class="hint" id="descHint">Mention what you see, since when, and anything that makes it urgent.</span>
                     </div>
 
-                    <div class="sit-form-actions">
-                        <button type="reset" class="sit-btn sit-btn--ghost">Clear Form</button>
-                        <button type="submit" class="sit-btn sit-btn--primary" id="reportSubmitBtn">Submit
-                            Report</button>
+                    <fieldset class="field" style="border:0;padding:0;margin:0">
+                        <legend class="label">How urgent is it?</legend>
+                        <div class="segmented" style="margin-top:8px;align-self:flex-start" id="priorityGroup"></div>
+                    </fieldset>
+
+                    <div class="field">
+                        <span class="label" id="photoLabel">Photo<span class="req" aria-hidden="true">*</span></span>
+                        <div id="photoUploader" aria-labelledby="photoLabel"></div>
+                    </div>
+
+                    <div class="alert alert-error" id="submitErr" role="alert" hidden style="margin-top:20px"></div>
+                    <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Submit report</button>
+                        <button type="reset" class="btn btn-ghost" id="clearBtn">Clear form</button>
                     </div>
                 </form>
-            </div>
-        </section>
 
-        <!-- TAB 2: CAMPUS FEED (all issues — browse & upvote instead of duplicating) -->
-        <section id="tab-feed" class="sit-tab-content" role="tabpanel" aria-labelledby="btn-feed" hidden>
-            <div class="sit-card">
-                <div class="sit-card__toolbar">
-                    <h3 class="sit-card__title">All Campus Issues</h3>
-                    <div class="sit-toolbar-controls">
-                        <select id="feedFilterStatus" class="sit-select-field sit-select-field--sm"
-                            aria-label="Filter feed by status" data-filter-key="status">
-                            <option value="ALL">All Status</option>
-                            <option value="PENDING">Pending</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="RESOLVED">Resolved</option>
-                        </select>
-                        <select id="feedFilterCategory" class="sit-select-field sit-select-field--sm"
-                            aria-label="Filter feed by category" data-filter-key="category">
-                            <option value="ALL">All Categories</option>
-                            <option value="ELECTRICAL">Electrical</option>
-                            <option value="PLUMBING">Plumbing</option>
-                            <option value="CIVIL">Civil</option>
-                            <option value="CLEANING">Cleanliness</option>
-                            <option value="IT">IT / Network</option>
-                            <option value="FURNITURE">Furniture</option>
-                            <option value="GENERAL">Other</option>
-                        </select>
-                        <select id="feedSortBy" class="sit-select-field sit-select-field--sm" aria-label="Sort feed">
-                            <option value="DATE_DESC">Newest First</option>
-                            <option value="DATE_ASC">Oldest First</option>
-                            <option value="UPVOTES">Most Upvoted</option>
-                        </select>
+                <div id="successPanel" hidden>
+                    <div class="alert alert-ok" role="status">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>
+                        <div><strong>Your report was submitted.</strong> Issue <span id="successId"></span> has been sent to <strong id="successDept"></strong>.</div>
                     </div>
-                </div>
-
-                <p class="sit-feed-hint">🔍 Check if your issue already exists — upvote it instead of creating a
-                    duplicate!</p>
-
-                <div class="sit-issues-list" id="feedList">
-
-                    <!-- Thymeleaf: all campus issues -->
-                    <div  class="sit-issue-card"
-                        >
-                        <div class="sit-issue-card__left">
-                            <span class="sit-status-badge"
-
-                                >STATUS</span>
-                            <h4 class="sit-issue-card__title" >Category</h4>
-                            <p class="sit-issue-card__location">
-                                📍 <span >Location</span>
-                            </p>
-                            <p class="sit-issue-card__desc" >Description</p>
-                            <small class="sit-issue-card__date">
-                                Reported by <strong >Student</strong>
-                                · <span >01 Jan 2025</span>
-                            </small>
-                        </div>
-                        <div class="sit-issue-card__right">
-                            <button class="sit-upvote-btn"  aria-label="Upvote this issue">
-                                <span class="sit-upvote-icon">▲</span>
-                                <span class="sit-upvote-count" >0</span>
-                            </button>
-                        </div>
+                    <h2 style="font-size:20px;margin:24px 0 10px">What happens next</h2>
+                    <ol class="steps">
+                        <li class="step is-done"><span class="step-dot"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span><div><div class="step-title">Reported</div><div class="step-time">Just now</div></div></li>
+                        <li class="step is-todo"><span class="step-dot"></span><div><div class="step-title">The department picks it up</div><div class="step-time">You will see the status change</div></div></li>
+                        <li class="step is-todo"><span class="step-dot"></span><div><div class="step-title">Work in progress, then resolved</div><div class="step-time">We email you when it is resolved</div></div></li>
+                    </ol>
+                    <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
+                        <a class="btn btn-primary" href="#issues">Track my issues</a>
+                        <button type="button" class="btn btn-secondary" id="reportAnother">Report another issue</button>
                     </div>
-
-                </div><!-- /feedList -->
-
-                <div class="sit-empty-state" id="feedEmptyState" style="display:none;" aria-live="polite">
-                    <span class="sit-empty-icon">📭</span>
-                    <p>No issues match the selected filters.</p>
                 </div>
             </div>
-        </section>
 
-        <!-- TAB 3: ISSUE HISTORY -->
-        <section id="tab-history" class="sit-tab-content" role="tabpanel" aria-labelledby="btn-history" hidden>
-            <div class="sit-card">
-                <div class="sit-card__toolbar">
-                    <h3 class="sit-card__title">My Reported Issues</h3>
-                    <div class="sit-toolbar-controls">
-                        <select id="filterStatus" class="sit-select-field sit-select-field--sm"
-                            aria-label="Filter by status" data-filter-key="status">
-                            <option value="ALL">All Status</option>
-                            <option value="PENDING">Pending</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="RESOLVED">Resolved</option>
-                        </select>
-                        <select id="sortBy" class="sit-select-field sit-select-field--sm" aria-label="Sort issues">
-                            <option value="DATE_DESC">Newest First</option>
-                            <option value="DATE_ASC">Oldest First</option>
-                            <option value="UPVOTES">Most Upvoted</option>
-                        </select>
-                    </div>
+            <aside class="stack" aria-label="Help">
+                <div class="card card-pad" id="similarCard" hidden>
+                    <h2 style="font-size:18px;margin-bottom:4px">Already reported?</h2>
+                    <p class="hint" style="margin-bottom:12px">Similar open issues. Upvote one instead of reporting it again.</p>
+                    <div id="similarList" class="issue-list"></div>
                 </div>
-
-                <div class="sit-issues-list" id="issuesList">
-
-                    <!-- ── Thymeleaf: real data rows ── -->
-                    <div  class="sit-issue-card"
-                        >
-                        <div class="sit-issue-card__left">
-                            <span class="sit-status-badge"
-
-                                >STATUS</span>
-                            <h4 class="sit-issue-card__title" >Category</h4>
-                            <p class="sit-issue-card__location">
-                                📍 <span >Location</span>
-                            </p>
-                            <p class="sit-issue-card__desc" >Description</p>
-                            <small class="sit-issue-card__date"
-                                >01 Jan 2025</small>
-                        </div>
-                        <div class="sit-issue-card__right">
-                            <button class="sit-upvote-btn"  aria-label="Upvote this issue">
-                                <span class="sit-upvote-icon">▲</span>
-                                <span class="sit-upvote-count" >0</span>
-                            </button>
-                        </div>
-                    </div>
-
-
-
-                </div><!-- /issuesList -->
-
-                <div class="sit-empty-state" id="emptyState" style="display:none;" aria-live="polite">
-                    <span class="sit-empty-icon">📭</span>
-                    <p>No issues match the selected filter.</p>
+                <div class="card card-pad">
+                    <h2 style="font-size:18px;margin-bottom:12px">How it works</h2>
+                    <ol class="steps">
+                        <li class="step is-todo"><span class="step-dot"></span><div><div class="step-title">You report</div><div class="step-time">Category, place, a short description and a photo.</div></div></li>
+                        <li class="step is-todo"><span class="step-dot"></span><div><div class="step-title">It is routed</div><div class="step-time">The matching department gets it on their board.</div></div></li>
+                        <li class="step is-todo"><span class="step-dot"></span><div><div class="step-title">You follow it</div><div class="step-time">Watch the status under My issues.</div></div></li>
+                    </ol>
                 </div>
+            </aside>
+        </div>
+    </section>
+
+    <!-- ========== Campus feed ========== -->
+    <section id="view-feed" data-view="feed" hidden aria-labelledby="h-feed">
+        <div class="page-head">
+            <div>
+                <h1 id="h-feed">Campus feed</h1>
+                <p>Issues reported across campus. If yours is already here, upvote it so the department sees how many people are affected.</p>
             </div>
-        </section>
+        </div>
+        <div class="toolbar">
+            <div class="input-icon grow">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                <input class="input" id="feedSearch" type="search" placeholder="Search by place or description" aria-label="Search the feed">
+            </div>
+            <select class="select" id="feedStatus" aria-label="Filter by status">
+                <option value="OPEN">Open issues</option>
+                <option value="NEW">New</option>
+                <option value="IN_PROGRESS">In progress</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="ALL">All</option>
+            </select>
+            <select class="select" id="feedCategory" aria-label="Filter by category">
+                <option value="ALL">All categories</option>
+                <option value="ELECTRICAL">Electrical</option>
+                <option value="PLUMBING">Plumbing</option>
+                <option value="CIVIL">Civil</option>
+                <option value="CLEANING">Cleaning</option>
+                <option value="IT">IT / Network</option>
+                <option value="FURNITURE">Furniture</option>
+                <option value="HOSTEL">Hostel</option>
+                <option value="GENERAL">Other</option>
+            </select>
+            <select class="select" id="feedSort" aria-label="Sort">
+                <option value="DATE_DESC">Newest first</option>
+                <option value="DATE_ASC">Oldest first</option>
+                <option value="UPVOTES">Most upvoted</option>
+            </select>
+        </div>
+        <div id="feedList" class="issue-list" aria-live="polite"></div>
+    </section>
 
-    </main>
+    <!-- ========== My issues ========== -->
+    <section id="view-issues" data-view="issues" hidden aria-labelledby="h-issues">
+        <div class="page-head">
+            <div>
+                <h1 id="h-issues">My issues</h1>
+                <p>Everything you have reported, with its progress.</p>
+            </div>
+            <div class="head-actions"><a class="btn btn-primary" href="#report"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Report an issue</a></div>
+        </div>
+        <div class="kpis" id="mineKpis"></div>
+        <div class="toolbar">
+            <select class="select" id="mineStatus" aria-label="Filter by status">
+                <option value="ALL">All statuses</option>
+                <option value="NEW">New</option>
+                <option value="IN_PROGRESS">In progress</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+            </select>
+        </div>
+        <div id="mineList" class="issue-list" aria-live="polite"></div>
+    </section>
+</main>
 
-    <!-- TOAST -->
-    <div id="sit-toast" class="sit-toast" role="status" aria-live="polite" aria-atomic="true"></div>
-
-    <script src="../../static/js/shared/toast.js"        ></script>
-    <script src="../../static/js/shared/api.js"          ></script>
-    <script src="../../static/js/shared/image-upload.js" ></script>
-    <script src="../../static/js/student/dashboard.js"   ></script>
+<script src="../../static/js/shared/toast.js"></script>
+<script src="../../static/js/shared/api.js"></script>
+<script src="../../static/js/shared/ui.js"></script>
+<script src="../../static/js/student/dashboard.js"></script>
 </body>
-
 </html>

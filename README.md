@@ -73,7 +73,11 @@ cd campusbackend
 ./mvnw test
 ```
 
-80 tests cover the sign-up flow (OTP expiry, attempt limits, resend throttling, account takeover attempts), login (rate limiting, disabled accounts, token tampering), role separation, department isolation, complaint routing, photo validation, upvotes, admin operations, response shapes and query counts.
+85 tests cover the sign-up flow (OTP expiry, attempt limits, resend throttling, account takeover attempts), login (rate limiting, disabled accounts, token tampering), role separation, department isolation, complaint routing, photo validation, upvotes, admin operations, response shapes and query counts.
+
+## The interface
+
+Plain HTML, CSS and JavaScript with no build step. One design system (`static/css/app.css`) and one set of helpers (`static/js/shared/ui.js`: icons, app shell, dialogs, status badges, photo uploader) serve all three roles. SIT crimson is the only accent; statuses use their own colours and always carry an icon and a label. It works on phones (bottom navigation for students and admins), is keyboard operable, and uses self-hosted fonts (Source Serif 4 and Source Sans 3, SIL Open Font License).
 
 ## How it works
 
@@ -92,6 +96,7 @@ src/main/resources/
 - **Login:** `POST /auth/login` returns a JWT (24 h). Failed attempts are rate limited. Disabling or deleting a user takes effect immediately, not when their token expires.
 - **Roles:** `/student/**`, `/dept/**` and `/admin/**` are restricted to their role. A department can only see and change its own complaints.
 - **Reporting:** `POST /student/report` (multipart: `complaint` JSON + `image`). The category the student picks (or keywords in the description, matched as whole words) decides the department; with no matching department it goes to General.
+- **Progress history:** every status change is recorded (`complaint_events`), so students see a step-by-step timeline (reported, assigned, in progress, resolved) with dates. Complaints from before this existed get a timeline derived from their created and updated times.
 - **Photos:** JPEG, PNG or WebP up to 5 MB, checked by content, stored under `campusbackend/uploads/` with random names and served at `/uploads/...`.
 
 ## License
