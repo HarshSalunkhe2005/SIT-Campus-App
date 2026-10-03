@@ -1,5 +1,7 @@
 package com.sit.campusbackend.auth.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,49 +10,42 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final AccountGuard accountGuard;
 
-    public JwtAuthFilter(JwtUtil jwtUtil) {
+    public JwtAuthFilter(JwtUtil jwtUtil, AccountGuard accountGuard) {
         this.jwtUtil = jwtUtil;
+        this.accountGuard = accountGuard;
     }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (header != null && header.startsWith("Bearer ")) {
+            try {
+                Claims claims = jwtUtil.parse(header.substring(7));
+                String email = claims.getSubject();
+                String role = claims.get("role", String.class);
 
-        final String token = authHeader.substring(7);
-        try {
-            String email = jwtUtil.validateAndGetEmail(token);
-            String role = jwtUtil.extractRole(token);
-
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        email,
-                        null,
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (email != null && role != null && accountGuard.isActive(role, email)) {
+                    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                            email, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))));
+                }
+            } catch (JwtException | IllegalArgumentException e) {
+                // invalid or expired token: leave the request unauthenticated and let the security rules reject it
             }
-        } catch (Exception e) {
-            // Invalid token - just proceed and let Spring Security reject the request
         }
 
         filterChain.doFilter(request, response);

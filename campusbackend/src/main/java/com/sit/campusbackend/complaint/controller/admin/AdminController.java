@@ -1,35 +1,30 @@
 package com.sit.campusbackend.complaint.controller.admin;
 
-import com.sit.campusbackend.complaint.dto.ComplaintResponse;
-import com.sit.campusbackend.complaint.dto.DashboardStatsResponse;
-import com.sit.campusbackend.complaint.dto.StatusUpdateRequest;
+import com.sit.campusbackend.complaint.dto.*;
+import com.sit.campusbackend.complaint.service.AdminService;
 import com.sit.campusbackend.complaint.service.ComplaintService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin(origins = "http://127.0.0.1:5500")
 public class AdminController {
 
     private final ComplaintService complaintService;
+    private final AdminService adminService;
 
-    public AdminController(ComplaintService complaintService) {
+    public AdminController(ComplaintService complaintService, AdminService adminService) {
         this.complaintService = complaintService;
+        this.adminService = adminService;
     }
 
-    @GetMapping("/complaints")
-    public ResponseEntity<Page<ComplaintResponse>> getAllComplaints(
-            @RequestParam(defaultValue = "0")  int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(complaintService.getAllComplaints(
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))));
+    @GetMapping("/all-complaints")
+    public ResponseEntity<List<ComplaintResponse>> getAllComplaints() {
+        return ResponseEntity.ok(complaintService.getAllComplaints());
     }
 
     @GetMapping("/stats")
@@ -38,59 +33,51 @@ public class AdminController {
     }
 
     @PutMapping("/status")
-    public ResponseEntity<ComplaintResponse> updateStatus(
-            @Valid @RequestBody StatusUpdateRequest request) {
-        com.sit.campusbackend.complaint.entity.ComplaintStatus statusEnum = 
-            com.sit.campusbackend.complaint.entity.ComplaintStatus.valueOf(request.status().toUpperCase());
-        return ResponseEntity.ok(complaintService.updateStatus(request.complaintId(), statusEnum));
+    public ResponseEntity<ComplaintResponse> updateStatus(@Valid @RequestBody StatusUpdateRequest request) {
+        return ResponseEntity.ok(complaintService.updateStatusAsAdmin(request.complaintId(), request.status()));
     }
 
-    @GetMapping("/all-complaints")
-    public ResponseEntity<List<ComplaintResponse>> getAllComplaintsList() {
-        return ResponseEntity.ok(complaintService.getAllComplaints());
+    @PostMapping("/password")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody PasswordChangeRequest request, Authentication auth) {
+        adminService.changeAdminPassword(auth.getName(), request.currentPassword(), request.newPassword());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<com.sit.campusbackend.auth.entity.Student>> getAllStudents() {
-        return ResponseEntity.ok(complaintService.getAllStudents());
-    }
-
-    @GetMapping("/depts")
-    public ResponseEntity<List<com.sit.campusbackend.complaint.entity.Department>> getAllDepts() {
-        return ResponseEntity.ok(complaintService.getAllDepartments());
-    }
-
-    @DeleteMapping("/issue/{id}")
-    public ResponseEntity<Void> deleteIssue(@PathVariable Long id) {
-        complaintService.deleteComplaint(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<StudentSummary>> getAllStudents() {
+        return ResponseEntity.ok(adminService.getStudents());
     }
 
     @PostMapping("/user/{email}/toggle")
     public ResponseEntity<Void> toggleUserStatus(@PathVariable String email) {
-        complaintService.toggleUserStatus(email);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/dept")
-    public ResponseEntity<com.sit.campusbackend.complaint.entity.Department> createDept(@RequestBody com.sit.campusbackend.complaint.entity.Department dept) {
-        return ResponseEntity.ok(complaintService.saveDepartment(dept));
-    }
-
-    @PutMapping("/dept/{id}")
-    public ResponseEntity<com.sit.campusbackend.complaint.entity.Department> updateDept(@PathVariable Long id, @RequestBody com.sit.campusbackend.complaint.entity.Department dept) {
-        return ResponseEntity.ok(complaintService.updateDepartment(id, dept));
-    }
-
-    @DeleteMapping("/dept/{id}")
-    public ResponseEntity<Void> deleteDept(@PathVariable Long id) {
-        complaintService.deleteDepartment(id);
+        adminService.toggleStudent(email);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/user/{email}")
     public ResponseEntity<Void> deleteUser(@PathVariable String email) {
-        complaintService.deleteStudent(email);
+        adminService.deleteStudent(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/depts")
+    public ResponseEntity<List<DepartmentResponse>> getAllDepts() {
+        return ResponseEntity.ok(adminService.getDepartments());
+    }
+
+    @PostMapping("/dept")
+    public ResponseEntity<DepartmentResponse> createDept(@Valid @RequestBody DepartmentRequest request) {
+        return ResponseEntity.ok(adminService.createDepartment(request));
+    }
+
+    @PutMapping("/dept/{id}")
+    public ResponseEntity<DepartmentResponse> updateDept(@PathVariable Long id, @Valid @RequestBody DepartmentRequest request) {
+        return ResponseEntity.ok(adminService.updateDepartment(id, request));
+    }
+
+    @DeleteMapping("/dept/{id}")
+    public ResponseEntity<Void> deleteDept(@PathVariable Long id) {
+        adminService.deleteDepartment(id);
         return ResponseEntity.ok().build();
     }
 }

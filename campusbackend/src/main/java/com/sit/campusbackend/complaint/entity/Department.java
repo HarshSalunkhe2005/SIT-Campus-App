@@ -1,5 +1,6 @@
 package com.sit.campusbackend.complaint.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,6 +23,7 @@ public class Department {
     @Column(nullable = false)
     private String email;
 
-    /** BCrypt hash of the department's login password (set via seed SQL). */
+    /** BCrypt hash of the department's login password (set when the department is created). */
+    @JsonIgnore
     private String passwordHash;
 }

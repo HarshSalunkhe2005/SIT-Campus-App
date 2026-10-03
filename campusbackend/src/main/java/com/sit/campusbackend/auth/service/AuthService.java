@@ -1,140 +1,186 @@
 package com.sit.campusbackend.auth.service;
 
-import com.sit.campusbackend.auth.entity.Admin;
 import com.sit.campusbackend.auth.entity.Student;
 import com.sit.campusbackend.auth.repository.AdminRepository;
 import com.sit.campusbackend.auth.repository.StudentRepository;
 import com.sit.campusbackend.auth.security.JwtUtil;
+import com.sit.campusbackend.common.MailService;
 import com.sit.campusbackend.complaint.entity.Department;
 import com.sit.campusbackend.complaint.repository.DepartmentRepository;
-import com.sit.campusbackend.complaint.exception.ResourceNotFoundException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 @Service
 public class AuthService {
 
-    private final StudentRepository studentRepository;
-    private final AdminRepository adminRepository;
-    private final DepartmentRepository departmentRepository;
-    private final JavaMailSender mailSender;
+    private static final String STUDENT_DOMAIN = "@sitpune.edu.in";
+    private static final Pattern PRN = Pattern.compile("^\\d{11}$");
+    private static final String BAD_CREDENTIALS = "Invalid credentials";
+
+    private final StudentRepository students;
+    private final AdminRepository admins;
+    private final DepartmentRepository departments;
+    private final MailService mail;
+    private final OtpService otps;
+    private final LoginRateLimiter rateLimiter;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    private final Map<String, String> otpStorage = new ConcurrentHashMap<>();
+    /** Compared against when the account does not exist, so response time does not reveal which emails are registered. */
+    private final String dummyHash;
 
-    public AuthService(StudentRepository studentRepository, AdminRepository adminRepository,
-                       DepartmentRepository departmentRepository, JavaMailSender mailSender,
+    public AuthService(StudentRepository students, AdminRepository admins, DepartmentRepository departments,
+                       MailService mail, OtpService otps, LoginRateLimiter rateLimiter,
                        BCryptPasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
-        this.studentRepository = studentRepository;
-        this.adminRepository = adminRepository;
-        this.departmentRepository = departmentRepository;
-        this.mailSender = mailSender;
+        this.students = students;
+        this.admins = admins;
+        this.departments = departments;
+        this.mail = mail;
+        this.otps = otps;
+        this.rateLimiter = rateLimiter;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.dummyHash = passwordEncoder.encode("not-a-real-password");
     }
 
-    public void registerStudent(String email, String prn) {
-        if (email == null || !email.endsWith("@sitpune.edu.in")) {
+    // ── registration: register (sends OTP) -> verify-otp -> set-password ────────────────────────
+
+    public void registerStudent(String rawEmail, String rawPrn) {
+        String email = normalize(rawEmail);
+        if (!email.endsWith(STUDENT_DOMAIN)) {
             throw new IllegalArgumentException("Invalid SIT email. Use your @sitpune.edu.in address.");
         }
-        Optional<Student> existing = studentRepository.findById(email);
-        if (existing.isPresent() && existing.get().getPasswordHash() != null) {
+        Student existing = students.findById(email).orElse(null);
+        if (existing != null && existing.getPasswordHash() != null) {
             throw new IllegalArgumentException("User already exists. Please login.");
         }
 
-        String namePart = email.split("@")[0];
-        String[] parts = namePart.split("\\.");
-        String firstName = parts.length > 0 ? capitalize(parts[0]) : "Student";
-        String lastName = parts.length > 1 ? capitalize(parts[1]) : "";
-        String batchYear = parts.length > 2 ? parts[2] : "Unknown";
-
-        Student student = existing.orElse(new Student());
-        student.setEmail(email);
-        student.setPrn(prn);
-        student.setFirstName(firstName);
-        student.setLastName(lastName);
-        student.setBatchYear(batchYear);
-        student.setIsVerified(false);
-        studentRepository.save(student);
-
-        String otp = String.valueOf(new Random().nextInt(900_000) + 100_000);
-        otpStorage.put(email, otp);
-        
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Your OTP Code — Campus Portal");
-        message.setText("Your verification code is: " + otp + "\n\nThis OTP expires when used.");
-        mailSender.send(message);
-    }
-
-    public void verifyOtp(String email, String otp) {
-        String savedOtp = otpStorage.get(email);
-        if (savedOtp == null) throw new IllegalArgumentException("No OTP found. Register first.");
-        if (!savedOtp.equals(otp)) throw new IllegalArgumentException("Wrong OTP.");
-
-        Student student = studentRepository.findById(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found."));
-        student.setIsVerified(true);
-        studentRepository.save(student);
-        otpStorage.remove(email);
-    }
-
-    public void setPassword(String email, String rawPassword) {
-        if (email == null || rawPassword == null || rawPassword.isBlank()) {
-            throw new IllegalArgumentException("Email and password required");
+        String prn = rawPrn == null ? "" : rawPrn.trim();
+        if ((existing == null || !prn.isEmpty()) && !PRN.matcher(prn).matches()) {
+            throw new IllegalArgumentException("PRN must be 11 numeric digits.");
         }
-        Student student = studentRepository.findById(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        String otp = otps.issue(email);
+        try {
+            Student student = existing != null ? existing : newStudent(email);
+            if (!prn.isEmpty()) student.setPrn(prn);
+            student.setIsVerified(false);
+            students.save(student);
+            mail.sendOtp(email, otp);
+        } catch (RuntimeException e) {
+            otps.revoke(email);
+            throw e;
+        }
+    }
+
+    public void verifyOtp(String rawEmail, String otp) {
+        String email = normalize(rawEmail);
+        otps.verify(email, otp == null ? null : otp.trim());
+        Student student = students.findById(email)
+                .orElseThrow(() -> new IllegalArgumentException("No OTP found. Register first."));
+        student.setIsVerified(true);
+        students.save(student);
+    }
+
+    public void setPassword(String rawEmail, String rawPassword) {
+        String email = normalize(rawEmail);
+        checkPasswordStrength(rawPassword);
+        if (!otps.isVerified(email)) {
+            throw new IllegalArgumentException("Verify your email with the OTP first.");
+        }
+        Student student = students.findById(email)
+                .orElseThrow(() -> new IllegalArgumentException("Verify your email with the OTP first."));
+        if (student.getPasswordHash() != null) {
+            throw new IllegalArgumentException("User already exists. Please login.");
+        }
         student.setPasswordHash(passwordEncoder.encode(rawPassword));
         student.setIsVerified(true);
-        studentRepository.save(student);
+        students.save(student);
+        otps.clearVerified(email);
     }
 
-    public Map<String, String> login(String email, String rawPassword) {
-        if (email == null || rawPassword == null) {
-            throw new IllegalArgumentException("Email and password required");
-        }
+    // ── login ────────────────────────────────────────────────────────────────────────────────────
 
-        Optional<Admin> adminOpt = adminRepository.findByEmail(email);
-        if (adminOpt.isPresent()) {
-            Admin admin = adminOpt.get();
-            if (admin.getPasswordHash() == null || !passwordEncoder.matches(rawPassword, admin.getPasswordHash())) {
-                throw new IllegalArgumentException("Invalid credentials");
-            }
-            return Map.of("role", "ADMIN", "email", email, "token", jwtUtil.generateToken(email, "ADMIN"));
-        }
+    public Map<String, String> login(String rawEmail, String rawPassword, String clientAddress) {
+        String email = normalize(rawEmail);
+        rateLimiter.checkAllowed(email, clientAddress);
 
-        Optional<Department> deptOpt = departmentRepository.findByEmail(email);
-        if (deptOpt.isPresent()) {
-            Department dept = deptOpt.get();
-            if (dept.getPasswordHash() == null || !passwordEncoder.matches(rawPassword, dept.getPasswordHash())) {
-                throw new IllegalArgumentException("Invalid credentials");
-            }
-            return Map.of("role", "DEPARTMENT", "email", email, "departmentId", String.valueOf(dept.getId()),
-                          "departmentName", dept.getName(), "token", jwtUtil.generateToken(email, "DEPARTMENT"));
+        Map<String, String> result = authenticate(email, rawPassword);
+        if (result == null) {
+            rateLimiter.recordFailure(email, clientAddress);
+            throw new IllegalArgumentException(BAD_CREDENTIALS);
         }
-
-        Student student = studentRepository.findById(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found."));
-        if (student.getIsVerified() == null || !student.getIsVerified()) {
-            throw new IllegalArgumentException("Please verify email first.");
-        }
-        if (student.getPasswordHash() == null || !passwordEncoder.matches(rawPassword, student.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid password");
-        }
-        return Map.of("role", "STUDENT", "email", email, "token", jwtUtil.generateToken(email, "STUDENT"));
+        rateLimiter.recordSuccess(email);
+        return result;
     }
 
-    private String capitalize(String s) {
-        if (s == null || s.isEmpty()) return s;
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1).toLowerCase();
+    /** Returns the login response, or null when the credentials are wrong. */
+    private Map<String, String> authenticate(String email, String password) {
+        var admin = admins.findByEmailIgnoreCase(email);
+        if (admin.isPresent()) {
+            if (!matches(password, admin.get().getPasswordHash())) return null;
+            String stored = admin.get().getEmail();
+            return Map.of("role", "ADMIN", "email", stored, "token", jwtUtil.generateToken(stored, "ADMIN"));
+        }
+
+        Optional<Department> dept = departments.findByEmailIgnoreCase(email);
+        if (dept.isPresent()) {
+            Department d = dept.get();
+            if (!matches(password, d.getPasswordHash())) return null;
+            return Map.of("role", "DEPARTMENT", "email", d.getEmail(), "departmentId", String.valueOf(d.getId()),
+                    "departmentName", d.getName(), "token", jwtUtil.generateToken(d.getEmail(), "DEPARTMENT"));
+        }
+
+        Optional<Student> student = students.findById(email);
+        if (!matches(password, student.map(Student::getPasswordHash).orElse(null))) return null;
+        Student s = student.get();
+        if (!Boolean.TRUE.equals(s.getIsVerified())) {
+            throw new IllegalArgumentException("Your account is disabled. Please contact the administrator.");
+        }
+        return Map.of("role", "STUDENT", "email", email, "name", s.getFirstName(), "token", jwtUtil.generateToken(email, "STUDENT"));
+    }
+
+    private boolean matches(String rawPassword, String hash) {
+        boolean ok = passwordEncoder.matches(rawPassword, hash != null ? hash : dummyHash);
+        return ok && hash != null;
+    }
+
+    // ── helpers ──────────────────────────────────────────────────────────────────────────────────
+
+    private Student newStudent(String email) {
+        String[] parts = email.substring(0, email.indexOf('@')).split("\\.");
+        Student s = new Student();
+        s.setEmail(email);
+        s.setFirstName(parts.length > 0 && !parts[0].isEmpty() ? capitalize(parts[0]) : "Student");
+        s.setLastName(parts.length > 1 ? capitalize(parts[1]) : "");
+        s.setBatchYear(parts.length > 2 ? parts[2] : "Unknown");
+        return s;
+    }
+
+    /** Same rule as the sign-up page: at least 8 characters and at least two of upper/digit/symbol/length. */
+    private void checkPasswordStrength(String password) {
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters.");
+        }
+        int score = 1;
+        if (password.chars().anyMatch(Character::isUpperCase)) score++;
+        if (password.chars().anyMatch(Character::isDigit)) score++;
+        if (password.chars().anyMatch(c -> !Character.isLetterOrDigit(c))) score++;
+        if (score < 2) {
+            throw new IllegalArgumentException("Password is too weak: add an uppercase letter, a number or a symbol.");
+        }
+    }
+
+    private static String normalize(String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static String capitalize(String s) {
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1).toLowerCase(Locale.ROOT);
     }
 }

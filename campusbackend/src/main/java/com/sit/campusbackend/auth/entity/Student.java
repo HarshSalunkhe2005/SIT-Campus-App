@@ -1,5 +1,6 @@
 package com.sit.campusbackend.auth.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -32,6 +33,7 @@ public class Student {
     private String batchYear;
 
     /** BCrypt hash of the student's password. Set after OTP verification. */
+    @JsonIgnore
     @Column
     private String passwordHash;
 

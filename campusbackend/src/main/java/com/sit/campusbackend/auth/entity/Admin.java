@@ -1,5 +1,6 @@
 package com.sit.campusbackend.auth.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -23,6 +24,7 @@ public class Admin {
     private String lastName;
 
     /** BCrypt hash of the admin's password. */
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 

@@ -1,34 +1,38 @@
 package com.sit.campusbackend.complaint.entity;
 
-import com.sit.campusbackend.auth.entity.Admin;
 import com.sit.campusbackend.auth.entity.Student;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "complaints")
-@Data
+@Getter
+@Setter
 public class Complaint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** The place the issue is at (what the student typed as "location"). */
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    /** Auto-detected from description keywords (e.g. "IT", "Electrical"). */
+    /** Canonical category, e.g. "Electrical", "IT", "Cleaning". */
     private String category;
 
-    /** Optional image URL — uploaded via Supabase; only URL stored here. */
+    /** Path of the photo the student attached, served from /uploads. */
     private String imageUrl;
 
-    /** Proof-of-resolution image URL set by department on resolve. */
+    /** Path of the latest proof photo the department attached when moving the issue forward. */
     private String resolvedImageUrl;
 
     @Enumerated(EnumType.STRING)
@@ -46,13 +50,15 @@ public class Complaint {
     @Column(nullable = false)
     private int upvoteCount = 0;
 
+    /** Students who upvoted, so each student can upvote an issue only once. */
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "complaint_upvoters", joinColumns = @JoinColumn(name = "complaint_id"))
+    @Column(name = "student_email", nullable = false)
+    private Set<String> upvoters = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_email", nullable = false)
     private Student student;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_email")
-    private Admin admin;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
@@ -61,7 +67,7 @@ public class Complaint {
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        updatedAt = createdAt;
     }
 
     @PreUpdate

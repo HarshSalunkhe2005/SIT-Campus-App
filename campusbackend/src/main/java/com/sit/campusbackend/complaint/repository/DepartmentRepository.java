@@ -9,5 +9,7 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
     Optional<Department> findByType(String type);
 
-    Optional<Department> findByEmail(String email);
+    Optional<Department> findByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
 }

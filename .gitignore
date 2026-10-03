@@ -1,0 +1,8 @@
+# secrets and local config
+.env
+campusbackend/.env
+
+# build output and runtime data
+campusbackend/target/
+campusbackend/uploads/
+*.log

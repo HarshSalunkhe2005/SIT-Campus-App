@@ -2,266 +2,212 @@ package com.sit.campusbackend.complaint.service;
 
 import com.sit.campusbackend.auth.entity.Student;
 import com.sit.campusbackend.auth.repository.StudentRepository;
-import com.sit.campusbackend.complaint.dto.*;
-import com.sit.campusbackend.complaint.entity.*;
+import com.sit.campusbackend.common.MailService;
+import com.sit.campusbackend.complaint.dto.ComplaintRequest;
+import com.sit.campusbackend.complaint.dto.ComplaintResponse;
+import com.sit.campusbackend.complaint.dto.DashboardStatsResponse;
+import com.sit.campusbackend.complaint.entity.Complaint;
+import com.sit.campusbackend.complaint.entity.ComplaintPriority;
+import com.sit.campusbackend.complaint.entity.ComplaintStatus;
+import com.sit.campusbackend.complaint.entity.Department;
+import com.sit.campusbackend.complaint.exception.ApiException;
 import com.sit.campusbackend.complaint.exception.ResourceNotFoundException;
 import com.sit.campusbackend.complaint.repository.ComplaintRepository;
 import com.sit.campusbackend.complaint.repository.DepartmentRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.sit.campusbackend.auth.security.JwtUtil;
-
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * Core service for the Campus Complaint Management System.
- *
- * Responsibilities:
- *  1. Create complaint — auto-detect category, assign department, set priority
- *  2. Retrieve complaints — by student, by department, or all (paginated)
- *  3. Update complaint status (admin)
- *  4. Resolve complaint (department) + send resolution email
- *  5. Department login — BCrypt password verification
- *  6. Dashboard stats (admin)
- */
+/** Reporting, tracking and moving complaints through their lifecycle. */
 @Service
+@Transactional
 public class ComplaintService {
 
-    private final ComplaintRepository   complaintRepository;
-    private final DepartmentRepository  departmentRepository;
-    private final StudentRepository     studentRepository;
-    private final JavaMailSender        mailSender;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtUtil               jwtUtil;
+    /** Upper bound on one list response (the feed and the admin table load everything in one go). */
+    private static final int LIST_LIMIT = 1000;
 
-    public ComplaintService(ComplaintRepository complaintRepository,
-                            DepartmentRepository departmentRepository,
-                            StudentRepository studentRepository,
-                            JavaMailSender mailSender,
-                            BCryptPasswordEncoder passwordEncoder,
-                            JwtUtil jwtUtil) {
-        this.complaintRepository  = complaintRepository;
-        this.departmentRepository = departmentRepository;
-        this.studentRepository    = studentRepository;
-        this.mailSender           = mailSender;
-        this.passwordEncoder      = passwordEncoder;
-        this.jwtUtil              = jwtUtil;
+    /** Statuses a department may set; closing is the admin's call. */
+    private static final Set<ComplaintStatus> DEPARTMENT_STATUSES =
+            EnumSet.of(ComplaintStatus.PENDING, ComplaintStatus.IN_PROGRESS, ComplaintStatus.RESOLVED);
+
+    private final ComplaintRepository complaints;
+    private final DepartmentRepository departments;
+    private final StudentRepository students;
+    private final ImageStorageService images;
+    private final MailService mail;
+
+    public ComplaintService(ComplaintRepository complaints, DepartmentRepository departments,
+                            StudentRepository students, ImageStorageService images, MailService mail) {
+        this.complaints = complaints;
+        this.departments = departments;
+        this.students = students;
+        this.images = images;
+        this.mail = mail;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 1. CREATE — auto-detect category, assign department, set priority
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── student ──────────────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Create and persist a new complaint.
-     *
-     * Flow:
-     *  a. Validate inputs (also enforced via @Valid in controller).
-     *  b. Detect category from description keywords.
-     *  c. Find matching department; fall back to "General" if not found.
-     *  d. Default priority to MEDIUM when not provided.
-     *  e. Set initial status to ASSIGNED.
-     */
-    public ComplaintResponse createComplaint(ComplaintRequest req, org.springframework.web.multipart.MultipartFile image, String email) {
-        if (email == null || req.location() == null || req.description() == null) {
-            throw new IllegalArgumentException("email, location, and description are required");
-        }
+    public ComplaintResponse createComplaint(ComplaintRequest req, MultipartFile image, String studentEmail) {
+        Student student = students.findById(studentEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentEmail));
 
-        Student student = studentRepository.findById(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + email));
+        String picked = CategoryDetector.fromPicked(req.category());
+        String category = picked != null ? picked : CategoryDetector.detect(req.description());
 
-        // Use student-selected category if provided, otherwise detect via AI
-        String category = (req.category() != null && !req.category().isBlank()) 
-                ? formatCategory(req.category()) 
-                : detectCategory(req.description());
-
-        Department dept = departmentRepository.findByType(category)
-                .orElseGet(() -> departmentRepository.findByType("General")
-                        .orElseThrow(() -> new ResourceNotFoundException("No department configured for category: " + category)));
-
-        ComplaintPriority priority = req.priority() != null ? req.priority() : ComplaintPriority.MEDIUM;
+        Department department = departments.findByType(category)
+                .or(() -> departments.findByType(CategoryDetector.GENERAL))
+                .orElseThrow(() -> new ResourceNotFoundException("No department configured for category: " + category));
 
         Complaint complaint = new Complaint();
         complaint.setStudent(student);
         complaint.setTitle(req.location().trim());
         complaint.setDescription(req.description().trim());
         complaint.setCategory(category);
-        complaint.setImageUrl(req.imageUrl());
-        complaint.setDepartment(dept);
+        complaint.setImageUrl(images.store(image));
+        complaint.setDepartment(department);
         complaint.setStatus(ComplaintStatus.ASSIGNED);
-        complaint.setPriority(priority);
+        complaint.setPriority(req.priority() != null ? req.priority() : ComplaintPriority.MEDIUM);
 
-        return toResponse(complaintRepository.save(complaint));
+        return toResponse(complaints.save(complaint), true);
     }
 
-    public List<ComplaintResponse> getStudentComplaints(String email) {
-        return complaintRepository.findByStudentEmail(email)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<ComplaintResponse> getStudentComplaints(String studentEmail) {
+        return complaints.findByStudentEmailOrderByCreatedAtDesc(studentEmail).stream()
+                .map(c -> toResponse(c, true)).toList();
     }
 
-    public Page<ComplaintResponse> getAllComplaints(Pageable pageable) {
-        return complaintRepository.findAll(pageable).map(this::toResponse);
+    /** The campus-wide feed every student sees: reporter names are shown, email addresses are not. */
+    @Transactional(readOnly = true)
+    public List<ComplaintResponse> getFeed() {
+        return latest().stream().map(c -> toResponse(c, false)).toList();
     }
 
-    public List<ComplaintResponse> getAllComplaints() {
-        return complaintRepository.findAll()
-                .stream().map(this::toResponse).collect(Collectors.toList());
-    }
-
-    public ComplaintResponse updateStatus(Long complaintId, ComplaintStatus status) {
-        Complaint complaint = findComplaint(complaintId);
-        complaint.setStatus(status);
-        return toResponse(complaintRepository.save(complaint));
-    }
-
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public DashboardStatsResponse getDashboardStats() {
-        return new DashboardStatsResponse(
-            complaintRepository.count(),
-            complaintRepository.countByStatus(ComplaintStatus.PENDING),
-            complaintRepository.countByStatus(ComplaintStatus.ASSIGNED),
-            complaintRepository.countByStatus(ComplaintStatus.IN_PROGRESS),
-            complaintRepository.countByStatus(ComplaintStatus.RESOLVED),
-            complaintRepository.countByStatus(ComplaintStatus.CLOSED)
-        );
-    }
-
-    public List<ComplaintResponse> getDepartmentComplaints(Long departmentId) {
-        return complaintRepository.findByDepartmentId(departmentId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
-    }
-
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
-    }
-
-    public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
-    }
-
-    public void toggleUserStatus(String email) {
-        com.sit.campusbackend.auth.entity.Student student = studentRepository.findById(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-        student.setIsVerified(!student.getIsVerified());
-        studentRepository.save(student);
-    }
-
-    public com.sit.campusbackend.complaint.entity.Department saveDepartment(com.sit.campusbackend.complaint.entity.Department dept) {
-        if (dept.getPasswordHash() == null) {
-            dept.setPasswordHash(new BCryptPasswordEncoder().encode("sit123"));
+    /** A student can upvote an issue once; a repeat is rejected. */
+    public ComplaintResponse upvote(Long complaintId, String studentEmail) {
+        Complaint complaint = find(complaintId);
+        if (!complaint.getUpvoters().add(studentEmail)) {
+            throw new IllegalArgumentException("You have already upvoted this issue.");
         }
-        return departmentRepository.save(dept);
-    }
-
-    @org.springframework.transaction.annotation.Transactional
-    public void deleteStudent(String email) {
-        if (!studentRepository.existsById(email)) {
-            throw new ResourceNotFoundException("Student not found: " + email);
-        }
-        // First delete their complaints (due to foreign key)
-        complaintRepository.deleteByStudentEmail(email);
-        studentRepository.deleteById(email);
-    }
-
-    public com.sit.campusbackend.complaint.entity.Department updateDepartment(Long id, com.sit.campusbackend.complaint.entity.Department updated) {
-        com.sit.campusbackend.complaint.entity.Department existing = departmentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Dept not found"));
-        existing.setName(updated.getName());
-        existing.setType(updated.getType());
-        existing.setEmail(updated.getEmail());
-        return departmentRepository.save(existing);
-    }
-
-    @org.springframework.transaction.annotation.Transactional
-    public void deleteDepartment(Long id) {
-        if (!departmentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Department not found: " + id);
-        }
-        // Delete all complaints assigned to this department first
-        complaintRepository.deleteByDepartmentId(id);
-        departmentRepository.deleteById(id);
-    }
-
-    public ComplaintResponse resolveComplaint(Long complaintId, String resolvedImageUrl) {
-        Complaint complaint = findComplaint(complaintId);
-        complaint.setResolvedImageUrl(resolvedImageUrl);
-        complaint.setStatus(ComplaintStatus.RESOLVED);
-        ComplaintResponse saved = toResponse(complaintRepository.save(complaint));
-
-        sendResolutionEmail(complaint.getStudent().getEmail(), complaint.getTitle());
-        return saved;
-    }
-
-    public ComplaintResponse upvoteComplaint(Long complaintId) {
-        Complaint complaint = findComplaint(complaintId);
         complaint.setUpvoteCount(complaint.getUpvoteCount() + 1);
-        return toResponse(complaintRepository.save(complaint));
+        return toResponse(complaints.save(complaint), false);
     }
 
-    private String formatCategory(String raw) {
-        if (raw == null) return "General";
-        // Convert "ELECTRICAL" to "Electrical" to match DB naming
-        String s = raw.toLowerCase();
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
-    }
+    // ── department ───────────────────────────────────────────────────────────────────────────────
 
-    String detectCategory(String description) {
-        if (description == null || description.isBlank()) return "General";
-        String text = description.toLowerCase();
-
-        if (containsAny(text, "fan", "light", "electricity", "switch", "socket", "power", "wiring", "bulb", "voltage", "electric", "ac", "air conditioner")) return "Electrical";
-        if (containsAny(text, "wifi", "internet", "network", "router", "laptop", "computer", "printer", "server", "cable", "portal", "system", "connection", "it")) return "IT";
-        if (containsAny(text, "clean", "garbage", "waste", "trash", "dirt", "sweep", "toilet", "bathroom", "dustbin", "smell", "hygiene", "floor", "cleaning", "mop")) return "Cleaning";
-        if (containsAny(text, "pipe", "water", "tap", "leak", "drain", "plumber", "flush", "seepage", "tank", "sink", "basin")) return "Plumbing";
-        if (containsAny(text, "hostel", "room", "bed", "mattress", "mess", "canteen", "food", "warden", "dorm", "lift", "elevator")) return "Hostel";
-        if (containsAny(text, "chair", "desk", "bench", "table", "door", "window", "lock", "handle", "cupboard", "almirah", "furniture", "wood")) return "Furniture";
-        if (containsAny(text, "wall", "paint", "crack", "ceiling", "floor", "tiles", "civil", "cement")) return "Civil";
-
-        return "General";
-    }
-
-    private boolean containsAny(String text, String... keywords) {
-        for (String kw : keywords) {
-            if (text.contains(kw)) return true;
+    @Transactional(readOnly = true)
+    public List<ComplaintResponse> getDepartmentQueue(Long departmentId, String departmentEmail) {
+        Department own = requireDepartment(departmentEmail);
+        if (!own.getId().equals(departmentId)) {
+            throw ApiException.forbidden("You can only view your own department's complaints.");
         }
-        return false;
+        return complaints.findByDepartmentIdOrderByCreatedAtDesc(departmentId).stream()
+                .map(c -> toResponse(c, true)).toList();
     }
 
-    private Complaint findComplaint(Long id) {
-        return complaintRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Complaint not found with id: " + id));
-    }
-
-    private void sendResolutionEmail(String to, String complaintTitle) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(to);
-        msg.setSubject("Complaint Resolved — " + complaintTitle);
-        msg.setText("Dear Student,\n\nYour complaint \"" + complaintTitle + "\" has been successfully resolved.\n\nIf the issue persists, please raise a new complaint with updated details.\n\nRegards,\nCampus Management Team");
-        mailSender.send(msg);
-    }
-
-    public void deleteComplaint(Long id) {
-        if (!complaintRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Complaint not found with id: " + id);
+    public ComplaintResponse updateStatusAsDepartment(Long complaintId, String statusName, String departmentEmail) {
+        ComplaintStatus status = parseStatus(statusName);
+        if (!DEPARTMENT_STATUSES.contains(status)) {
+            throw ApiException.forbidden("Departments can only set Pending, In Progress or Resolved.");
         }
-        complaintRepository.deleteById(id);
+        return changeStatus(ownedBy(complaintId, departmentEmail), status);
     }
 
-    private ComplaintResponse toResponse(Complaint c) {
-        String studentEmail = c.getStudent() != null ? c.getStudent().getEmail() : null;
-        String studentName = c.getStudent() != null ? c.getStudent().getFirstName() + " " + c.getStudent().getLastName() : null;
-        String deptName = c.getDepartment() != null ? c.getDepartment().getName() : null;
-        
+    /** Stores the photo a department attached as proof when moving an issue forward. */
+    public ComplaintResponse attachProof(Long complaintId, MultipartFile image, String departmentEmail) {
+        Complaint complaint = ownedBy(complaintId, departmentEmail);
+        complaint.setResolvedImageUrl(images.store(image));
+        return toResponse(complaints.save(complaint), true);
+    }
+
+    // ── admin ────────────────────────────────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public List<ComplaintResponse> getAllComplaints() {
+        return latest().stream().map(c -> toResponse(c, true)).toList();
+    }
+
+    public ComplaintResponse updateStatusAsAdmin(Long complaintId, String statusName) {
+        return changeStatus(find(complaintId), parseStatus(statusName));
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardStatsResponse getDashboardStats() {
+        Map<ComplaintStatus, Long> counts = new EnumMap<>(ComplaintStatus.class);
+        for (Object[] row : complaints.countGroupedByStatus()) {
+            counts.put((ComplaintStatus) row[0], (Long) row[1]);
+        }
+        long total = counts.values().stream().mapToLong(Long::longValue).sum();
+        return new DashboardStatsResponse(total,
+                counts.getOrDefault(ComplaintStatus.PENDING, 0L),
+                counts.getOrDefault(ComplaintStatus.ASSIGNED, 0L),
+                counts.getOrDefault(ComplaintStatus.IN_PROGRESS, 0L),
+                counts.getOrDefault(ComplaintStatus.RESOLVED, 0L),
+                counts.getOrDefault(ComplaintStatus.CLOSED, 0L));
+    }
+
+    // ── internals ────────────────────────────────────────────────────────────────────────────────
+
+    private ComplaintResponse changeStatus(Complaint complaint, ComplaintStatus status) {
+        boolean newlyResolved = status == ComplaintStatus.RESOLVED && complaint.getStatus() != ComplaintStatus.RESOLVED;
+        complaint.setStatus(status);
+        ComplaintResponse response = toResponse(complaints.save(complaint), true);
+        if (newlyResolved) {
+            mail.sendResolution(complaint.getStudent().getEmail(), complaint.getTitle());
+        }
+        return response;
+    }
+
+    private List<Complaint> latest() {
+        return complaints.findAllBy(PageRequest.of(0, LIST_LIMIT, Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
+
+    private Complaint find(Long id) {
+        return complaints.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Complaint not found with id: " + id));
+    }
+
+    private Department requireDepartment(String email) {
+        return departments.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> ApiException.forbidden("Department account not found."));
+    }
+
+    /** The complaint, provided it belongs to the calling department. */
+    private Complaint ownedBy(Long complaintId, String departmentEmail) {
+        Department own = requireDepartment(departmentEmail);
+        Complaint complaint = find(complaintId);
+        if (complaint.getDepartment() == null || !complaint.getDepartment().getId().equals(own.getId())) {
+            throw ApiException.forbidden("This complaint belongs to another department.");
+        }
+        return complaint;
+    }
+
+    private static ComplaintStatus parseStatus(String name) {
+        try {
+            return ComplaintStatus.valueOf(name.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown status: " + name);
+        }
+    }
+
+    private static ComplaintResponse toResponse(Complaint c, boolean includeEmail) {
+        Student s = c.getStudent();
         return new ComplaintResponse(
-            c.getId(), c.getTitle(), c.getDescription(), c.getCategory(),
-            c.getImageUrl(), c.getResolvedImageUrl(), c.getStatus(),
-            c.getPriority(), c.getCreatedAt(), c.getUpdatedAt(),
-            studentEmail, studentName, deptName, c.getUpvoteCount()
-        );
+                c.getId(), c.getTitle(), c.getDescription(), c.getCategory(),
+                c.getImageUrl(), c.getResolvedImageUrl(), c.getStatus(),
+                c.getPriority(), c.getCreatedAt(), c.getUpdatedAt(),
+                includeEmail && s != null ? s.getEmail() : null,
+                s != null ? (s.getFirstName() + " " + s.getLastName()).trim() : null,
+                c.getDepartment() != null ? c.getDepartment().getName() : null,
+                c.getUpvoteCount());
     }
 }

@@ -1,52 +1,49 @@
 package com.sit.campusbackend.auth.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * JWT utility — fully implemented.
- */
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+/** Issues and verifies HS256 JWTs. The signing key is built once at startup. */
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secret;
+    private static final int MIN_SECRET_BYTES = 32;
 
-    @Value("${jwt.expiry-ms}")
-    private long expiryMs;
+    private final SecretKey key;
+    private final long expiryMs;
 
-    /**
-     * Generate a signed JWT for the given email and role.
-     *
-     * @param email subject — student/admin/dept email
-     * @param role  "STUDENT", "ADMIN", or "DEPARTMENT"
-     * @return signed JWT string
-     */
+    public JwtUtil(@Value("${jwt.secret}") String secret, @Value("${jwt.expiry-ms}") long expiryMs) {
+        byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length < MIN_SECRET_BYTES) {
+            throw new IllegalStateException("JWT_SECRET must be at least " + MIN_SECRET_BYTES + " characters long.");
+        }
+        this.key = Keys.hmacShaKeyFor(bytes);
+        this.expiryMs = expiryMs;
+    }
+
+    /** @param role "STUDENT", "ADMIN" or "DEPARTMENT" */
     public String generateToken(String email, String role) {
-        return io.jsonwebtoken.Jwts.builder()
-            .setSubject(email)
-            .claim("role", role)
-            .setIssuedAt(new java.util.Date())
-            .setExpiration(new java.util.Date(System.currentTimeMillis() + expiryMs))
-            .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes()), io.jsonwebtoken.SignatureAlgorithm.HS256)
-            .compact();
+        Date now = new Date();
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("role", role)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + expiryMs))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    public String validateAndGetEmail(String token) {
-        return io.jsonwebtoken.Jwts.parserBuilder()
-            .setSigningKey(io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes()))
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .getSubject();
-    }
-
-    public String extractRole(String token) {
-        return io.jsonwebtoken.Jwts.parserBuilder()
-            .setSigningKey(io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes()))
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .get("role", String.class);
+    /** Verifies signature and expiry and returns the claims; throws {@link JwtException} when invalid. */
+    public Claims parse(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 }

@@ -2,23 +2,29 @@ package com.sit.campusbackend.complaint.repository;
 
 import com.sit.campusbackend.complaint.entity.Complaint;
 import com.sit.campusbackend.complaint.entity.ComplaintStatus;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
+/** The list queries fetch student and department in the same query so mapping them to responses is not N+1. */
 public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
 
-    List<Complaint> findByStudentEmail(String email);
+    @EntityGraph(attributePaths = {"student", "department"})
+    List<Complaint> findAllBy(Pageable pageable);
 
-    List<Complaint> findByDepartmentId(Long departmentId);
+    @EntityGraph(attributePaths = {"student", "department"})
+    List<Complaint> findByStudentEmailOrderByCreatedAtDesc(String email);
 
-    List<Complaint> findByStatus(ComplaintStatus status);
+    @EntityGraph(attributePaths = {"student", "department"})
+    List<Complaint> findByDepartmentIdOrderByCreatedAtDesc(Long departmentId);
 
-    long countByStatus(ComplaintStatus status);
+    @Query("select c.status, count(c) from Complaint c group by c.status")
+    List<Object[]> countGroupedByStatus();
 
-    @org.springframework.transaction.annotation.Transactional
     void deleteByStudentEmail(String email);
 
-    @org.springframework.transaction.annotation.Transactional
     void deleteByDepartmentId(Long departmentId);
 }
