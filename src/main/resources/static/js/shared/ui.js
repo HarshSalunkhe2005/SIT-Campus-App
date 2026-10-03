@@ -248,17 +248,17 @@ const UI = (() => {
               <input type="file" id="${id}" accept="image/jpeg,image/png,image/webp" hidden>
               <div id="${id}-prompt">${icon('upload', 'icon-lg')}<div><strong>Choose a photo</strong> or drag it here</div><div class="hint">JPEG, PNG or WebP, up to 5 MB</div></div>
               <div class="dropzone-preview" id="${id}-preview" hidden>
-                <img id="${id}-img" alt="Selected photo preview"><div class="meta"><strong id="${id}-name"></strong><div class="hint" id="${id}-size"></div></div>
+                <div class="meta"><strong id="${id}-name"></strong><div class="hint" id="${id}-size"></div></div>
                 <button type="button" class="btn btn-secondary btn-sm" id="${id}-remove">Remove</button></div></div>
             <div class="error-text" id="${id}-err" role="alert"></div>`;
         const zone = container.querySelector(`#${id}-zone`), input = container.querySelector(`#${id}`);
         const prompt = container.querySelector(`#${id}-prompt`), preview = container.querySelector(`#${id}-preview`);
-        const img = container.querySelector(`#${id}-img`), err = container.querySelector(`#${id}-err`);
+        const err = container.querySelector(`#${id}-err`);
         let file = null;
 
         const setError = (m) => { err.textContent = m || ''; zone.classList.toggle('has-error', !!m); };
         function reset() {
-            file = null; input.value = ''; img.removeAttribute('src');
+            file = null; input.value = ''; const old = preview.querySelector('img'); if (old) old.remove();
             preview.hidden = true; prompt.hidden = false; setError('');
         }
         function pick(f) {
@@ -267,7 +267,13 @@ const UI = (() => {
             if (f.size > 5 * 1024 * 1024) { setError('The image must be under 5 MB.'); return; }
             file = f;
             const reader = new FileReader();
-            reader.onload = (ev) => { img.src = ev.target.result; };
+            reader.onload = (ev) => {
+                const previous = preview.querySelector('img'); if (previous) previous.remove();
+                const img = document.createElement('img');
+                img.alt = 'Selected photo preview';
+                img.src = ev.target.result;
+                preview.prepend(img);
+            };
             reader.readAsDataURL(f);
             container.querySelector(`#${id}-name`).textContent = f.name;
             container.querySelector(`#${id}-size`).textContent = `${(f.size / 1024).toFixed(0)} KB`;
